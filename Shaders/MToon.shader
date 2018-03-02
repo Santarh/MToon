@@ -13,10 +13,6 @@ Shader "MToon"
 		_ShadeShift ("Shade Shift", Range(0, 1)) = 0.5
 		_ShadeToony ("Shade Toony", Range(0, 1)) = 0.5
 		_LightColorAttenuation ("Light Color Attenuation", Range(0, 1)) = 0
-		_NormalFromVColorRate ("Normal from Vertex Color Rate", Range(0, 1)) = 0
-		_NormalCylinderizeRate ("Normal Cylinderize Rate", Range(0, 1)) = 0
-		_NormalCylinderizePos ("Normal Cylinderize Center Pos", Vector) = (0, 0, 0, 0)
-		_NormalCylinderizeAxis ("Normal Cylinderize Axis", Vector) = (0, 1, 0, 0)
 		[NoScaleOffset] _SphereAdd ("Sphere Texture(Add)", 2D) = "black" {}
 		[NoScaleOffset] _OutlineWidthTexture ("Outline Width Tex", 2D) = "white" {}
 		_OutlineWidth ("Outline Width", Range(0, 1)) = 0.5
@@ -34,7 +30,6 @@ Shader "MToon"
 	{
 		Tags { "RenderType" = "Opaque"  "Queue" = "Geometry" }
 		Cull Back
-		ZWrite On
 
 		Pass 
 		{
@@ -63,6 +58,7 @@ Shader "MToon"
 			Tags { "LightMode" = "ForwardAdd" }
 
 			Blend [_SrcBlend] One
+			ZWrite [_ZWrite]
 
 			CGPROGRAM
 			#pragma shader_feature MTOON_DEBUG_NONE MTOON_DEBUG_NORMAL
