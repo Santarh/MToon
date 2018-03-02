@@ -99,18 +99,15 @@ public class MToonInspector : ShaderGUI
 				}
 			}
 			EditorGUI.showMixedValue = false;
-
-			EditorGUI.indentLevel++;
 			{
 				if (bm == BlendMode.Transparent)
 				{
 					materialEditor.ShaderProperty(_alpha, "Alpha");
 				}
 			}
-			EditorGUI.indentLevel--;
+			EditorGUILayout.Space();
 
-			EditorGUILayout.LabelField("Color");
-			EditorGUI.indentLevel++;
+			EditorGUILayout.LabelField("Color", EditorStyles.boldLabel);
 			{
 				// Color
 				materialEditor.TexturePropertySingleLine(new GUIContent("Lit Texture", "Lit Texture (RGB)"), _mainTex, _color);
@@ -127,10 +124,9 @@ public class MToonInspector : ShaderGUI
 					_receiveShadowTexture.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
 				}
 			}
-			EditorGUI.indentLevel --;
+			EditorGUILayout.Space();
 
-			EditorGUILayout.LabelField("Lighting");
-			EditorGUI.indentLevel++;
+			EditorGUILayout.LabelField("Lighting", EditorStyles.boldLabel);
 			{
 				// Lighting
 				materialEditor.ShaderProperty(_shadeShift, "Shade Shift");
@@ -138,16 +134,14 @@ public class MToonInspector : ShaderGUI
 				materialEditor.ShaderProperty(_lightColorAttenuation, "Light Color Attenuation");
 				materialEditor.TexturePropertySingleLine(new GUIContent("Sphere Add", "Sphere Additive Texture (RGB)"), _sphereAdd);
 			}
-			EditorGUI.indentLevel --;
+			EditorGUILayout.Space();
 
-			EditorGUILayout.LabelField("Normal");
-			EditorGUI.indentLevel++;
+			EditorGUILayout.LabelField("Normal", EditorStyles.boldLabel);
 			{
 			}
-			EditorGUI.indentLevel --;
+			EditorGUILayout.Space();
 
-			EditorGUILayout.LabelField("Outline");
-			EditorGUI.indentLevel++;
+			EditorGUILayout.LabelField("Outline", EditorStyles.boldLabel);
 			{
 				// Outline
 				EditorGUI.showMixedValue = _outlineMode.hasMixedValue;
@@ -171,12 +165,16 @@ public class MToonInspector : ShaderGUI
 					materialEditor.ShaderProperty(_outlineColor, "Outline Color");
 				}
 			}
-			EditorGUI.indentLevel--;
+			EditorGUILayout.Space();
+		
+            EditorGUILayout.LabelField("Advanced Options", EditorStyles.boldLabel);
+            {
+                materialEditor.EnableInstancingField();
+                materialEditor.DoubleSidedGIField();
+            }
+            EditorGUILayout.Space();
 		}
 		EditorGUI.EndChangeCheck();
-		
-		materialEditor.EnableInstancingField();
-		materialEditor.DoubleSidedGIField();
 	}
 
 	private void SetupDebugMode(Material material, DebugMode debugMode)
