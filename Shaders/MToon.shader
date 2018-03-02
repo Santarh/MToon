@@ -3,11 +3,11 @@ Shader "MToon"
 	Properties
 	{
 		_Alpha ("Alpha", Range(0, 1)) = 1.0
-		_LitColor ("Lit Color", Color) = (1,1,1,1)
+		_Color ("Lit Color", Color) = (1,1,1,1)
 		_ShadeColor ("Shade Color", Color) = (0,0,0,1)
-		[NoScaleOffset] _LitTexture ("Lit Texture", 2D) = "white" {}
+		[NoScaleOffset] _MainTex ("Lit Texture", 2D) = "white" {}
 		[NoScaleOffset] _ShadeTexture ("Shade Texture", 2D) = "white" {}
-		[Normal] _NormalTexture ("Normal Texture", 2D) = "bump" {}
+		[Normal] _BumpMap ("Normal Texture", 2D) = "bump" {}
 		_ReceiveShadowRate ("Receive Shadow", Range(0, 1)) = 1
 		[NoScaleOffset] _ReceiveShadowTexture ("Receive Shadow Texture", 2D) = "white" {}
 		_ShadeShift ("Shade Shift", Range(0, 1)) = 0.5

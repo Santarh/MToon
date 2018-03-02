@@ -5,11 +5,11 @@
 #pragma target 3.0
 
 half _Alpha;
-fixed4 _LitColor;
+fixed4 _Color;
 fixed4 _ShadeColor;
-sampler2D _LitTexture; float4 _LitTexture_ST;
+sampler2D _MainTex; float4 _MainTex_ST;
 sampler2D _ShadeTexture; float4 _ShadeTexture_ST;
-sampler2D _NormalTexture; float4 _NormalTexture_ST;
+sampler2D _BumpMap; float4 _BumpMap_ST;
 sampler2D _ReceiveShadowTexture; float4 _ReceiveShadowTexture_ST;
 half _ReceiveShadowRate;
 half _ShadeShift;
@@ -93,7 +93,7 @@ void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
 
 float4 frag(v2f i) : SV_TARGET
 {
-	half3 tangentNormal = UnpackNormal(tex2D(_NormalTexture, TRANSFORM_TEX(i.uv0, _NormalTexture)));
+	half3 tangentNormal = UnpackNormal(tex2D(_BumpMap, TRANSFORM_TEX(i.uv0, _BumpMap)));
 	half3 worldNormal;
 	worldNormal.x = dot(i.tspace0, tangentNormal);
 	worldNormal.y = dot(i.tspace1, tangentNormal);
@@ -132,7 +132,7 @@ float4 frag(v2f i) : SV_TARGET
 
 	// color lerp
 	half3 shade = _ShadeColor.rgb * tex2D(_ShadeTexture, TRANSFORM_TEX(i.uv0, _ShadeTexture)).rgb;
-	half3 lit = _LitColor.rgb * tex2D(_LitTexture, TRANSFORM_TEX(i.uv0, _LitTexture)).rgb;
+	half3 lit = _Color.rgb * tex2D(_MainTex, TRANSFORM_TEX(i.uv0, _MainTex)).rgb;
 #ifndef MTOON_FORWARD_ADD
 	half3 col = lerp(shade, lit, lighting);
 #else
