@@ -7,6 +7,7 @@ Shader "MToon"
 		_ShadeColor ("Shade Color", Color) = (1,1,1,1)
 		[NoScaleOffset] _MainTex ("Lit Texture", 2D) = "white" {}
 		[NoScaleOffset] _ShadeTexture ("Shade Texture", 2D) = "white" {}
+		_BumpScale ("Normal Scale", Float) = 1.0
 		[Normal] _BumpMap ("Normal Texture", 2D) = "bump" {}
 		_ReceiveShadowRate ("Receive Shadow", Range(0, 1)) = 1
 		[NoScaleOffset] _ReceiveShadowTexture ("Receive Shadow Texture", 2D) = "white" {}

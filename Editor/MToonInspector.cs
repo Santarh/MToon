@@ -33,6 +33,7 @@ public class MToonInspector : ShaderGUI
 	private MaterialProperty _shadeColor;
 	private MaterialProperty _mainTex;
 	private MaterialProperty _shadeTexture;
+	private MaterialProperty _bumpScale;
 	private MaterialProperty _bumpMap;
 	private MaterialProperty _receiveShadowRate;
 	private MaterialProperty _receiveShadowTexture;
@@ -55,6 +56,7 @@ public class MToonInspector : ShaderGUI
 		_shadeColor = FindProperty("_ShadeColor", properties);
 		_mainTex = FindProperty("_MainTex", properties);
 		_shadeTexture = FindProperty("_ShadeTexture", properties);
+		_bumpScale = FindProperty("_BumpScale", properties);
 		_bumpMap = FindProperty("_BumpMap", properties);
 		_receiveShadowRate = FindProperty("_ReceiveShadowRate", properties);
 		_receiveShadowTexture = FindProperty("_ReceiveShadowTexture", properties);
@@ -112,7 +114,7 @@ public class MToonInspector : ShaderGUI
 				// Color
 				materialEditor.TexturePropertySingleLine(new GUIContent("Lit Texture", "Lit Texture (RGB)"), _mainTex, _color);
 				materialEditor.TexturePropertySingleLine(new GUIContent("Shade Texture", "Shade Texture (RGB)"), _shadeTexture, _shadeColor);
-				materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map (RGB)"), _bumpMap);
+				materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map (RGB)"), _bumpMap, _bumpScale);
 				materialEditor.TexturePropertySingleLine(new GUIContent("Receive Shadow", "Receive Shadow Map (R)"), _receiveShadowTexture, _receiveShadowRate);
 
 				EditorGUI.BeginChangeCheck();

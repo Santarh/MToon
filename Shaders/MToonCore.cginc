@@ -9,6 +9,7 @@ fixed4 _Color;
 fixed4 _ShadeColor;
 sampler2D _MainTex; float4 _MainTex_ST;
 sampler2D _ShadeTexture; float4 _ShadeTexture_ST;
+half _BumpScale;
 sampler2D _BumpMap; float4 _BumpMap_ST;
 sampler2D _ReceiveShadowTexture; float4 _ReceiveShadowTexture_ST;
 half _ReceiveShadowRate;
@@ -101,7 +102,7 @@ float4 frag(v2f i) : SV_TARGET
 {
     UNITY_SETUP_INSTANCE_ID(i); // necessary only if any instanced properties are going to be accessed in the fragment Shader.
     
-	half3 tangentNormal = UnpackNormal(tex2D(_BumpMap, TRANSFORM_TEX(i.uv0, _BumpMap)));
+	half3 tangentNormal = UnpackScaleNormal(tex2D(_BumpMap, TRANSFORM_TEX(i.uv0, _BumpMap)), _BumpScale);
 	half3 worldNormal;
 	worldNormal.x = dot(i.tspace0, tangentNormal);
 	worldNormal.y = dot(i.tspace1, tangentNormal);
