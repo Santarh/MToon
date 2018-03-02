@@ -3,6 +3,8 @@ Shader "MToon"
 	Properties
 	{
 		_Alpha ("Alpha", Range(0, 1)) = 1.0
+        _Cutoff ("Alpha Cutoff", Range(0, 1)) = 0.5
+        _AlphaTexture ("Alpha Texture", 2D) = "white" {}
 		_Color ("Lit Color", Color) = (1,1,1,1)
 		_ShadeColor ("Shade Color", Color) = (1,1,1,1)
 		[NoScaleOffset] _MainTex ("Lit Texture", 2D) = "white" {}
@@ -51,6 +53,7 @@ Shader "MToon"
 			#pragma fragment frag
 			#pragma multi_compile_fwdbase
 			#pragma multi_compile_fog
+            #pragma multi_compile_instancing
 			ENDCG
 		}
 
@@ -73,9 +76,57 @@ Shader "MToon"
 			#pragma fragment frag
 			#pragma multi_compile_fwdadd_fullshadows
 			#pragma multi_compile_fog
+            #pragma multi_compile_instancing
 			ENDCG
 		}
+		
+		Pass
+		{
+		    Tags { "LightMode" = "ShadowCaster" }
+		    
+		    CGPROGRAM
+			#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+		    #pragma vertex vert
+		    #pragma fragment frag
+		    #pragma multi_compile_shadowcaster
+            #include "UnityCG.cginc"
+            
+            sampler3D _DitherMaskLOD;
+            
+            half _Alpha;
+            half _Cutoff;
+            sampler2D _AlphaTexture; float4 _AlphaTexture_ST;
+            
+            struct v2f
+            {
+                V2F_SHADOW_CASTER;
+                float2 uv0 : TEXCOORD1;
+            };
+            
+            v2f vert(appdata_base v)
+            {
+                v2f o;
+                TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
+                o.uv0 = v.texcoord;
+                return o;
+            }
+            
+            float4 frag(UNITY_POSITION(vpos), v2f i) : SV_Target
+            {
+            #ifdef _ALPHATEST_ON
+                half alpha = _Alpha * tex2D(_AlphaTexture, TRANSFORM_TEX(i.uv0, _AlphaTexture));
+                clip(alpha - _Cutoff);
+            #endif
+            #ifdef _ALPHABLEND_ON
+                half alpha = _Alpha * tex2D(_AlphaTexture, TRANSFORM_TEX(i.uv0, _AlphaTexture));
+                half alphaRef = tex3D(_DitherMaskLOD, float3(vpos.xy * 0.25, alpha * 0.9375)).a;
+                clip (alphaRef - 0.01);
+            #endif
+                SHADOW_CASTER_FRAGMENT(i)
+            }
+            ENDCG
+		}
 	}
-	Fallback "Diffuse"
+	//Fallback "Diffuse"
 	CustomEditor "MToonInspector"
 }

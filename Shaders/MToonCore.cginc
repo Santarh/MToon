@@ -5,6 +5,8 @@
 #pragma target 3.0
 
 half _Alpha;
+half _Cutoff;
+sampler2D _AlphaTexture; float4 _AlphaTexture_ST;
 fixed4 _Color;
 fixed4 _ShadeColor;
 sampler2D _MainTex; float4 _MainTex_ST;
@@ -102,6 +104,17 @@ float4 frag(v2f i) : SV_TARGET
 {
     UNITY_SETUP_INSTANCE_ID(i); // necessary only if any instanced properties are going to be accessed in the fragment Shader.
     
+    // alpha
+    half alpha = 1;
+#ifdef _ALPHATEST_ON
+    alpha = _Alpha * tex2D(_AlphaTexture, TRANSFORM_TEX(i.uv0, _AlphaTexture));
+    clip(alpha - _Cutoff);
+#endif
+#ifdef _ALPHABLEND_ON
+    alpha = _Alpha * tex2D(_AlphaTexture, TRANSFORM_TEX(i.uv0, _AlphaTexture));
+#endif
+    
+    // normal
 #ifdef _NORMALMAP
 	half3 tangentNormal = UnpackScaleNormal(tex2D(_BumpMap, TRANSFORM_TEX(i.uv0, _BumpMap)), _BumpScale);
 	half3 worldNormal;
@@ -120,13 +133,14 @@ float4 frag(v2f i) : SV_TARGET
 	#endif
 #endif
 
+    // vectors
 	float3 view = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
 	float3 viewReflect = reflect(-view, worldNormal);
 	half nv = dot(worldNormal, view);
 	UNITY_LIGHT_ATTENUATION(atten, i, i.posWorld.xyz);
 
 	// Receive Shadow Rate
-	atten = lerp(1, atten, _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, TRANSFORM_TEX(i.uv0, _ReceiveShadowTexture)).r);
+	atten = lerp(1, atten, _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, TRANSFORM_TEX(i.uv0, _ReceiveShadowTexture)).a);
 
 	// lighting
 	half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
@@ -151,7 +165,6 @@ float4 frag(v2f i) : SV_TARGET
 #else
 	half3 col = lerp(half3(0,0,0), saturate(lit.rgb - shade.rgb), lighting);
 #endif
-    half alpha = _Alpha * lerp(shade.a, lit.a, lighting);
 
 	// light strength tint
 	half3 tintCol = ShadeSH9(half4(0, 1, 0, 1)) + _LightColor0.rgb;

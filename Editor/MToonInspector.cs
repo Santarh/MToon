@@ -22,6 +22,7 @@ public class MToonInspector : ShaderGUI
 	public enum BlendMode
 	{
 		Opaque,
+		Cutout,
 		Transparent,
 	}
 
@@ -29,6 +30,8 @@ public class MToonInspector : ShaderGUI
 	private MaterialProperty _outlineMode;
 	private MaterialProperty _blendMode;
 	private MaterialProperty _alpha;
+	private MaterialProperty _cutoff;
+	private MaterialProperty _alphaTexture;
 	private MaterialProperty _color;
 	private MaterialProperty _shadeColor;
 	private MaterialProperty _mainTex;
@@ -45,6 +48,8 @@ public class MToonInspector : ShaderGUI
 	private MaterialProperty _outlineWidth;
 	private MaterialProperty _outlineColor;
 
+	private bool _firstTimeApply = true;
+
 
 	public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
 	{
@@ -52,6 +57,8 @@ public class MToonInspector : ShaderGUI
 		_outlineMode = FindProperty("_OutlineMode", properties);
 		_blendMode = FindProperty("_BlendMode", properties);
 		_alpha = FindProperty("_Alpha", properties);
+		_cutoff = FindProperty("_Cutoff", properties);
+		_alphaTexture = FindProperty("_AlphaTexture", properties);
 		_color = FindProperty("_Color", properties);
 		_shadeColor = FindProperty("_ShadeColor", properties);
 		_mainTex = FindProperty("_MainTex", properties);
@@ -68,53 +75,61 @@ public class MToonInspector : ShaderGUI
 		_outlineWidth = FindProperty("_OutlineWidth", properties);
 		_outlineColor = FindProperty("_OutlineColor", properties);
 
-		var selfMaterial = materialEditor.target as Material;
+		if (_firstTimeApply)
+		{
+			_firstTimeApply = false;
+			foreach (var obj in materialEditor.targets)
+			{
+				var mat = (Material) obj;
+				SetupBlendMode(mat, (BlendMode) mat.GetFloat(_blendMode.name));
+				SetupNormalMode(mat, mat.GetTexture(_bumpMap.name));
+				SetupOutlineMode(mat, (OutlineMode) mat.GetFloat(_outlineMode.name));
+				SetupDebugMode(mat, (DebugMode) mat.GetFloat(_debugMode.name));
+			}
+		}
 
 		EditorGUI.BeginChangeCheck();
 		{
 			EditorGUI.showMixedValue = _blendMode.hasMixedValue;
 			EditorGUI.BeginChangeCheck();
-			var dm = (DebugMode) EditorGUILayout.Popup("DebugType", (int) _debugMode.floatValue, Enum.GetNames(typeof(DebugMode)));
-			if (EditorGUI.EndChangeCheck())
-			{
-				materialEditor.RegisterPropertyChangeUndo("DebugType");
-				_debugMode.floatValue = (float) dm;
-
-				foreach (var obj in _debugMode.targets)
-				{
-					SetupDebugMode((Material) obj, dm);
-				}
-			}
-			EditorGUI.showMixedValue = false;
-
-			EditorGUI.showMixedValue = _blendMode.hasMixedValue;
-			EditorGUI.BeginChangeCheck();
-			var bm = (BlendMode) EditorGUILayout.Popup("RenderType", (int) _blendMode.floatValue, Enum.GetNames(typeof(BlendMode)));
+			var bm = (BlendMode) EditorGUILayout.Popup("Rendering Type", (int) _blendMode.floatValue, Enum.GetNames(typeof(BlendMode)));
 			if (EditorGUI.EndChangeCheck())
 			{
 				materialEditor.RegisterPropertyChangeUndo("RenderType");
 				_blendMode.floatValue = (float) bm;
 
-				foreach (var obj in _blendMode.targets)
+				foreach (var obj in materialEditor.targets)
 				{
 					SetupBlendMode((Material) obj, bm);
 				}
 			}
 			EditorGUI.showMixedValue = false;
-			{
-				if (bm == BlendMode.Transparent)
-				{
-					materialEditor.ShaderProperty(_alpha, "Alpha");
-				}
-			}
 			EditorGUILayout.Space();
+
+			if (bm != BlendMode.Opaque)
+			{
+				EditorGUILayout.LabelField("Alpha", EditorStyles.boldLabel);
+				{
+					if (bm == BlendMode.Transparent)
+					{
+						materialEditor.TexturePropertySingleLine(new GUIContent("Alpha", "Alpha Texture (A)"), _alphaTexture, _alpha);
+					}
+
+					if (bm == BlendMode.Cutout)
+					{
+						materialEditor.TexturePropertySingleLine(new GUIContent("Alpha", "Alpha Texture (A)"), _alphaTexture, _alpha);
+						materialEditor.ShaderProperty(_cutoff, "Alpha Cutoff");
+					}
+				}
+				EditorGUILayout.Space();
+			}
 
 			EditorGUILayout.LabelField("Color", EditorStyles.boldLabel);
 			{
 				// Color
 				materialEditor.TexturePropertySingleLine(new GUIContent("Lit Texture", "Lit Texture (RGB)"), _mainTex, _color);
 				materialEditor.TexturePropertySingleLine(new GUIContent("Shade Texture", "Shade Texture (RGB)"), _shadeTexture, _shadeColor);
-				materialEditor.TexturePropertySingleLine(new GUIContent("Receive Shadow", "Receive Shadow Map (R)"), _receiveShadowTexture, _receiveShadowRate);
+				materialEditor.TexturePropertySingleLine(new GUIContent("Receive Shadow", "Receive Shadow Map (A)"), _receiveShadowTexture, _receiveShadowRate);
 			}
 			EditorGUILayout.Space();
 
@@ -137,7 +152,7 @@ public class MToonInspector : ShaderGUI
 				{
 					materialEditor.RegisterPropertyChangeUndo("BumpEnabledDisabled");
 					
-					foreach (var obj in _bumpMap.targets)
+					foreach (var obj in materialEditor.targets)
 					{
 						var mat = (Material) obj;
 						SetupNormalMode(mat, mat.GetTexture(_bumpMap.name));
@@ -158,9 +173,9 @@ public class MToonInspector : ShaderGUI
 					materialEditor.RegisterPropertyChangeUndo("OutlineType");
 					_outlineMode.floatValue = (float) om;
 
-					foreach (var obj in _outlineMode.targets)
+					foreach (var obj in materialEditor.targets)
 					{
-						SetupOutlineMode((Material) obj, (OutlineMode) selfMaterial.GetFloat("_OutlineMode"));
+						SetupOutlineMode((Material) obj, om);
 					}
 				}
 				EditorGUI.showMixedValue = false;
@@ -186,7 +201,27 @@ public class MToonInspector : ShaderGUI
 			}
 			EditorGUILayout.Space();
 		
-            EditorGUILayout.LabelField("Advanced Options", EditorStyles.boldLabel);
+			EditorGUILayout.LabelField("Debugging Options", EditorStyles.boldLabel);
+			{
+				EditorGUI.showMixedValue = _blendMode.hasMixedValue;
+				EditorGUI.BeginChangeCheck();
+				var dm = (DebugMode) EditorGUILayout.Popup("Visualize", (int) _debugMode.floatValue,
+					Enum.GetNames(typeof(DebugMode)));
+				if (EditorGUI.EndChangeCheck())
+				{
+					materialEditor.RegisterPropertyChangeUndo("DebugType");
+					_debugMode.floatValue = (float) dm;
+
+					foreach (var obj in materialEditor.targets)
+					{
+						SetupDebugMode((Material) obj, dm);
+					}
+				}
+				EditorGUI.showMixedValue = false;
+			}
+			EditorGUILayout.Space();
+
+			EditorGUILayout.LabelField("Advanced Options", EditorStyles.boldLabel);
             {
                 materialEditor.EnableInstancingField();
                 materialEditor.DoubleSidedGIField();
@@ -223,6 +258,16 @@ public class MToonInspector : ShaderGUI
                 SetKeyword(material, "_ALPHABLEND_ON", false);
                 SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
                 material.renderQueue = -1;
+				break;
+			case BlendMode.Cutout:
+				material.SetOverrideTag("RenderType", "TransparentCutout");
+                material.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.One);
+                material.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.Zero);
+                material.SetInt("_ZWrite", 1);
+                SetKeyword(material, "_ALPHATEST_ON", true);
+                SetKeyword(material, "_ALPHABLEND_ON", false);
+                SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
+				material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.AlphaTest;
 				break;
 			case BlendMode.Transparent:
 				material.SetOverrideTag("RenderType", "Transparent");
