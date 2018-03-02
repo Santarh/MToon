@@ -29,11 +29,11 @@ public class MToonInspector : ShaderGUI
 	private MaterialProperty _outlineMode;
 	private MaterialProperty _blendMode;
 	private MaterialProperty _alpha;
-	private MaterialProperty _Color;
+	private MaterialProperty _color;
 	private MaterialProperty _shadeColor;
-	private MaterialProperty _MainTex;
+	private MaterialProperty _mainTex;
 	private MaterialProperty _shadeTexture;
-	private MaterialProperty _BumpMap;
+	private MaterialProperty _bumpMap;
 	private MaterialProperty _receiveShadowRate;
 	private MaterialProperty _receiveShadowTexture;
 	private MaterialProperty _shadeShift;
@@ -51,11 +51,11 @@ public class MToonInspector : ShaderGUI
 		_outlineMode = FindProperty("_OutlineMode", properties);
 		_blendMode = FindProperty("_BlendMode", properties);
 		_alpha = FindProperty("_Alpha", properties);
-		_Color = FindProperty("_Color", properties);
+		_color = FindProperty("_Color", properties);
 		_shadeColor = FindProperty("_ShadeColor", properties);
-		_MainTex = FindProperty("_MainTex", properties);
+		_mainTex = FindProperty("_MainTex", properties);
 		_shadeTexture = FindProperty("_ShadeTexture", properties);
-		_BumpMap = FindProperty("_BumpMap", properties);
+		_bumpMap = FindProperty("_BumpMap", properties);
 		_receiveShadowRate = FindProperty("_ReceiveShadowRate", properties);
 		_receiveShadowTexture = FindProperty("_ReceiveShadowTexture", properties);
 		_shadeShift = FindProperty("_ShadeShift", properties);
@@ -113,18 +113,18 @@ public class MToonInspector : ShaderGUI
 			EditorGUI.indentLevel++;
 			{
 				// Color
-				materialEditor.TexturePropertySingleLine(new GUIContent("Lit Texture", "Lit Texture (RGB)"), _MainTex, _Color);
+				materialEditor.TexturePropertySingleLine(new GUIContent("Lit Texture", "Lit Texture (RGB)"), _mainTex, _color);
 				materialEditor.TexturePropertySingleLine(new GUIContent("Shade Texture", "Shade Texture (RGB)"), _shadeTexture, _shadeColor);
-				materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map (RGB)"), _BumpMap);
+				materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map (RGB)"), _bumpMap);
 				materialEditor.TexturePropertySingleLine(new GUIContent("Receive Shadow", "Receive Shadow Map (R)"), _receiveShadowTexture, _receiveShadowRate);
 
 				EditorGUI.BeginChangeCheck();
-				materialEditor.TextureScaleOffsetProperty(_MainTex);
+				materialEditor.TextureScaleOffsetProperty(_mainTex);
 				if (EditorGUI.EndChangeCheck())
 				{
-					_shadeTexture.textureScaleAndOffset = _MainTex.textureScaleAndOffset;
-					_BumpMap.textureScaleAndOffset = _MainTex.textureScaleAndOffset;
-					_receiveShadowTexture.textureScaleAndOffset = _MainTex.textureScaleAndOffset;
+					_shadeTexture.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
+					_bumpMap.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
+					_receiveShadowTexture.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
 				}
 			}
 			EditorGUI.indentLevel --;
