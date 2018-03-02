@@ -145,7 +145,6 @@ public class MToonInspector : ShaderGUI
 
 			EditorGUILayout.LabelField("Normal", EditorStyles.boldLabel);
 			{
-				EditorGUI.showMixedValue = _outlineMode.hasMixedValue;
 				EditorGUI.BeginChangeCheck();
 				materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map (RGB)"), _bumpMap, _bumpScale);
 				if (EditorGUI.EndChangeCheck())
@@ -158,7 +157,6 @@ public class MToonInspector : ShaderGUI
 						SetupNormalMode(mat, mat.GetTexture(_bumpMap.name));
 					}
 				}
-				EditorGUI.showMixedValue = false;
 			}
 			EditorGUILayout.Space();
 
@@ -203,7 +201,7 @@ public class MToonInspector : ShaderGUI
 		
 			EditorGUILayout.LabelField("Debugging Options", EditorStyles.boldLabel);
 			{
-				EditorGUI.showMixedValue = _blendMode.hasMixedValue;
+				EditorGUI.showMixedValue = _debugMode.hasMixedValue;
 				EditorGUI.BeginChangeCheck();
 				var dm = (DebugMode) EditorGUILayout.Popup("Visualize", (int) _debugMode.floatValue,
 					Enum.GetNames(typeof(DebugMode)));
