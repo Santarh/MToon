@@ -27,9 +27,8 @@ struct v2g
 	float3 normalLocal : TEXCOORD1;
 	float4 tangentLocal : TEXCOORD2;
 	float2 uv0 : TEXCOORD3;
-	float2 uv1 : TEXCOORD4;
-	float outlineWidth : TEXCOORD5;
-	fixed4 color : TEXCOORD6;
+	float outlineWidth : TEXCOORD4;
+	fixed4 color : TEXCOORD5;
 };
 
 struct v2f
@@ -40,11 +39,10 @@ struct v2f
 	float3 tangent : TEXCOORD2;
 	float3 bitangent : TEXCOORD3;
 	float2 uv0 : TEXCOORD4;
-	float2 uv1 : TEXCOORD5;
-	float isOutline : TEXCOORD6;
-	fixed4 color : TEXCOORD7;
-	SHADOW_COORDS(8)
-	UNITY_FOG_COORDS(9)
+	float isOutline : TEXCOORD5;
+	fixed4 color : TEXCOORD6;
+	SHADOW_COORDS(7)
+	UNITY_FOG_COORDS(8)
 };
 
 v2f vert_without_geom(appdata_full v)
@@ -53,7 +51,6 @@ v2f vert_without_geom(appdata_full v)
 	o.pos = UnityObjectToClipPos(v.vertex);
 	o.posWorld = mul(unity_ObjectToWorld, v.vertex);
 	o.uv0 = v.texcoord;
-	o.uv1 = v.texcoord1;
 	o.normal = normalize(UnityObjectToWorldNormal(v.normal));
 	o.tangent = normalize(mul(unity_ObjectToWorld, float4(v.tangent.xyz, 0.0)).xyz);
 	o.bitangent = normalize(cross(o.normal, o.tangent) * v.tangent.w);
@@ -71,7 +68,6 @@ v2g vert_with_geom(appdata_full v)
 	o.normalLocal = v.normal;
 	o.tangentLocal = v.tangent;
 	o.uv0 = v.texcoord;
-	o.uv1 = v.texcoord1;
 	o.outlineWidth = 0.01 * _OutlineWidth * tex2Dlod(_OutlineWidthTexture, float4(TRANSFORM_TEX(v.texcoord, _OutlineWidthTexture), 0, 0)).r;
 	o.color = v.color;
 	return o;
@@ -89,7 +85,6 @@ void geom(triangle v2g IN[3], inout TriangleStream<v2f> stream)
 		o.pos = UnityObjectToClipPos(v.posLocal + normalize(v.normalLocal) * v.outlineWidth);
 		o.posWorld = mul(unity_ObjectToWorld, o.pos);
 		o.uv0 = v.uv0;
-		o.uv1 = v.uv1;
 		o.normal = normalize(UnityObjectToWorldNormal(v.normalLocal));
 		o.tangent = normalize(mul(unity_ObjectToWorld, float4(v.tangentLocal.xyz, 0.0)).xyz);
 		o.bitangent = normalize(cross(o.normal, o.tangent) * v.tangentLocal.w);
@@ -108,7 +103,6 @@ void geom(triangle v2g IN[3], inout TriangleStream<v2f> stream)
 		o.pos = UnityObjectToClipPos(v.posLocal);
 		o.posWorld = mul(unity_ObjectToWorld, v.posLocal);
 		o.uv0 = v.uv0;
-		o.uv1 = v.uv1;
 		o.normal = normalize(UnityObjectToWorldNormal(v.normalLocal));
 		o.tangent = normalize(mul(unity_ObjectToWorld, float4(v.tangentLocal.xyz, 0.0)).xyz);
 		o.bitangent = normalize(cross(o.normal, o.tangent) * v.tangentLocal.w);
