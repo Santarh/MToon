@@ -41,8 +41,9 @@ Shader "MToon"
 			ZWrite [_ZWrite]
 
 			CGPROGRAM
-			#pragma shader_feature MTOON_DEBUG_NONE MTOON_DEBUG_NORMAL
-			#pragma shader_feature MTOON_OUTLINE_NONE MTOON_OUTLINE_COLORED
+			#pragma shader_feature MTOON_DEBUG_NORMAL
+			#pragma shader_feature MTOON_OUTLINE_COLORED
+			#pragma shader_feature _NORMALMAP
 			#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
 			#include "MToonCore.cginc"
 			#pragma vertex vert_with_geom
@@ -62,8 +63,9 @@ Shader "MToon"
 			ZWrite [_ZWrite]
 
 			CGPROGRAM
-			#pragma shader_feature MTOON_DEBUG_NONE MTOON_DEBUG_NORMAL
-			#pragma shader_feature MTOON_OUTLINE_NONE MTOON_OUTLINE_COLORED
+			#pragma shader_feature MTOON_DEBUG_NORMAL
+			#pragma shader_feature MTOON_OUTLINE_COLORED
+			#pragma shader_feature _NORMALMAP
 			#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
 			#define MTOON_FORWARD_ADD
 			#include "MToonCore.cginc"

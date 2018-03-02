@@ -114,17 +114,7 @@ public class MToonInspector : ShaderGUI
 				// Color
 				materialEditor.TexturePropertySingleLine(new GUIContent("Lit Texture", "Lit Texture (RGB)"), _mainTex, _color);
 				materialEditor.TexturePropertySingleLine(new GUIContent("Shade Texture", "Shade Texture (RGB)"), _shadeTexture, _shadeColor);
-				materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map (RGB)"), _bumpMap, _bumpScale);
 				materialEditor.TexturePropertySingleLine(new GUIContent("Receive Shadow", "Receive Shadow Map (R)"), _receiveShadowTexture, _receiveShadowRate);
-
-				EditorGUI.BeginChangeCheck();
-				materialEditor.TextureScaleOffsetProperty(_mainTex);
-				if (EditorGUI.EndChangeCheck())
-				{
-					_shadeTexture.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
-					_bumpMap.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
-					_receiveShadowTexture.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
-				}
 			}
 			EditorGUILayout.Space();
 
@@ -140,6 +130,20 @@ public class MToonInspector : ShaderGUI
 
 			EditorGUILayout.LabelField("Normal", EditorStyles.boldLabel);
 			{
+				EditorGUI.showMixedValue = _outlineMode.hasMixedValue;
+				EditorGUI.BeginChangeCheck();
+				materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map (RGB)"), _bumpMap, _bumpScale);
+				if (EditorGUI.EndChangeCheck())
+				{
+					materialEditor.RegisterPropertyChangeUndo("BumpEnabledDisabled");
+					
+					foreach (var obj in _bumpMap.targets)
+					{
+						var mat = (Material) obj;
+						SetupNormalMode(mat, mat.GetTexture(_bumpMap.name));
+					}
+				}
+				EditorGUI.showMixedValue = false;
 			}
 			EditorGUILayout.Space();
 
@@ -168,6 +172,19 @@ public class MToonInspector : ShaderGUI
 				}
 			}
 			EditorGUILayout.Space();
+			
+			EditorGUILayout.LabelField("Texture Options", EditorStyles.boldLabel);
+			{
+				EditorGUI.BeginChangeCheck();
+				materialEditor.TextureScaleOffsetProperty(_mainTex);
+				if (EditorGUI.EndChangeCheck())
+				{
+					_shadeTexture.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
+					_bumpMap.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
+					_receiveShadowTexture.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
+				}
+			}
+			EditorGUILayout.Space();
 		
             EditorGUILayout.LabelField("Advanced Options", EditorStyles.boldLabel);
             {
@@ -185,12 +202,10 @@ public class MToonInspector : ShaderGUI
 		switch (debugMode)
 		{
 			case DebugMode.None:
-				material.EnableKeyword("MTOON_DEBUG_NONE");
-				material.DisableKeyword("MTOON_DEBUG_NORMAL");
+				SetKeyword(material, "MTOON_DEBUG_NORMAL", false);
 				break;
 			case DebugMode.Normal:
-				material.DisableKeyword("MTOON_DEBUG_NONE");
-				material.EnableKeyword("MTOON_DEBUG_NORMAL");
+				SetKeyword(material, "MTOON_DEBUG_NORMAL", true);
 				break;
 		}
 	}
@@ -204,9 +219,9 @@ public class MToonInspector : ShaderGUI
                 material.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.One);
                 material.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.Zero);
                 material.SetInt("_ZWrite", 1);
-                material.DisableKeyword("_ALPHATEST_ON");
-                material.DisableKeyword("_ALPHABLEND_ON");
-                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                SetKeyword(material, "_ALPHATEST_ON", false);
+                SetKeyword(material, "_ALPHABLEND_ON", false);
+                SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
                 material.renderQueue = -1;
 				break;
 			case BlendMode.Transparent:
@@ -214,9 +229,9 @@ public class MToonInspector : ShaderGUI
                 material.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.SrcAlpha);
                 material.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
                 material.SetInt("_ZWrite", 0);
-                material.DisableKeyword("_ALPHATEST_ON");
-                material.DisableKeyword("_ALPHABLEND_ON");
-                material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+                SetKeyword(material, "_ALPHATEST_ON", false);
+                SetKeyword(material, "_ALPHABLEND_ON", true);
+                SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
                 material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
 				break;
 		}
@@ -227,13 +242,28 @@ public class MToonInspector : ShaderGUI
 		switch (outlineMode)
 		{
 			case OutlineMode.None:
-				material.EnableKeyword("MTOON_OUTLINE_NONE");
-				material.DisableKeyword("MTOON_OUTLINE_COLORED");
+                SetKeyword(material, "MTOON_OUTLINE_COLORED", false);
 				break;
 			case OutlineMode.Colored:
-				material.DisableKeyword("MTOON_OUTLINE_NONE");
-				material.EnableKeyword("MTOON_OUTLINE_COLORED");
+                SetKeyword(material, "MTOON_OUTLINE_COLORED", true);
 				break;
+		}
+	}
+
+	private void SetupNormalMode(Material material, bool requireNormalMapping)
+	{
+		SetKeyword(material, "_NORMALMAP", requireNormalMapping);
+	}
+
+	private void SetKeyword(Material mat, string keyword, bool required)
+	{
+		if (required)
+		{
+			mat.EnableKeyword(keyword);
+		}
+		else
+		{
+			mat.DisableKeyword(keyword);
 		}
 	}
 }

@@ -102,11 +102,15 @@ float4 frag(v2f i) : SV_TARGET
 {
     UNITY_SETUP_INSTANCE_ID(i); // necessary only if any instanced properties are going to be accessed in the fragment Shader.
     
+#ifdef _NORMALMAP
 	half3 tangentNormal = UnpackScaleNormal(tex2D(_BumpMap, TRANSFORM_TEX(i.uv0, _BumpMap)), _BumpScale);
 	half3 worldNormal;
 	worldNormal.x = dot(i.tspace0, tangentNormal);
 	worldNormal.y = dot(i.tspace1, tangentNormal);
 	worldNormal.z = dot(i.tspace2, tangentNormal);
+#else
+    half3 worldNormal = half3(i.tspace0.z, i.tspace1.z, i.tspace2.z);
+#endif
 
 #ifdef MTOON_DEBUG_NORMAL
 	#ifndef _M_FORWARD_ADD
