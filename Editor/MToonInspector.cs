@@ -171,6 +171,7 @@ public class MToonInspector : ShaderGUI
             {
                 materialEditor.EnableInstancingField();
                 materialEditor.DoubleSidedGIField();
+                materialEditor.RenderQueueField();
             }
             EditorGUILayout.Space();
 		}
