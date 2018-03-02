@@ -40,9 +40,6 @@ public class MToonInspector : ShaderGUI
 	private MaterialProperty _shadeToony;
 	private MaterialProperty _lightColorAttenuation;
 	private MaterialProperty _normalFromVColorRate;
-	private MaterialProperty _normalCylinderizeRate;
-	private MaterialProperty _normalCylinderizePos;
-	private MaterialProperty _normalCylinderizeAxis;
 	private MaterialProperty _sphereAdd;
 	private MaterialProperty _outlineWidthTexture;
 	private MaterialProperty _outlineWidth;
@@ -66,9 +63,6 @@ public class MToonInspector : ShaderGUI
 		_shadeToony = FindProperty("_ShadeToony", properties);
 		_lightColorAttenuation = FindProperty("_LightColorAttenuation", properties);
 		_normalFromVColorRate = FindProperty("_NormalFromVColorRate", properties);
-		_normalCylinderizeRate = FindProperty("_NormalCylinderizeRate", properties);
-		_normalCylinderizePos = FindProperty("_NormalCylinderizePos", properties);
-		_normalCylinderizeAxis = FindProperty("_NormalCylinderizeAxis", properties);
 		_sphereAdd = FindProperty("_SphereAdd", properties);
 		_outlineWidthTexture = FindProperty("_OutlineWidthTexture", properties);
 		_outlineWidth = FindProperty("_OutlineWidth", properties);
@@ -152,9 +146,6 @@ public class MToonInspector : ShaderGUI
 			EditorGUI.indentLevel++;
 			{
 				materialEditor.ShaderProperty(_normalFromVColorRate, "Normal from Vertex Color Rate");
-				materialEditor.ShaderProperty(_normalCylinderizeRate, "Normal Cylinderize Rate");
-				materialEditor.ShaderProperty(_normalCylinderizePos, "Normal Cylinderize Pos");
-				materialEditor.ShaderProperty(_normalCylinderizeAxis, "Normal Cylinderize Axis");
 			}
 			EditorGUI.indentLevel --;
 

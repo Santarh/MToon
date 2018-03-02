@@ -16,9 +16,6 @@ half _ShadeShift;
 half _ShadeToony;
 half _LightColorAttenuation;
 half _NormalFromVColorRate;
-half _NormalCylinderizeRate;
-float3 _NormalCylinderizePos;
-float3 _NormalCylinderizeAxis;
 sampler2D _SphereAdd;
 sampler2D _OutlineWidthTexture; float4 _OutlineWidthTexture_ST;
 half _OutlineWidth;
@@ -132,13 +129,6 @@ float4 frag(v2f i) : SV_TARGET
 
 	float3 vColorBump = i.color.rgb * 2.0 - 1.0;
 	normalDir = normalize(lerp(normalDir, normalize(mul(vColorBump, tangentTransform)), _NormalFromVColorRate));
-
-	// normal cylinderize
-	// float3 diffPos = normalize(i.posWorld - mul(unity_ObjectToWorld, float4(_NormalCylinderizePos, 1)).xyz);
-	// float3 axis = normalize(_NormalCylinderizeAxis);
-	// float3 cylinderNormal = normalize(diffPos - dot(diffPos, mul(unity_ObjectToWorld, float4(axis, 0)) * axis));
-	// normalDir = normalize(lerp(normalDir, cylinderNormal, _NormalCylinderizeRate));
-
 
 #ifdef MTOON_DEBUG_NORMAL
 	#ifndef _M_FORWARD_ADD
