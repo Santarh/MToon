@@ -32,3 +32,7 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+# not Unity
+LICENSE.meta
+README.md.meta
