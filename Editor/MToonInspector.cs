@@ -207,7 +207,7 @@ public class MToonInspector : ShaderGUI
 				break;
 			case BlendMode.Transparent:
 				material.SetOverrideTag("RenderType", "Transparent");
-                material.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.One);
+                material.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.SrcAlpha);
                 material.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
                 material.SetInt("_ZWrite", 0);
                 material.DisableKeyword("_ALPHATEST_ON");
