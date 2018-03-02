@@ -39,7 +39,6 @@ public class MToonInspector : ShaderGUI
 	private MaterialProperty _shadeShift;
 	private MaterialProperty _shadeToony;
 	private MaterialProperty _lightColorAttenuation;
-	private MaterialProperty _normalFromVColorRate;
 	private MaterialProperty _sphereAdd;
 	private MaterialProperty _outlineWidthTexture;
 	private MaterialProperty _outlineWidth;
@@ -62,7 +61,6 @@ public class MToonInspector : ShaderGUI
 		_shadeShift = FindProperty("_ShadeShift", properties);
 		_shadeToony = FindProperty("_ShadeToony", properties);
 		_lightColorAttenuation = FindProperty("_LightColorAttenuation", properties);
-		_normalFromVColorRate = FindProperty("_NormalFromVColorRate", properties);
 		_sphereAdd = FindProperty("_SphereAdd", properties);
 		_outlineWidthTexture = FindProperty("_OutlineWidthTexture", properties);
 		_outlineWidth = FindProperty("_OutlineWidth", properties);
@@ -145,7 +143,6 @@ public class MToonInspector : ShaderGUI
 			EditorGUILayout.LabelField("Normal");
 			EditorGUI.indentLevel++;
 			{
-				materialEditor.ShaderProperty(_normalFromVColorRate, "Normal from Vertex Color Rate");
 			}
 			EditorGUI.indentLevel --;
 

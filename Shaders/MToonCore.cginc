@@ -15,29 +15,18 @@ half _ReceiveShadowRate;
 half _ShadeShift;
 half _ShadeToony;
 half _LightColorAttenuation;
-half _NormalFromVColorRate;
 sampler2D _SphereAdd;
 sampler2D _OutlineWidthTexture; float4 _OutlineWidthTexture_ST;
 half _OutlineWidth;
 fixed4 _OutlineColor;
 
-struct v2g
-{
-	float4 posLocal : TEXCOORD0;
-	float3 normalLocal : TEXCOORD1;
-	float4 tangentLocal : TEXCOORD2;
-	float2 uv0 : TEXCOORD3;
-	float outlineWidth : TEXCOORD4;
-	fixed4 color : TEXCOORD5;
-};
-
 struct v2f
 {
 	float4 pos : SV_POSITION;
 	float4 posWorld : TEXCOORD0;
-	float3 normal : TEXCOORD1;
-	float3 tangent : TEXCOORD2;
-	float3 bitangent : TEXCOORD3;
+	half3 tspace0 : TEXCOORD1;
+	half3 tspace1 : TEXCOORD2;
+	half3 tspace2 : TEXCOORD3;
 	float2 uv0 : TEXCOORD4;
 	float isOutline : TEXCOORD5;
 	fixed4 color : TEXCOORD6;
@@ -45,53 +34,49 @@ struct v2f
 	UNITY_FOG_COORDS(8)
 };
 
-v2f vert_without_geom(appdata_full v)
+inline v2f InitializeV2F(appdata_full v, float3 positionOffset, float isOutline)
 {
 	v2f o;
-	o.pos = UnityObjectToClipPos(v.vertex);
-	o.posWorld = mul(unity_ObjectToWorld, v.vertex);
+	float4 vertex = v.vertex + float4(positionOffset, 0);
+	o.pos = UnityObjectToClipPos(vertex);
+	o.posWorld = mul(unity_ObjectToWorld, vertex);
 	o.uv0 = v.texcoord;
-	o.normal = normalize(UnityObjectToWorldNormal(v.normal));
-	o.tangent = normalize(mul(unity_ObjectToWorld, float4(v.tangent.xyz, 0.0)).xyz);
-	o.bitangent = normalize(cross(o.normal, o.tangent) * v.tangent.w);
-	o.isOutline = 0;
+	half3 worldNormal = UnityObjectToWorldNormal(v.normal);
+	half3 worldTangent = UnityObjectToWorldDir(v.tangent);
+	half tangentSign = v.tangent.w * unity_WorldTransformParams.w;
+	half3 worldBitangent = cross(worldNormal, worldTangent) * tangentSign;
+	o.tspace0 = half3(worldTangent.x, worldBitangent.x, worldNormal.x);
+	o.tspace1 = half3(worldTangent.y, worldBitangent.y, worldNormal.y);
+	o.tspace2 = half3(worldTangent.z, worldBitangent.z, worldNormal.z);
+	o.isOutline = isOutline;
 	o.color = v.color;
 	TRANSFER_SHADOW(o);
 	UNITY_TRANSFER_FOG(o, o.pos);
 	return o;
 }
 
-v2g vert_with_geom(appdata_full v)
+v2f vert_without_geom(appdata_full v)
 {
-	v2g o;
-	o.posLocal = v.vertex;
-	o.normalLocal = v.normal;
-	o.tangentLocal = v.tangent;
-	o.uv0 = v.texcoord;
-	o.outlineWidth = 0.01 * _OutlineWidth * tex2Dlod(_OutlineWidthTexture, float4(TRANSFORM_TEX(v.texcoord, _OutlineWidthTexture), 0, 0)).r;
-	o.color = v.color;
-	return o;
+    return InitializeV2F(v, float3(0, 0, 0), 0);
+}
+
+appdata_full vert_with_geom(appdata_full v)
+{
+    return v;
 }
 
 [maxvertexcount(6)]
-void geom(triangle v2g IN[3], inout TriangleStream<v2f> stream)
+void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
 {
 	v2f o;
 
 #ifdef MTOON_OUTLINE_COLORED
 	for (int i = 2; i >= 0; --i)
 	{
-		v2g v = IN[i];
-		o.pos = UnityObjectToClipPos(v.posLocal + normalize(v.normalLocal) * v.outlineWidth);
-		o.posWorld = mul(unity_ObjectToWorld, o.pos);
-		o.uv0 = v.uv0;
-		o.normal = normalize(UnityObjectToWorldNormal(v.normalLocal));
-		o.tangent = normalize(mul(unity_ObjectToWorld, float4(v.tangentLocal.xyz, 0.0)).xyz);
-		o.bitangent = normalize(cross(o.normal, o.tangent) * v.tangentLocal.w);
-		o.isOutline = 1;
-		o.color = 0;
-		TRANSFER_SHADOW(o);
-		UNITY_TRANSFER_FOG(o, o.pos);
+		appdata_full v = IN[i];
+		float outlineTex = tex2Dlod(_OutlineWidthTexture, float4(TRANSFORM_TEX(v.texcoord, _OutlineWidthTexture), 0, 0)).r;
+        float3 outlineOffset = 0.01 * _OutlineWidth * outlineTex * v.normal;
+        v2f o = InitializeV2F(v, outlineOffset, 1);
 		stream.Append(o);
 	}
 	stream.RestartStrip();
@@ -99,17 +84,8 @@ void geom(triangle v2g IN[3], inout TriangleStream<v2f> stream)
 
 	for (int j = 0; j < 3; ++j)
 	{
-		v2g v = IN[j];
-		o.pos = UnityObjectToClipPos(v.posLocal);
-		o.posWorld = mul(unity_ObjectToWorld, v.posLocal);
-		o.uv0 = v.uv0;
-		o.normal = normalize(UnityObjectToWorldNormal(v.normalLocal));
-		o.tangent = normalize(mul(unity_ObjectToWorld, float4(v.tangentLocal.xyz, 0.0)).xyz);
-		o.bitangent = normalize(cross(o.normal, o.tangent) * v.tangentLocal.w);
-		o.isOutline = 0;
-		o.color = v.color;
-		TRANSFER_SHADOW(o);
-		UNITY_TRANSFER_FOG(o, o.pos);
+		appdata_full v = IN[j];
+		v2f o = InitializeV2F(v, float3(0, 0, 0), 0);
 		stream.Append(o);
 	}
 	stream.RestartStrip();
@@ -117,24 +93,23 @@ void geom(triangle v2g IN[3], inout TriangleStream<v2f> stream)
 
 float4 frag(v2f i) : SV_TARGET
 {
-	float3x3 tangentTransform = float3x3(i.tangent, i.bitangent, i.normal);
-	float3 bump = UnpackNormal(tex2D(_NormalTexture, TRANSFORM_TEX(i.uv0, _NormalTexture)));
-	float3 normalDir = normalize(mul(bump, tangentTransform));
-
-	float3 vColorBump = i.color.rgb * 2.0 - 1.0;
-	normalDir = normalize(lerp(normalDir, normalize(mul(vColorBump, tangentTransform)), _NormalFromVColorRate));
+	half3 tangentNormal = UnpackNormal(tex2D(_NormalTexture, TRANSFORM_TEX(i.uv0, _NormalTexture)));
+	half3 worldNormal;
+	worldNormal.x = dot(i.tspace0, tangentNormal);
+	worldNormal.y = dot(i.tspace1, tangentNormal);
+	worldNormal.z = dot(i.tspace2, tangentNormal);
 
 #ifdef MTOON_DEBUG_NORMAL
 	#ifndef _M_FORWARD_ADD
-		return float4(normalDir * 0.5 + 0.5, 1);
+		return float4(worldNormal * 0.5 + 0.5, 1);
 	#else
 		return float4(0, 0, 0, 0);
 	#endif
 #endif
 
 	float3 view = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
-	float3 viewReflect = reflect(-view, normalDir);
-	half nv = dot(normalDir, view);
+	float3 viewReflect = reflect(-view, worldNormal);
+	half nv = dot(worldNormal, view);
 	UNITY_LIGHT_ATTENUATION(atten, i, i.posWorld.xyz);
 
 	// Receive Shadow Rate
@@ -142,9 +117,9 @@ float4 frag(v2f i) : SV_TARGET
 
 	// lighting
 	half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
-	half3 directLighting = saturate(dot(lightDir, normalDir) * 0.5 + 0.5) * _LightColor0.rgb * atten;
-	half3 indirectLighting = ShadeSH9(half4(normalDir, 1));
-	half3 rimLighting = tex2D(_SphereAdd, mul(UNITY_MATRIX_V, half4(normalDir, 0)).xy * 0.5 + 0.5);
+	half3 directLighting = saturate(dot(lightDir, worldNormal) * 0.5 + 0.5) * _LightColor0.rgb * atten;
+	half3 indirectLighting = ShadeSH9(half4(worldNormal, 1));
+	half3 rimLighting = tex2D(_SphereAdd, mul(UNITY_MATRIX_V, half4(worldNormal, 0)).xy * 0.5 + 0.5);
 	half3 lighting = indirectLighting + directLighting + rimLighting;
 
 	// tooned
