@@ -174,6 +174,9 @@ public class MToonInspector : ShaderGUI
 			EditorGUI.indentLevel--;
 		}
 		EditorGUI.EndChangeCheck();
+		
+		materialEditor.EnableInstancingField();
+		materialEditor.DoubleSidedGIField();
 	}
 
 	private void SetupDebugMode(Material material, DebugMode debugMode)

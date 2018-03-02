@@ -4,7 +4,7 @@ Shader "MToon"
 	{
 		_Alpha ("Alpha", Range(0, 1)) = 1.0
 		_Color ("Lit Color", Color) = (1,1,1,1)
-		_ShadeColor ("Shade Color", Color) = (0,0,0,1)
+		_ShadeColor ("Shade Color", Color) = (1,1,1,1)
 		[NoScaleOffset] _MainTex ("Lit Texture", 2D) = "white" {}
 		[NoScaleOffset] _ShadeTexture ("Shade Texture", 2D) = "white" {}
 		[Normal] _BumpMap ("Normal Texture", 2D) = "bump" {}
