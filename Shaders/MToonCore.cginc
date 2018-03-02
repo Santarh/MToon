@@ -144,13 +144,14 @@ float4 frag(v2f i) : SV_TARGET
 	lighting = lerp(lighting, half3(illum, illum, illum), _LightColorAttenuation * illum);
 
 	// color lerp
-	half3 shade = _ShadeColor.rgb * tex2D(_ShadeTexture, TRANSFORM_TEX(i.uv0, _ShadeTexture)).rgb;
-	half3 lit = _Color.rgb * tex2D(_MainTex, TRANSFORM_TEX(i.uv0, _MainTex)).rgb;
+	half4 shade = _ShadeColor * tex2D(_ShadeTexture, TRANSFORM_TEX(i.uv0, _ShadeTexture));
+	half4 lit = _Color * tex2D(_MainTex, TRANSFORM_TEX(i.uv0, _MainTex));
 #ifndef MTOON_FORWARD_ADD
-	half3 col = lerp(shade, lit, lighting);
+	half3 col = lerp(shade.rgb, lit.rgb, lighting);
 #else
-	half3 col = lerp(half3(0,0,0), saturate(lit - shade), lighting);
+	half3 col = lerp(half3(0,0,0), saturate(lit.rgb - shade.rgb), lighting);
 #endif
+    half alpha = _Alpha * lerp(shade.a, lit.a, lighting);
 
 	// light strength tint
 	half3 tintCol = ShadeSH9(half4(0, 1, 0, 1)) + _LightColor0.rgb;
@@ -160,7 +161,7 @@ float4 frag(v2f i) : SV_TARGET
 	// outline
 	col = lerp(col, _OutlineColor * tint, i.isOutline);
 
-	half4 result = half4(col, _Alpha);
+	half4 result = half4(col, alpha);
 	UNITY_APPLY_FOG(i.fogCoord, result);
 	return result;
 }
