@@ -67,7 +67,6 @@ Shader "MToon"
 
 			CGPROGRAM
 			#pragma shader_feature MTOON_DEBUG_NORMAL
-			#pragma shader_feature MTOON_OUTLINE_COLORED
 			#pragma shader_feature _NORMALMAP
 			#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
 			#define MTOON_FORWARD_ADD
@@ -89,6 +88,7 @@ Shader "MToon"
 		    #pragma vertex vert
 		    #pragma fragment frag
 		    #pragma multi_compile_shadowcaster
+            #pragma multi_compile_instancing
             #include "UnityCG.cginc"
             
             sampler3D _DitherMaskLOD;
@@ -106,6 +106,7 @@ Shader "MToon"
             v2f vert(appdata_base v)
             {
                 v2f o;
+                UNITY_SETUP_INSTANCE_ID(v);
                 TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
                 o.uv0 = v.texcoord;
                 return o;
@@ -127,6 +128,6 @@ Shader "MToon"
             ENDCG
 		}
 	}
-	//Fallback "Diffuse"
+	Fallback "Unlit/Texture"
 	CustomEditor "MToonInspector"
 }

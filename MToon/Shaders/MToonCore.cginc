@@ -38,12 +38,15 @@ struct v2f
 	fixed4 color : TEXCOORD6;
 	SHADOW_COORDS(7)
 	UNITY_FOG_COORDS(8)
-	UNITY_VERTEX_INPUT_INSTANCE_ID
+	//UNITY_VERTEX_INPUT_INSTANCE_ID // necessary only if any instanced properties are going to be accessed in the fragment Shader.
 };
 
 inline v2f InitializeV2F(appdata_full v, float3 positionOffset, float isOutline)
 {
 	v2f o;
+	UNITY_SETUP_INSTANCE_ID(v);
+	//UNITY_TRANSFER_INSTANCE_ID(v, o);
+	
 	float4 vertex = v.vertex + float4(positionOffset, 0);
 	o.pos = UnityObjectToClipPos(vertex);
 	o.posWorld = mul(unity_ObjectToWorld, vertex);
@@ -59,8 +62,6 @@ inline v2f InitializeV2F(appdata_full v, float3 positionOffset, float isOutline)
 	o.color = v.color;
 	TRANSFER_SHADOW(o);
 	UNITY_TRANSFER_FOG(o, o.pos);
-	UNITY_SETUP_INSTANCE_ID(v);
-	UNITY_TRANSFER_INSTANCE_ID(v, o); // necessary only if any instanced properties are going to be accessed in the fragment Shader.
 	return o;
 }
 
@@ -102,8 +103,8 @@ void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
 
 float4 frag(v2f i) : SV_TARGET
 {
-    UNITY_SETUP_INSTANCE_ID(i); // necessary only if any instanced properties are going to be accessed in the fragment Shader.
-    
+	//UNITY_TRANSFER_INSTANCE_ID(v, o);
+	
     // alpha
     half alpha = 1;
 #ifdef _ALPHATEST_ON
