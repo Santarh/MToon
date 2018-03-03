@@ -24,6 +24,7 @@ Shader "MToon"
 		[HideInInspector] _DebugMode ("_DebugMode", Float) = 0.0
 		[HideInInspector] _BlendMode ("_BlendMode", Float) = 0.0
 		[HideInInspector] _OutlineMode ("_OutlineMode", Float) = 0.0
+		[HideInInspector] _CullMode ("_CullMode", Float) = 2.0
 		[HideInInspector] _SrcBlend ("_SrcBlend", Float) = 1.0
 		[HideInInspector] _DstBlend ("_DstBlend", Float) = 0.0
 		[HideInInspector] _ZWrite ("_ZWrite", Float) = 1.0
@@ -32,7 +33,7 @@ Shader "MToon"
 	SubShader
 	{
 		Tags { "RenderType" = "Opaque"  "Queue" = "Geometry" }
-		Cull Back
+		Cull [_CullMode]
 
 		Pass 
 		{

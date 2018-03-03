@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using System.Linq;
+using UnityEngine.Rendering;
 
 public class MToonInspector : ShaderGUI
 {
@@ -19,7 +20,7 @@ public class MToonInspector : ShaderGUI
 		Colored,
 	}
 
-	public enum BlendMode
+	public enum RenderMode
 	{
 		Opaque,
 		Cutout,
@@ -29,6 +30,7 @@ public class MToonInspector : ShaderGUI
 	private MaterialProperty _debugMode;
 	private MaterialProperty _outlineMode;
 	private MaterialProperty _blendMode;
+	private MaterialProperty _cullMode;
 	private MaterialProperty _alpha;
 	private MaterialProperty _cutoff;
 	private MaterialProperty _alphaTexture;
@@ -56,6 +58,7 @@ public class MToonInspector : ShaderGUI
 		_debugMode = FindProperty("_DebugMode", properties);
 		_outlineMode = FindProperty("_OutlineMode", properties);
 		_blendMode = FindProperty("_BlendMode", properties);
+		_cullMode = FindProperty("_CullMode", properties);
 		_alpha = FindProperty("_Alpha", properties);
 		_cutoff = FindProperty("_Cutoff", properties);
 		_alphaTexture = FindProperty("_AlphaTexture", properties);
@@ -81,10 +84,11 @@ public class MToonInspector : ShaderGUI
 			foreach (var obj in materialEditor.targets)
 			{
 				var mat = (Material) obj;
-				SetupBlendMode(mat, (BlendMode) mat.GetFloat(_blendMode.name));
+				SetupBlendMode(mat, (RenderMode) mat.GetFloat(_blendMode.name));
 				SetupNormalMode(mat, mat.GetTexture(_bumpMap.name));
 				SetupOutlineMode(mat, (OutlineMode) mat.GetFloat(_outlineMode.name));
 				SetupDebugMode(mat, (DebugMode) mat.GetFloat(_debugMode.name));
+				SetupCullMode(mat, (CullMode) mat.GetFloat(_cullMode.name));
 			}
 		}
 
@@ -92,7 +96,7 @@ public class MToonInspector : ShaderGUI
 		{
 			EditorGUI.showMixedValue = _blendMode.hasMixedValue;
 			EditorGUI.BeginChangeCheck();
-			var bm = (BlendMode) EditorGUILayout.Popup("Rendering Type", (int) _blendMode.floatValue, Enum.GetNames(typeof(BlendMode)));
+			var bm = (RenderMode) EditorGUILayout.Popup("Rendering Type", (int) _blendMode.floatValue, Enum.GetNames(typeof(RenderMode)));
 			if (EditorGUI.EndChangeCheck())
 			{
 				materialEditor.RegisterPropertyChangeUndo("RenderType");
@@ -106,16 +110,16 @@ public class MToonInspector : ShaderGUI
 			EditorGUI.showMixedValue = false;
 			EditorGUILayout.Space();
 
-			if (bm != BlendMode.Opaque)
+			if (bm != RenderMode.Opaque)
 			{
 				EditorGUILayout.LabelField("Alpha", EditorStyles.boldLabel);
 				{
-					if (bm == BlendMode.Transparent)
+					if (bm == RenderMode.Transparent)
 					{
 						materialEditor.TexturePropertySingleLine(new GUIContent("Alpha", "Alpha Texture (A)"), _alphaTexture, _alpha);
 					}
 
-					if (bm == BlendMode.Cutout)
+					if (bm == RenderMode.Cutout)
 					{
 						materialEditor.TexturePropertySingleLine(new GUIContent("Alpha", "Alpha Texture (A)"), _alphaTexture, _alpha);
 						materialEditor.ShaderProperty(_cutoff, "Alpha Cutoff");
@@ -186,6 +190,26 @@ public class MToonInspector : ShaderGUI
 			}
 			EditorGUILayout.Space();
 			
+			EditorGUILayout.LabelField("Geometry Options", EditorStyles.boldLabel);
+			{
+				EditorGUI.showMixedValue = _cullMode.hasMixedValue;
+				EditorGUI.BeginChangeCheck();
+				var cm = (CullMode) EditorGUILayout.Popup("Cull Mode", (int) _cullMode.floatValue,
+					Enum.GetNames(typeof(CullMode)));
+				if (EditorGUI.EndChangeCheck())
+				{
+					materialEditor.RegisterPropertyChangeUndo("CullType");
+					_cullMode.floatValue = (float) cm;
+
+					foreach (var obj in materialEditor.targets)
+					{
+						SetupCullMode((Material) obj, cm);
+					}
+				}
+				EditorGUI.showMixedValue = false;
+			}
+			EditorGUILayout.Space();
+			
 			EditorGUILayout.LabelField("Texture Options", EditorStyles.boldLabel);
 			{
 				EditorGUI.BeginChangeCheck();
@@ -243,39 +267,39 @@ public class MToonInspector : ShaderGUI
 		}
 	}
 
-	private void SetupBlendMode(Material material, BlendMode blendMode)
+	private void SetupBlendMode(Material material, RenderMode renderMode)
 	{
-		switch (blendMode)
+		switch (renderMode)
 		{
-			case BlendMode.Opaque:
+			case RenderMode.Opaque:
 				material.SetOverrideTag("RenderType", "Opaque");
-                material.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.One);
-                material.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.Zero);
+                material.SetInt("_SrcBlend", (int) BlendMode.One);
+                material.SetInt("_DstBlend", (int) BlendMode.Zero);
                 material.SetInt("_ZWrite", 1);
                 SetKeyword(material, "_ALPHATEST_ON", false);
                 SetKeyword(material, "_ALPHABLEND_ON", false);
                 SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
                 material.renderQueue = -1;
 				break;
-			case BlendMode.Cutout:
+			case RenderMode.Cutout:
 				material.SetOverrideTag("RenderType", "TransparentCutout");
-                material.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.One);
-                material.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.Zero);
+                material.SetInt("_SrcBlend", (int) BlendMode.One);
+                material.SetInt("_DstBlend", (int) BlendMode.Zero);
                 material.SetInt("_ZWrite", 1);
                 SetKeyword(material, "_ALPHATEST_ON", true);
                 SetKeyword(material, "_ALPHABLEND_ON", false);
                 SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
-				material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.AlphaTest;
+				material.renderQueue = (int) RenderQueue.AlphaTest;
 				break;
-			case BlendMode.Transparent:
+			case RenderMode.Transparent:
 				material.SetOverrideTag("RenderType", "Transparent");
-                material.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.SrcAlpha);
-                material.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                material.SetInt("_SrcBlend", (int) BlendMode.SrcAlpha);
+                material.SetInt("_DstBlend", (int) BlendMode.OneMinusSrcAlpha);
                 material.SetInt("_ZWrite", 0);
                 SetKeyword(material, "_ALPHATEST_ON", false);
                 SetKeyword(material, "_ALPHABLEND_ON", true);
                 SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
-                material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
+                material.renderQueue = (int) RenderQueue.Transparent;
 				break;
 		}
 	}
@@ -296,6 +320,22 @@ public class MToonInspector : ShaderGUI
 	private void SetupNormalMode(Material material, bool requireNormalMapping)
 	{
 		SetKeyword(material, "_NORMALMAP", requireNormalMapping);
+	}
+
+	private void SetupCullMode(Material material, CullMode cullMode)
+	{
+		switch (cullMode)
+		{
+			case CullMode.Back:
+                material.SetInt("_CullMode", (int) CullMode.Back);
+				break;
+			case CullMode.Front:
+                material.SetInt("_CullMode", (int) CullMode.Front);
+				break;
+			case CullMode.Off:
+                material.SetInt("_CullMode", (int) CullMode.Off);
+				break;
+		}
 	}
 
 	private void SetKeyword(Material mat, string keyword, bool required)
