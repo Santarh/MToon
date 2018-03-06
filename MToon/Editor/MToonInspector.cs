@@ -163,6 +163,10 @@ public class MToonInspector : ShaderGUI
 				// Shadow
 				EditorGUILayout.LabelField("Shadow");
 				EditorGUI.indentLevel++;
+				if (((Material) materialEditor.target).GetFloat("_ShadeShift") < 0f)
+				{
+					EditorGUILayout.LabelField("Receive rate should be lower value when Shade Shift is lower than 0.", EditorStyles.wordWrappedLabel);
+				}
 				materialEditor.TexturePropertySingleLine(new GUIContent("Receive Rate", "Receive Shadow Rate Map (A)"), _receiveShadowTexture, _receiveShadowRate);
 				EditorGUI.indentLevel--;
 				
