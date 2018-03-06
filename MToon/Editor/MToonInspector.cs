@@ -31,9 +31,7 @@ public class MToonInspector : ShaderGUI
 	private MaterialProperty _outlineMode;
 	private MaterialProperty _blendMode;
 	private MaterialProperty _cullMode;
-	private MaterialProperty _alpha;
 	private MaterialProperty _cutoff;
-	private MaterialProperty _alphaTexture;
 	private MaterialProperty _color;
 	private MaterialProperty _shadeColor;
 	private MaterialProperty _mainTex;
@@ -49,6 +47,7 @@ public class MToonInspector : ShaderGUI
 	private MaterialProperty _outlineWidthTexture;
 	private MaterialProperty _outlineWidth;
 	private MaterialProperty _outlineColor;
+	private MaterialProperty _outlineLightingMix;
 
 	private bool _firstTimeApply = true;
 
@@ -59,9 +58,7 @@ public class MToonInspector : ShaderGUI
 		_outlineMode = FindProperty("_OutlineMode", properties);
 		_blendMode = FindProperty("_BlendMode", properties);
 		_cullMode = FindProperty("_CullMode", properties);
-		_alpha = FindProperty("_Alpha", properties);
 		_cutoff = FindProperty("_Cutoff", properties);
-		_alphaTexture = FindProperty("_AlphaTexture", properties);
 		_color = FindProperty("_Color", properties);
 		_shadeColor = FindProperty("_ShadeColor", properties);
 		_mainTex = FindProperty("_MainTex", properties);
@@ -77,6 +74,7 @@ public class MToonInspector : ShaderGUI
 		_outlineWidthTexture = FindProperty("_OutlineWidthTexture", properties);
 		_outlineWidth = FindProperty("_OutlineWidth", properties);
 		_outlineColor = FindProperty("_OutlineColor", properties);
+		_outlineLightingMix = FindProperty("_OutlineLightingMix", properties);
 
 		if (_firstTimeApply)
 		{
@@ -116,12 +114,12 @@ public class MToonInspector : ShaderGUI
 				{
 					if (bm == RenderMode.Transparent)
 					{
-						materialEditor.TexturePropertySingleLine(new GUIContent("Alpha", "Alpha Texture (A)"), _alphaTexture, _alpha);
+						EditorGUILayout.TextField("Ensure your lit color and texture have alpha channels.");
 					}
 
 					if (bm == RenderMode.Cutout)
 					{
-						materialEditor.TexturePropertySingleLine(new GUIContent("Alpha", "Alpha Texture (A)"), _alphaTexture, _alpha);
+						EditorGUILayout.TextField("Ensure your lit color and texture have alpha channels.");
 						materialEditor.ShaderProperty(_cutoff, "Alpha Cutoff");
 					}
 				}
@@ -131,8 +129,8 @@ public class MToonInspector : ShaderGUI
 			EditorGUILayout.LabelField("Color", EditorStyles.boldLabel);
 			{
 				// Color
-				materialEditor.TexturePropertySingleLine(new GUIContent("Lit Texture", "Lit Texture (RGB)"), _mainTex, _color);
-				materialEditor.TexturePropertySingleLine(new GUIContent("Shade Texture", "Shade Texture (RGB)"), _shadeTexture, _shadeColor);
+				materialEditor.TexturePropertySingleLine(new GUIContent("Lit Color & Alpha", "Lit (RGB), Alpha (A)"), _mainTex, _color);
+				materialEditor.TexturePropertySingleLine(new GUIContent("Shade Color", "Shade (RGB)"), _shadeTexture, _shadeColor);
 				materialEditor.TexturePropertySingleLine(new GUIContent("Receive Shadow", "Receive Shadow Map (A)"), _receiveShadowTexture, _receiveShadowRate);
 			}
 			EditorGUILayout.Space();
@@ -186,6 +184,7 @@ public class MToonInspector : ShaderGUI
 				{
 					materialEditor.TexturePropertySingleLine(new GUIContent("OutlineWidth Tex", "Outline Width Texture (RGB)"), _outlineWidthTexture, _outlineWidth);
 					materialEditor.ShaderProperty(_outlineColor, "Outline Color");
+					materialEditor.DefaultShaderProperty(_outlineLightingMix, "Outline Lighting Mix");
 				}
 			}
 			EditorGUILayout.Space();

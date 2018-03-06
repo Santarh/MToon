@@ -2,11 +2,8 @@
 
 #include "Lighting.cginc"
 #include "AutoLight.cginc"
-#pragma target 3.0
 
-half _Alpha;
 half _Cutoff;
-sampler2D _AlphaTexture; float4 _AlphaTexture_ST;
 fixed4 _Color;
 fixed4 _ShadeColor;
 sampler2D _MainTex; float4 _MainTex_ST;
@@ -22,9 +19,10 @@ sampler2D _SphereAdd;
 sampler2D _OutlineWidthTexture; float4 _OutlineWidthTexture_ST;
 half _OutlineWidth;
 fixed4 _OutlineColor;
+half _OutlineLightingMix;
 
-UNITY_INSTANCING_BUFFER_START(Props)
-UNITY_INSTANCING_BUFFER_END(Props)
+//UNITY_INSTANCING_BUFFER_START(Props)
+//UNITY_INSTANCING_BUFFER_END(Props)
 
 struct v2f
 {
@@ -36,8 +34,8 @@ struct v2f
 	float2 uv0 : TEXCOORD4;
 	float isOutline : TEXCOORD5;
 	fixed4 color : TEXCOORD6;
-	SHADOW_COORDS(7)
-	UNITY_FOG_COORDS(8)
+	LIGHTING_COORDS(7,8)
+	UNITY_FOG_COORDS(9)
 	//UNITY_VERTEX_INPUT_INSTANCE_ID // necessary only if any instanced properties are going to be accessed in the fragment Shader.
 };
 
@@ -60,7 +58,7 @@ inline v2f InitializeV2F(appdata_full v, float3 positionOffset, float isOutline)
 	o.tspace2 = half3(worldTangent.z, worldBitangent.z, worldNormal.z);
 	o.isOutline = isOutline;
 	o.color = v.color;
-	TRANSFER_SHADOW(o);
+	TRANSFER_VERTEX_TO_FRAGMENT(o);
 	UNITY_TRANSFER_FOG(o, o.pos);
 	return o;
 }
@@ -81,6 +79,7 @@ void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
 	v2f o;
 
 #ifdef MTOON_OUTLINE_COLORED
+    half3 normal = normalize(cross(IN[1].vertex - IN[0].vertex, IN[2].vertex - IN[0].vertex));
 	for (int i = 2; i >= 0; --i)
 	{
 		appdata_full v = IN[i];
@@ -101,18 +100,21 @@ void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
 	stream.RestartStrip();
 }
 
-float4 frag(v2f i) : SV_TARGET
+float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
 {
 	//UNITY_TRANSFER_INSTANCE_ID(v, o);
+	
+	// main tex
+	half4 mainTex = tex2D(_MainTex, TRANSFORM_TEX(i.uv0, _MainTex));
 	
     // alpha
     half alpha = 1;
 #ifdef _ALPHATEST_ON
-    alpha = _Alpha * tex2D(_AlphaTexture, TRANSFORM_TEX(i.uv0, _AlphaTexture));
+    alpha = _Color.a * mainTex.a;
     clip(alpha - _Cutoff);
 #endif
 #ifdef _ALPHABLEND_ON
-    alpha = _Alpha * tex2D(_AlphaTexture, TRANSFORM_TEX(i.uv0, _AlphaTexture));
+    alpha = _Color.a * mainTex.a;
 #endif
     
     // normal
@@ -125,12 +127,13 @@ float4 frag(v2f i) : SV_TARGET
 #else
     half3 worldNormal = half3(i.tspace0.z, i.tspace1.z, i.tspace2.z);
 #endif
+    worldNormal *= facing;
 
 #ifdef MTOON_DEBUG_NORMAL
-	#ifndef _M_FORWARD_ADD
-		return float4(worldNormal * 0.5 + 0.5, 1);
-	#else
+	#ifdef MTOON_FORWARD_ADD
 		return float4(0, 0, 0, 0);
+	#else
+		return float4(worldNormal * 0.5 + 0.5, 1);
 	#endif
 #endif
 
@@ -138,42 +141,53 @@ float4 frag(v2f i) : SV_TARGET
 	float3 view = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
 	float3 viewReflect = reflect(-view, worldNormal);
 	half nv = dot(worldNormal, view);
-	UNITY_LIGHT_ATTENUATION(atten, i, i.posWorld.xyz);
 
-	// Receive Shadow Rate
-	atten = lerp(1, atten, _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, TRANSFORM_TEX(i.uv0, _ReceiveShadowTexture)).a);
-
-	// lighting
+	// information for lighting
 	half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
-	half3 directLighting = saturate(dot(lightDir, worldNormal) * 0.5 + 0.5) * _LightColor0.rgb * atten;
-	half3 indirectLighting = ShadeSH9(half4(worldNormal, 1));
-	half3 rimLighting = tex2D(_SphereAdd, mul(UNITY_MATRIX_V, half4(worldNormal, 0)).xy * 0.5 + 0.5);
-	half3 lighting = indirectLighting + directLighting + rimLighting;
-
-	// tooned
-	half toony = lerp(0.5, 0, _ShadeToony);
-	lighting = smoothstep(_ShadeShift - toony, _ShadeShift + toony, lighting);
-
+	float atten = LIGHT_ATTENUATION(i);
+	half receiveShadow = 1 - _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, TRANSFORM_TEX(i.uv0, _ReceiveShadowTexture)).a;
+#ifdef MTOON_FORWARD_ADD
+    // FIXME atten is distance function when tranparent && point light
+    half shadow = atten;
+#else
+	half shadow = max(atten, receiveShadow);
+#endif
+	
+	// direct lighting
+	half directLighting = dot(lightDir, worldNormal); // neutral
+	directLighting = smoothstep(_ShadeShift, _ShadeShift + (1.0 - _ShadeToony), directLighting); // shade & tooned
+	directLighting = lerp(0, directLighting, shadow); // receive shadow
+	half3 directLightingColored = directLighting * _LightColor0.rgb;
+	
+	// merge ambient
+	half3 indirectLightingColored = ShadeSH9(half4(worldNormal, 1));
+	half3 lighting = indirectLightingColored + directLightingColored;
+	
 	// light color attenuation
 	half illum = max(lighting.x, max(lighting.y, lighting.z));
 	lighting = lerp(lighting, half3(illum, illum, illum), _LightColorAttenuation * illum);
-
+	
 	// color lerp
 	half4 shade = _ShadeColor * tex2D(_ShadeTexture, TRANSFORM_TEX(i.uv0, _ShadeTexture));
-	half4 lit = _Color * tex2D(_MainTex, TRANSFORM_TEX(i.uv0, _MainTex));
-#ifndef MTOON_FORWARD_ADD
-	half3 col = lerp(shade.rgb, lit.rgb, lighting);
+	half4 lit = _Color * mainTex;
+#ifdef MTOON_FORWARD_ADD
+	half3 col = lerp(half3(0,0,0), saturate(lit.rgb), lighting);
 #else
-	half3 col = lerp(half3(0,0,0), saturate(lit.rgb - shade.rgb), lighting);
+	half3 col = lerp(shade.rgb, lit.rgb, lighting);
 #endif
 
-	// light strength tint
-	half3 tintCol = ShadeSH9(half4(0, 1, 0, 1)) + _LightColor0.rgb;
-	half tint = saturate(max(tintCol.r, max(tintCol.g, tintCol.b)));
+    // rim
+	//half3 rimLighting = tex2D(_SphereAdd, mul(UNITY_MATRIX_V, half4(worldNormal, 0)).xy * 0.5 + 0.5);
+
+	// energy conservation
+	half3 energy = ShadeSH9(half4(0, 1, 0, 1)) + _LightColor0.rgb;
+	half energyV = max(0.001, max(energy.r, max(energy.g, energy.b)));
+	half colV = max(0.001, max(col.r, max(col.g, col.b)));
+	half tint = min(energyV, colV) / colV;
 	col *= tint;
 
 	// outline
-	col = lerp(col, _OutlineColor * tint, i.isOutline);
+	col = lerp(col, _OutlineColor * lerp(tint.xxx, col, _OutlineLightingMix), i.isOutline);
 
 	half4 result = half4(col, alpha);
 	UNITY_APPLY_FOG(i.fogCoord, result);
