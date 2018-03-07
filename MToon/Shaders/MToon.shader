@@ -1,4 +1,4 @@
-Shader "MToon"
+Shader "VRM/MToon"
 {
 	Properties
 	{
