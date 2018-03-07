@@ -152,16 +152,25 @@ float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
 #else
 	half shadow = max(atten, receiveShadow);
 #endif
+
+	// ambient
+	half3 indirect = ShadeSH9(half4(worldNormal, 1));
+	half indirectLighting = max(0.001, max(indirect.x, max(indirect.y, indirect.z)));
+	half3 indirectColor = indirect;
 	
 	// direct lighting
 	half directLighting = dot(lightDir, worldNormal); // neutral
-	directLighting = smoothstep(_ShadeShift, _ShadeShift + (1.0 - _ShadeToony), directLighting); // shade & tooned
 	directLighting = lerp(0, directLighting, shadow); // receive shadow
-	half3 directLightingColored = directLighting * _LightColor0.rgb;
+	directLighting = smoothstep(_ShadeShift, _ShadeShift + (1.0 - _ShadeToony), directLighting); // shade & tooned
 	
-	// merge ambient
-	half3 indirectLightingColored = ShadeSH9(half4(worldNormal, 1));
-	half3 lighting = indirectLightingColored + directLightingColored;
+	// brightness
+	half brightness = directLighting + indirectLighting;
+	brightness = smoothstep(_ShadeShift, _ShadeShift + (1.0 - _ShadeToony), brightness); // shade & tooned
+	brightness = lerp(0, brightness, shadow); // receive shadow
+	
+	// colored
+	half3 colorShift = lerp(indirectColor, _LightColor0.rgb, saturate(directLighting / indirectLighting));
+	half3 lighting = brightness * colorShift;
 	
 	// light color attenuation
 	half illum = max(lighting.x, max(lighting.y, lighting.z));
