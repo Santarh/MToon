@@ -77,9 +77,12 @@ appdata_full vert_with_geom(appdata_full v)
 void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
 {
 	v2f o;
+	
+	IN[0].normal = normalize(IN[0].normal);
+	IN[1].normal = normalize(IN[1].normal);
+	IN[2].normal = normalize(IN[2].normal);
 
 #ifdef MTOON_OUTLINE_COLORED
-    half3 normal = normalize(cross(IN[1].vertex - IN[0].vertex, IN[2].vertex - IN[0].vertex));
 	for (int i = 2; i >= 0; --i)
 	{
 		appdata_full v = IN[i];
