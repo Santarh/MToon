@@ -173,11 +173,8 @@ float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
 	
 	// colored
 	half3 colorShift = lerp(indirectColor, _LightColor0.rgb, saturate(directLighting / indirectLighting));
-	half3 lighting = brightness * colorShift;
-	
-	// light color attenuation
-	half illum = max(lighting.x, max(lighting.y, lighting.z));
-	lighting = lerp(lighting, half3(illum, illum, illum), _LightColorAttenuation * illum);
+	half colorShiftBrightness = max(0.001, max(colorShift.x, max(colorShift.y, colorShift.z)));
+	half3 lighting = brightness * lerp(colorShift, colorShiftBrightness.xxx, _LightColorAttenuation); // color atten
 	
 	// color lerp
 	half4 shade = _ShadeColor * tex2D(_ShadeTexture, TRANSFORM_TEX(i.uv0, _ShadeTexture));
