@@ -15,6 +15,8 @@ Shader "VRM/MToon"
 		_ShadeToony ("Shade Toony", Range(0, 1)) = 0.9
 		_LightColorAttenuation ("Light Color Attenuation", Range(0, 1)) = 0
 		[NoScaleOffset] _SphereAdd ("Sphere Texture(Add)", 2D) = "black" {}
+		_EmissionColor ("Color", Color) = (0,0,0)
+		[NoScaleOffset] _EmissionMap ("Emission", 2D) = "white" {}
 		[NoScaleOffset] _OutlineWidthTexture ("Outline Width Tex", 2D) = "white" {}
 		_OutlineWidth ("Outline Width", Range(0, 1)) = 0.5
 		_OutlineColor ("Outline Color", Color) = (0,0,0,1)

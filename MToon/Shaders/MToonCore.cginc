@@ -16,6 +16,8 @@ half _ShadeShift;
 half _ShadeToony;
 half _LightColorAttenuation;
 sampler2D _SphereAdd;
+fixed4 _EmissionColor;
+sampler2D _EmissionMap; float4 _EmissionMap_ST;
 sampler2D _OutlineWidthTexture; float4 _OutlineWidthTexture_ST;
 half _OutlineWidth;
 fixed4 _OutlineColor;
@@ -194,6 +196,10 @@ float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
 	half colV = max(0.001, max(col.r, max(col.g, col.b)));
 	half tint = min(energyV, colV) / colV;
 	col *= tint;
+	
+	// Emission
+	half3 emission = tex2D(_EmissionMap, TRANSFORM_TEX(i.uv0, _EmissionMap)).rgb * _EmissionColor.rgb;
+	col += lerp(emission, half3(0, 0, 0), i.isOutline);
 
 	// outline
 	col = lerp(col, _OutlineColor * lerp(tint.xxx, col, _OutlineLightingMix), i.isOutline);

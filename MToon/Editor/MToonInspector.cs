@@ -44,6 +44,8 @@ public class MToonInspector : ShaderGUI
 	private MaterialProperty _shadeToony;
 	private MaterialProperty _lightColorAttenuation;
 	private MaterialProperty _sphereAdd;
+	private MaterialProperty _emissionColor;
+	private MaterialProperty _emissionMap;
 	private MaterialProperty _outlineWidthTexture;
 	private MaterialProperty _outlineWidth;
 	private MaterialProperty _outlineColor;
@@ -71,10 +73,22 @@ public class MToonInspector : ShaderGUI
 		_shadeToony = FindProperty("_ShadeToony", properties);
 		_lightColorAttenuation = FindProperty("_LightColorAttenuation", properties);
 		_sphereAdd = FindProperty("_SphereAdd", properties);
+		_emissionColor = FindProperty("_EmissionColor", properties);
+		_emissionMap = FindProperty("_EmissionMap", properties);
 		_outlineWidthTexture = FindProperty("_OutlineWidthTexture", properties);
 		_outlineWidth = FindProperty("_OutlineWidth", properties);
 		_outlineColor = FindProperty("_OutlineColor", properties);
 		_outlineLightingMix = FindProperty("_OutlineLightingMix", properties);
+
+		var uvMappedTextureProperties = new[]
+		{
+			_mainTex,
+			_shadeTexture,
+			_bumpMap,
+			_receiveShadowTexture,
+			_emissionMap,
+			_outlineWidthTexture,
+		};
 
 		if (_firstTimeApply)
 		{
@@ -189,6 +203,12 @@ public class MToonInspector : ShaderGUI
 					materialEditor.TexturePropertySingleLine(new GUIContent("Additive", "Rim Additive Texture (RGB)"), _sphereAdd);
 				}
 				EditorGUILayout.Space();
+				
+				EditorGUILayout.LabelField("Emission", EditorStyles.boldLabel);
+				{
+					materialEditor.TexturePropertySingleLine(new GUIContent("Emission", "Emission (RGB)"), _emissionMap, _emissionColor);
+				}
+				EditorGUILayout.Space();
 
 				EditorGUILayout.LabelField("Normal", EditorStyles.boldLabel);
 				{
@@ -254,9 +274,10 @@ public class MToonInspector : ShaderGUI
 					materialEditor.TextureScaleOffsetProperty(_mainTex);
 					if (EditorGUI.EndChangeCheck())
 					{
-						_shadeTexture.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
-						_bumpMap.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
-						_receiveShadowTexture.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
+						foreach (var textureProperty in uvMappedTextureProperties)
+						{
+							textureProperty.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
+						}
 					}
 				}
 				EditorGUILayout.Space();
