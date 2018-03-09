@@ -142,11 +142,6 @@ float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
 	#endif
 #endif
 
-    // vectors
-	float3 view = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
-	float3 viewReflect = reflect(-view, worldNormal);
-	half nv = dot(worldNormal, view);
-
 	// information for lighting
 	half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
 	float atten = LIGHT_ATTENUATION(i);
@@ -188,7 +183,13 @@ float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
 #endif
 
     // rim
-	//half3 rimLighting = tex2D(_SphereAdd, mul(UNITY_MATRIX_V, half4(worldNormal, 0)).xy * 0.5 + 0.5);
+	half3 worldView = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
+	half3 worldReflect = normalize(reflect(-worldView, worldNormal));
+	half3 viewReflect = mul(UNITY_MATRIX_V, half4(worldReflect, 0)).xyz;
+	viewReflect.z = viewReflect.z + 1.0;
+	half2 rimUv = viewReflect.xy / sqrt(dot(viewReflect, viewReflect)) * 0.5 + 0.5;
+	half3 rimLighting = tex2D(_SphereAdd, rimUv);
+	col += lerp(rimLighting, half3(0, 0, 0), i.isOutline);
 
 	// energy conservation
 	half3 energy = ShadeSH9(half4(0, 1, 0, 1)) + _LightColor0.rgb;
