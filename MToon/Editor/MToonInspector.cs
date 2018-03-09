@@ -92,176 +92,205 @@ public class MToonInspector : ShaderGUI
 
 		EditorGUI.BeginChangeCheck();
 		{
-			EditorGUI.showMixedValue = _blendMode.hasMixedValue;
-			EditorGUI.BeginChangeCheck();
-			var bm = (RenderMode) EditorGUILayout.Popup("Rendering Type", (int) _blendMode.floatValue, Enum.GetNames(typeof(RenderMode)));
-			if (EditorGUI.EndChangeCheck())
+			EditorGUILayout.LabelField("Basic", EditorStyles.boldLabel);
+			EditorGUILayout.BeginVertical(GUI.skin.box);
 			{
-				materialEditor.RegisterPropertyChangeUndo("RenderType");
-				_blendMode.floatValue = (float) bm;
-
-				foreach (var obj in materialEditor.targets)
+				EditorGUILayout.LabelField("Mode", EditorStyles.boldLabel);
+				EditorGUI.showMixedValue = _blendMode.hasMixedValue;
+				EditorGUI.BeginChangeCheck();
+				var bm = (RenderMode) EditorGUILayout.Popup("Rendering Type", (int) _blendMode.floatValue,
+					Enum.GetNames(typeof(RenderMode)));
+				if (EditorGUI.EndChangeCheck())
 				{
-					SetupBlendMode((Material) obj, bm);
-				}
-			}
-			EditorGUI.showMixedValue = false;
+					materialEditor.RegisterPropertyChangeUndo("RenderType");
+					_blendMode.floatValue = (float) bm;
 
-            EditorGUI.showMixedValue = _cullMode.hasMixedValue;
-            EditorGUI.BeginChangeCheck();
-            var cm = (CullMode) EditorGUILayout.Popup("Cull Mode", (int) _cullMode.floatValue,
-                Enum.GetNames(typeof(CullMode)));
-            if (EditorGUI.EndChangeCheck())
-            {
-                materialEditor.RegisterPropertyChangeUndo("CullType");
-                _cullMode.floatValue = (float) cm;
-
-                foreach (var obj in materialEditor.targets)
-                {
-                    SetupCullMode((Material) obj, cm);
-                }
-            }
-            EditorGUI.showMixedValue = false;
-			EditorGUILayout.Space();
-			
-			if (bm != RenderMode.Opaque)
-			{
-				EditorGUILayout.LabelField("Alpha", EditorStyles.boldLabel);
-				{
-					if (bm == RenderMode.Transparent)
+					foreach (var obj in materialEditor.targets)
 					{
-						EditorGUILayout.TextField("Ensure your lit color and texture have alpha channels.");
-					}
-
-					if (bm == RenderMode.Cutout)
-					{
-						EditorGUILayout.TextField("Ensure your lit color and texture have alpha channels.");
-						materialEditor.ShaderProperty(_cutoff, "Cutoff");
+						SetupBlendMode((Material) obj, bm);
 					}
 				}
+				EditorGUI.showMixedValue = false;
+
+				EditorGUI.showMixedValue = _cullMode.hasMixedValue;
+				EditorGUI.BeginChangeCheck();
+				var cm = (CullMode) EditorGUILayout.Popup("Cull Mode", (int) _cullMode.floatValue,
+					Enum.GetNames(typeof(CullMode)));
+				if (EditorGUI.EndChangeCheck())
+				{
+					materialEditor.RegisterPropertyChangeUndo("CullType");
+					_cullMode.floatValue = (float) cm;
+
+					foreach (var obj in materialEditor.targets)
+					{
+						SetupCullMode((Material) obj, cm);
+					}
+				}
+				EditorGUI.showMixedValue = false;
 				EditorGUILayout.Space();
-			}
 
-			EditorGUILayout.LabelField("Color", EditorStyles.boldLabel);
-			{
-				// Color
-				materialEditor.TexturePropertySingleLine(new GUIContent("Lit & Alpha", "Lit (RGB), Alpha (A)"), _mainTex, _color);
-				materialEditor.TexturePropertySingleLine(new GUIContent("Shade", "Shade (RGB)"), _shadeTexture, _shadeColor);
+				if (bm != RenderMode.Opaque)
+				{
+					EditorGUILayout.LabelField("Alpha", EditorStyles.boldLabel);
+					{
+						if (bm == RenderMode.Transparent)
+						{
+							EditorGUILayout.TextField("Ensure your lit color and texture have alpha channels.");
+						}
+
+						if (bm == RenderMode.Cutout)
+						{
+							EditorGUILayout.TextField("Ensure your lit color and texture have alpha channels.");
+							materialEditor.ShaderProperty(_cutoff, "Cutoff");
+						}
+					}
+					EditorGUILayout.Space();
+				}
+
+				EditorGUILayout.LabelField("Color", EditorStyles.boldLabel);
+				{
+					// Color
+					materialEditor.TexturePropertySingleLine(new GUIContent("Lit & Alpha", "Lit (RGB), Alpha (A)"), _mainTex, _color);
+					materialEditor.TexturePropertySingleLine(new GUIContent("Shade", "Shade (RGB)"), _shadeTexture, _shadeColor);
+				}
 			}
+			EditorGUILayout.EndVertical();
 			EditorGUILayout.Space();
 
 			EditorGUILayout.LabelField("Lighting", EditorStyles.boldLabel);
+			EditorGUILayout.BeginVertical(GUI.skin.box);
 			{
-				// Shade
-				EditorGUILayout.LabelField("Shade");
-				EditorGUI.indentLevel++;
-				materialEditor.ShaderProperty(_shadeShift, "Shift");
-				materialEditor.ShaderProperty(_shadeToony, "Toony");
-				materialEditor.ShaderProperty(_lightColorAttenuation, "LightColor Attenuation");
-				EditorGUI.indentLevel--;
-				
-				// Shadow
-				EditorGUILayout.LabelField("Shadow");
-				EditorGUI.indentLevel++;
-				if (((Material) materialEditor.target).GetFloat("_ShadeShift") < 0f)
+				EditorGUILayout.LabelField("Shade", EditorStyles.boldLabel);
 				{
-					EditorGUILayout.LabelField("Receive rate should be lower value when Shade Shift is lower than 0.", EditorStyles.wordWrappedLabel);
+					// Shade
+					materialEditor.ShaderProperty(_shadeShift, "Shift");
+					materialEditor.ShaderProperty(_shadeToony, "Toony");
+					materialEditor.ShaderProperty(_lightColorAttenuation, "LightColor Attenuation");
 				}
-				materialEditor.TexturePropertySingleLine(new GUIContent("Receive Rate", "Receive Shadow Rate Map (A)"), _receiveShadowTexture, _receiveShadowRate);
-				EditorGUI.indentLevel--;
-				
-				// Rim Light
-				EditorGUILayout.LabelField("Rim");
-				EditorGUI.indentLevel++;
-				materialEditor.TexturePropertySingleLine(new GUIContent("Additive", "Rim Additive Texture (RGB)"), _sphereAdd);
-				EditorGUI.indentLevel--;
-				
-				// Normal
-				EditorGUILayout.LabelField("Normal");
-				EditorGUI.indentLevel++;
-				EditorGUI.BeginChangeCheck();
-				materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map (RGB)"), _bumpMap, _bumpScale);
-				if (EditorGUI.EndChangeCheck())
+				EditorGUILayout.Space();
+
+				EditorGUILayout.LabelField("Shadow", EditorStyles.boldLabel);
 				{
-					materialEditor.RegisterPropertyChangeUndo("BumpEnabledDisabled");
-					
-					foreach (var obj in materialEditor.targets)
+					// Shadow
+					if (((Material) materialEditor.target).GetFloat("_ShadeShift") < 0f)
 					{
-						var mat = (Material) obj;
-						SetupNormalMode(mat, mat.GetTexture(_bumpMap.name));
+						EditorGUILayout.LabelField("Receive rate should be lower value when Shade Shift is lower than 0.",
+							EditorStyles.wordWrappedLabel);
+					}
+
+					materialEditor.TexturePropertySingleLine(new GUIContent("Receive Rate", "Receive Shadow Rate Map (A)"),
+						_receiveShadowTexture, _receiveShadowRate);
+				}
+				EditorGUILayout.Space();
+
+				EditorGUILayout.LabelField("Rim", EditorStyles.boldLabel);
+				{
+					// Rim Light
+					materialEditor.TexturePropertySingleLine(new GUIContent("Additive", "Rim Additive Texture (RGB)"), _sphereAdd);
+				}
+				EditorGUILayout.Space();
+
+				EditorGUILayout.LabelField("Normal", EditorStyles.boldLabel);
+				{
+					// Normal
+					EditorGUI.BeginChangeCheck();
+					materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map (RGB)"), _bumpMap, _bumpScale);
+					if (EditorGUI.EndChangeCheck())
+					{
+						materialEditor.RegisterPropertyChangeUndo("BumpEnabledDisabled");
+
+						foreach (var obj in materialEditor.targets)
+						{
+							var mat = (Material) obj;
+							SetupNormalMode(mat, mat.GetTexture(_bumpMap.name));
+						}
 					}
 				}
-				EditorGUI.indentLevel--;
 			}
-			EditorGUILayout.Space();
-			
-			EditorGUILayout.LabelField("Outline", EditorStyles.boldLabel);
-			{
-				// Outline
-				EditorGUI.showMixedValue = _outlineMode.hasMixedValue;
-				EditorGUI.BeginChangeCheck();
-				var om = (OutlineMode) EditorGUILayout.Popup("Mode", (int) _outlineMode.floatValue, Enum.GetNames(typeof(OutlineMode)));
-				if (EditorGUI.EndChangeCheck())
-				{
-					materialEditor.RegisterPropertyChangeUndo("OutlineType");
-					_outlineMode.floatValue = (float) om;
-
-					foreach (var obj in materialEditor.targets)
-					{
-						SetupOutlineMode((Material) obj, om);
-					}
-				}
-				EditorGUI.showMixedValue = false;
-
-				if (om != OutlineMode.None)
-				{
-					materialEditor.TexturePropertySingleLine(new GUIContent("Width", "Outline Width Texture (RGB)"), _outlineWidthTexture, _outlineWidth);
-					materialEditor.ShaderProperty(_outlineColor, "Color");
-					materialEditor.DefaultShaderProperty(_outlineLightingMix, "Lighting Mix");
-				}
-			}
-			EditorGUILayout.Space();
-			
-			EditorGUILayout.LabelField("Texture Options", EditorStyles.boldLabel);
-			{
-				EditorGUI.BeginChangeCheck();
-				materialEditor.TextureScaleOffsetProperty(_mainTex);
-				if (EditorGUI.EndChangeCheck())
-				{
-					_shadeTexture.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
-					_bumpMap.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
-					_receiveShadowTexture.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
-				}
-			}
-			EditorGUILayout.Space();
-		
-			EditorGUILayout.LabelField("Debugging Options", EditorStyles.boldLabel);
-			{
-				EditorGUI.showMixedValue = _debugMode.hasMixedValue;
-				EditorGUI.BeginChangeCheck();
-				var dm = (DebugMode) EditorGUILayout.Popup("Visualize", (int) _debugMode.floatValue,
-					Enum.GetNames(typeof(DebugMode)));
-				if (EditorGUI.EndChangeCheck())
-				{
-					materialEditor.RegisterPropertyChangeUndo("DebugType");
-					_debugMode.floatValue = (float) dm;
-
-					foreach (var obj in materialEditor.targets)
-					{
-						SetupDebugMode((Material) obj, dm);
-					}
-				}
-				EditorGUI.showMixedValue = false;
-			}
-			EditorGUILayout.Space();
-
-			EditorGUILayout.LabelField("Advanced Options", EditorStyles.boldLabel);
-            {
-                materialEditor.EnableInstancingField();
-                materialEditor.DoubleSidedGIField();
-                materialEditor.RenderQueueField();
-            }
+			EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
+
+			EditorGUILayout.LabelField("Geometry", EditorStyles.boldLabel);
+			EditorGUILayout.BeginVertical(GUI.skin.box);
+			{
+				EditorGUILayout.LabelField("Outline", EditorStyles.boldLabel);
+				{
+					// Outline
+					EditorGUI.showMixedValue = _outlineMode.hasMixedValue;
+					EditorGUI.BeginChangeCheck();
+					var om = (OutlineMode) EditorGUILayout.Popup("Mode", (int) _outlineMode.floatValue,
+						Enum.GetNames(typeof(OutlineMode)));
+					if (EditorGUI.EndChangeCheck())
+					{
+						materialEditor.RegisterPropertyChangeUndo("OutlineType");
+						_outlineMode.floatValue = (float) om;
+
+						foreach (var obj in materialEditor.targets)
+						{
+							SetupOutlineMode((Material) obj, om);
+						}
+					}
+
+					EditorGUI.showMixedValue = false;
+
+					if (om != OutlineMode.None)
+					{
+						materialEditor.TexturePropertySingleLine(new GUIContent("Width", "Outline Width Texture (RGB)"),
+							_outlineWidthTexture, _outlineWidth);
+						materialEditor.ShaderProperty(_outlineColor, "Color");
+						materialEditor.DefaultShaderProperty(_outlineLightingMix, "Lighting Mix");
+					}
+				}
+			}
+			EditorGUILayout.EndVertical();
+			EditorGUILayout.Space();
+			
+			EditorGUILayout.LabelField("Options", EditorStyles.boldLabel);
+			EditorGUILayout.BeginVertical(GUI.skin.box);
+			{
+				EditorGUILayout.LabelField("Texture Options", EditorStyles.boldLabel);
+				{
+					EditorGUI.BeginChangeCheck();
+					materialEditor.TextureScaleOffsetProperty(_mainTex);
+					if (EditorGUI.EndChangeCheck())
+					{
+						_shadeTexture.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
+						_bumpMap.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
+						_receiveShadowTexture.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
+					}
+				}
+				EditorGUILayout.Space();
+
+				EditorGUILayout.LabelField("Debugging Options", EditorStyles.boldLabel);
+				{
+					EditorGUI.showMixedValue = _debugMode.hasMixedValue;
+					EditorGUI.BeginChangeCheck();
+					var dm = (DebugMode) EditorGUILayout.Popup("Visualize", (int) _debugMode.floatValue,
+						Enum.GetNames(typeof(DebugMode)));
+					if (EditorGUI.EndChangeCheck())
+					{
+						materialEditor.RegisterPropertyChangeUndo("DebugType");
+						_debugMode.floatValue = (float) dm;
+
+						foreach (var obj in materialEditor.targets)
+						{
+							SetupDebugMode((Material) obj, dm);
+						}
+					}
+
+					EditorGUI.showMixedValue = false;
+				}
+				EditorGUILayout.Space();
+
+				EditorGUILayout.LabelField("Advanced Options", EditorStyles.boldLabel);
+				{
+					materialEditor.EnableInstancingField();
+					materialEditor.DoubleSidedGIField();
+					materialEditor.RenderQueueField();
+				}
+			}
+			EditorGUILayout.EndVertical();
+			EditorGUILayout.Space();
 		}
 		EditorGUI.EndChangeCheck();
 	}
