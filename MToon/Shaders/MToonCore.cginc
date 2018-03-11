@@ -133,6 +133,7 @@ float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
     half3 worldNormal = half3(i.tspace0.z, i.tspace1.z, i.tspace2.z);
 #endif
     worldNormal *= facing;
+    worldNormal = normalize(worldNormal);
 
 #ifdef MTOON_DEBUG_NORMAL
 	#ifdef MTOON_FORWARD_ADD
@@ -183,11 +184,11 @@ float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
 #endif
 
     // rim
+	half3 worldCameraUp = normalize(UNITY_MATRIX_V[1].xyz);
 	half3 worldView = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
-	half3 worldReflect = normalize(reflect(-worldView, worldNormal));
-	half3 viewReflect = mul(UNITY_MATRIX_V, half4(worldReflect, 0)).xyz;
-	viewReflect.z = viewReflect.z + 1.0;
-	half2 rimUv = viewReflect.xy / sqrt(dot(viewReflect, viewReflect)) * 0.5 + 0.5;
+	half3 worldViewUp = normalize(worldCameraUp - worldView * dot(worldView, worldCameraUp));
+	half3 worldViewRight = normalize(cross(worldView, worldViewUp));
+	half2 rimUv = half2(dot(worldViewRight, worldNormal), dot(worldViewUp, worldNormal)) * 0.5 + 0.5;
 	half3 rimLighting = tex2D(_SphereAdd, rimUv);
 	col += lerp(rimLighting, half3(0, 0, 0), i.isOutline);
 
