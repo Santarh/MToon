@@ -184,7 +184,8 @@ float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
 #endif
 
     // rim
-#ifndef MTOON_FORWARD_ADD
+#ifdef MTOON_FORWARD_ADD
+#else
 	half3 worldCameraUp = normalize(UNITY_MATRIX_V[1].xyz);
 	half3 worldView = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
 	half3 worldViewUp = normalize(worldCameraUp - worldView * dot(worldView, worldCameraUp));
@@ -202,7 +203,8 @@ float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
 	col *= tint;
 	
 	// Emission
-#ifndef MTOON_FORWARD_ADD
+#ifdef MTOON_FORWARD_ADD
+#else
 	half3 emission = tex2D(_EmissionMap, TRANSFORM_TEX(i.uv0, _EmissionMap)).rgb * _EmissionColor.rgb;
 	col += lerp(emission, half3(0, 0, 0), i.isOutline);
 #endif
