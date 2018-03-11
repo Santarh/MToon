@@ -178,12 +178,13 @@ float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
 	half4 shade = _ShadeColor * tex2D(_ShadeTexture, TRANSFORM_TEX(i.uv0, _ShadeTexture));
 	half4 lit = _Color * mainTex;
 #ifdef MTOON_FORWARD_ADD
-	half3 col = lerp(half3(0,0,0), saturate(lit.rgb), lighting);
+	half3 col = lerp(half3(0,0,0), saturate(lit.rgb - shade.rgb), lighting);
 #else
 	half3 col = lerp(shade.rgb, lit.rgb, lighting);
 #endif
 
     // rim
+#ifndef MTOON_FORWARD_ADD
 	half3 worldCameraUp = normalize(UNITY_MATRIX_V[1].xyz);
 	half3 worldView = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
 	half3 worldViewUp = normalize(worldCameraUp - worldView * dot(worldView, worldCameraUp));
@@ -191,6 +192,7 @@ float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
 	half2 rimUv = half2(dot(worldViewRight, worldNormal), dot(worldViewUp, worldNormal)) * 0.5 + 0.5;
 	half3 rimLighting = tex2D(_SphereAdd, rimUv);
 	col += lerp(rimLighting, half3(0, 0, 0), i.isOutline);
+#endif
 
 	// energy conservation
 	half3 energy = ShadeSH9(half4(0, 1, 0, 1)) + _LightColor0.rgb;
@@ -200,8 +202,10 @@ float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
 	col *= tint;
 	
 	// Emission
+#ifndef MTOON_FORWARD_ADD
 	half3 emission = tex2D(_EmissionMap, TRANSFORM_TEX(i.uv0, _EmissionMap)).rgb * _EmissionColor.rgb;
 	col += lerp(emission, half3(0, 0, 0), i.isOutline);
+#endif
 
 	// outline
 	col = lerp(col, _OutlineColor * lerp(tint.xxx, col, _OutlineLightingMix), i.isOutline);
