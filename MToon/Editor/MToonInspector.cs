@@ -244,7 +244,7 @@ public class MToonInspector : ShaderGUI
                     var widthMode = (OutlineWidthMode) _outlineWidthMode.floatValue;
                     if (widthMode != OutlineWidthMode.None)
                         materialEditor.TexturePropertySingleLine(
-                            new GUIContent("Width (cm)", "Outline Width Texture (RGB)"),
+                            new GUIContent("Width", "Outline Width Texture (RGB)"),
                             _outlineWidthTexture, _outlineWidth);
 
                     if (EditorGUI.EndChangeCheck())

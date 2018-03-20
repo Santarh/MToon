@@ -41,15 +41,14 @@ struct v2f
     //UNITY_VERTEX_INPUT_INSTANCE_ID // necessary only if any instanced properties are going to be accessed in the fragment Shader.
 };
 
-inline v2f InitializeV2F(appdata_full v, float3 positionOffset, float isOutline)
+inline v2f InitializeV2F(appdata_full v, float4 projectedVertex, float isOutline)
 {
     v2f o;
     UNITY_SETUP_INSTANCE_ID(v);
     //UNITY_TRANSFER_INSTANCE_ID(v, o);
     
-    float4 vertex = v.vertex + float4(positionOffset, 0);
-    o.pos = UnityObjectToClipPos(vertex);
-    o.posWorld = mul(unity_ObjectToWorld, vertex);
+    o.pos = projectedVertex;
+    o.posWorld = mul(unity_ObjectToWorld, v.vertex);
     o.uv0 = v.texcoord;
     half3 worldNormal = UnityObjectToWorldNormal(v.normal);
     half3 worldTangent = UnityObjectToWorldDir(v.tangent);
@@ -67,7 +66,7 @@ inline v2f InitializeV2F(appdata_full v, float3 positionOffset, float isOutline)
 
 v2f vert_without_geom(appdata_full v)
 {
-    return InitializeV2F(v, float3(0, 0, 0), 0);
+    return InitializeV2F(v, UnityObjectToClipPos(v.vertex), 0);
 }
 
 appdata_full vert_with_geom(appdata_full v)
@@ -84,13 +83,23 @@ void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
     IN[1].normal = normalize(IN[1].normal);
     IN[2].normal = normalize(IN[2].normal);
 
-#ifdef MTOON_OUTLINE_WIDTH_WORLD
+#if defined(MTOON_OUTLINE_WIDTH_WORLD) || defined(MTOON_OUTLINE_WIDTH_SCREEN)
     for (int i = 2; i >= 0; --i)
     {
         appdata_full v = IN[i];
         float outlineTex = tex2Dlod(_OutlineWidthTexture, float4(TRANSFORM_TEX(v.texcoord, _OutlineWidthTexture), 0, 0)).r;
+        
+ #if defined(MTOON_OUTLINE_WIDTH_WORLD)
         float3 outlineOffset = 0.01 * _OutlineWidth * outlineTex * v.normal;
-        v2f o = InitializeV2F(v, outlineOffset, 1);
+        float4 vertex = UnityObjectToClipPos(v.vertex + outlineOffset);
+ #elif defined(MTOON_OUTLINE_WIDTH_SCREEN)
+        float4 vertex = UnityObjectToClipPos(v.vertex);
+        //float3 projectedNormal = normalize(mul((float3x3)UNITY_MATRIX_IT_MV, v.normal.xyz));
+        //float2 offset = TransformViewToProjection(projectedNormal.xy);
+        //float depth = (vertex.z - UNITY_NEAR_CLIP_VALUE) / (1.0 - UNITY_NEAR_CLIP_VALUE);
+        //vertex.xy += _OutlineWidth * outlineTex * offset * depth;
+ #endif
+        v2f o = InitializeV2F(v, vertex, 1);
         stream.Append(o);
     }
     stream.RestartStrip();
@@ -99,7 +108,7 @@ void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
     for (int j = 0; j < 3; ++j)
     {
         appdata_full v = IN[j];
-        v2f o = InitializeV2F(v, float3(0, 0, 0), 0);
+        v2f o = InitializeV2F(v, UnityObjectToClipPos(v.vertex), 0);
         stream.Append(o);
     }
     stream.RestartStrip();
