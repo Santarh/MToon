@@ -96,13 +96,19 @@ public class MToonInspector : ShaderGUI
             _outlineWidthTexture
         };
 
-        if (_isFirstSetup.floatValue > 0.5f)
+        foreach (var obj in materialEditor.targets)
         {
-            _isFirstSetup.floatValue = 0.0f;
-            if (_mainTex.textureValue != null && _shadeTexture.textureValue == null)
-                _shadeTexture.textureValue = _mainTex.textureValue;
-            else if (_mainTex.textureValue == null && _shadeTexture.textureValue != null)
-                _mainTex.textureValue = _shadeTexture.textureValue;
+            var mat = (Material) obj;
+            var isFirstSetup = mat.GetFloat(_isFirstSetup.name);
+            if (isFirstSetup < 0.5f) continue;
+            
+            mat.SetFloat(_isFirstSetup.name, 0.0f);
+            var mainTex = mat.GetTexture(_mainTex.name);
+            var shadeTex = mat.GetTexture(_shadeTexture.name);
+            if (mainTex != null && shadeTex == null)
+            {
+                mat.SetTexture(_shadeTexture.name, mainTex);
+            }
         }
 
         foreach (var obj in materialEditor.targets)
