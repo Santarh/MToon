@@ -50,9 +50,7 @@ public class MToonInspector : ShaderGUI
 	private MaterialProperty _outlineWidth;
 	private MaterialProperty _outlineColor;
 	private MaterialProperty _outlineLightingMix;
-
-	private bool _firstTimeApply = true;
-
+	private MaterialProperty _isFirstSetup;
 
 	public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
 	{
@@ -79,6 +77,7 @@ public class MToonInspector : ShaderGUI
 		_outlineWidth = FindProperty("_OutlineWidth", properties);
 		_outlineColor = FindProperty("_OutlineColor", properties);
 		_outlineLightingMix = FindProperty("_OutlineLightingMix", properties);
+		_isFirstSetup = FindProperty("_IsFirstSetup", properties);
 
 		var uvMappedTextureProperties = new[]
 		{
@@ -90,9 +89,9 @@ public class MToonInspector : ShaderGUI
 			_outlineWidthTexture,
 		};
 
-		if (_firstTimeApply)
+		if (_isFirstSetup.floatValue > 0.5f)
 		{
-			_firstTimeApply = false;
+			_isFirstSetup.floatValue = 0.0f;
 			foreach (var obj in materialEditor.targets)
 			{
 				var mat = (Material) obj;
@@ -102,6 +101,15 @@ public class MToonInspector : ShaderGUI
 				SetupDebugMode(mat, (DebugMode) mat.GetFloat(_debugMode.name));
 				SetupCullMode(mat, (CullMode) mat.GetFloat(_cullMode.name));
 			}
+			
+            if (_mainTex.textureValue != null && _shadeTexture.textureValue == null)
+            {
+                _shadeTexture.textureValue = _mainTex.textureValue;
+            }
+            else if (_mainTex.textureValue == null && _shadeTexture.textureValue != null)
+            {
+                _mainTex.textureValue = _shadeTexture.textureValue;
+            }
 		}
 
 		EditorGUI.BeginChangeCheck();

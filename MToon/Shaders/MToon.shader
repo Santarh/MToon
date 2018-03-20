@@ -29,6 +29,7 @@ Shader "VRM/MToon"
 		[HideInInspector] _SrcBlend ("_SrcBlend", Float) = 1.0
 		[HideInInspector] _DstBlend ("_DstBlend", Float) = 0.0
 		[HideInInspector] _ZWrite ("_ZWrite", Float) = 1.0
+		[HideInInspector] _IsFirstSetup ("_IsFirstSetup", Float) = 1.0
 	}
 
 	SubShader
