@@ -87,6 +87,7 @@ Material:
     - _Alpha: 1
     - _BlendMode: 0
     - _BumpScale: 1
+    - _CullMode: 2
     - _Cutoff: 0.611
     - _DebugMode: 0
     - _DetailNormalMapScale: 1
@@ -94,14 +95,19 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
+    - _IsFirstSetup: 0
     - _LightColorAttenuation: 0
     - _Metallic: 0
     - _Mode: 0
     - _NormalCylinderizeRate: 0
     - _NormalFromVColorRate: 0
     - _OcclusionStrength: 1
+    - _OutlineColorMode: 0
+    - _OutlineLightingMix: 1
     - _OutlineMode: 0
+    - _OutlineScaledMaxDistance: 1
     - _OutlineWidth: 1
+    - _OutlineWidthMode: 0
     - _Parallax: 0.02
     - _ReceiveShadowRate: 1
     - _ShadeShift: 0.5
