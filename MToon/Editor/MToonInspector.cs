@@ -48,6 +48,7 @@ public class MToonInspector : ShaderGUI
     private MaterialProperty _outlineColorMode;
     private MaterialProperty _outlineLightingMix;
     private MaterialProperty _outlineWidth;
+    private MaterialProperty _outlineScaledMaxDistance;
     private MaterialProperty _outlineWidthMode;
     private MaterialProperty _outlineWidthTexture;
     private MaterialProperty _receiveShadowRate;
@@ -82,6 +83,7 @@ public class MToonInspector : ShaderGUI
         _emissionMap = FindProperty("_EmissionMap", properties);
         _outlineWidthTexture = FindProperty("_OutlineWidthTexture", properties);
         _outlineWidth = FindProperty("_OutlineWidth", properties);
+        _outlineScaledMaxDistance = FindProperty("_OutlineScaledMaxDistance", properties);
         _outlineColor = FindProperty("_OutlineColor", properties);
         _outlineLightingMix = FindProperty("_OutlineLightingMix", properties);
         _isFirstSetup = FindProperty("_IsFirstSetup", properties);
@@ -249,9 +251,16 @@ public class MToonInspector : ShaderGUI
                     PopupEnum<OutlineWidthMode>("Mode", _outlineWidthMode, materialEditor);
                     var widthMode = (OutlineWidthMode) _outlineWidthMode.floatValue;
                     if (widthMode != OutlineWidthMode.None)
+                    {
                         materialEditor.TexturePropertySingleLine(
                             new GUIContent("Width", "Outline Width Texture (RGB)"),
                             _outlineWidthTexture, _outlineWidth);
+                    }
+
+                    if (widthMode == OutlineWidthMode.ScreenCoordinates)
+                    {
+                        materialEditor.ShaderProperty(_outlineScaledMaxDistance, "Width Scaled Max Distance");
+                    }
 
                     if (EditorGUI.EndChangeCheck())
                     {

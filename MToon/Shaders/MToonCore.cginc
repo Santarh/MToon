@@ -20,6 +20,7 @@ fixed4 _EmissionColor;
 sampler2D _EmissionMap; float4 _EmissionMap_ST;
 sampler2D _OutlineWidthTexture; float4 _OutlineWidthTexture_ST;
 half _OutlineWidth;
+half _OutlineScaledMaxDistance;
 fixed4 _OutlineColor;
 half _OutlineLightingMix;
 
@@ -89,16 +90,18 @@ void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
         appdata_full v = IN[i];
         float outlineTex = tex2Dlod(_OutlineWidthTexture, float4(TRANSFORM_TEX(v.texcoord, _OutlineWidthTexture), 0, 0)).r;
         
- #if defined(MTOON_OUTLINE_WIDTH_WORLD)
+     #if defined(MTOON_OUTLINE_WIDTH_WORLD)
         float3 outlineOffset = 0.01 * _OutlineWidth * outlineTex * v.normal;
         float4 vertex = UnityObjectToClipPos(v.vertex + outlineOffset);
- #elif defined(MTOON_OUTLINE_WIDTH_SCREEN)
+     #elif defined(MTOON_OUTLINE_WIDTH_SCREEN)
         float4 vertex = UnityObjectToClipPos(v.vertex);
-        //float3 projectedNormal = normalize(mul((float3x3)UNITY_MATRIX_IT_MV, v.normal.xyz));
-        //float2 offset = TransformViewToProjection(projectedNormal.xy);
-        //float depth = (vertex.z - UNITY_NEAR_CLIP_VALUE) / (1.0 - UNITY_NEAR_CLIP_VALUE);
-        //vertex.xy += _OutlineWidth * outlineTex * offset * depth;
- #endif
+        float3 viewNormal = mul((float3x3)UNITY_MATRIX_IT_MV, v.normal.xyz);
+        float2 projectedNormal = normalize(TransformViewToProjection(viewNormal.xy));
+        projectedNormal *= min(vertex.w, _OutlineScaledMaxDistance);
+        float aspect = _ScreenParams.y / _ScreenParams.x;
+        projectedNormal.x *= aspect;
+        vertex.xy += 0.01 * _OutlineWidth * outlineTex * projectedNormal.xy;
+     #endif
         v2f o = InitializeV2F(v, vertex, 1);
         stream.Append(o);
     }
