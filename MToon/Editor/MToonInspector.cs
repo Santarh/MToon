@@ -14,10 +14,17 @@ public class MToonInspector : ShaderGUI
 		Normal,
 	}
 
-	public enum OutlineMode
+	public enum OutlineWidthMode
 	{
 		None,
-		Colored,
+		WorldCoordinates,
+		ScreenCoordinates,
+	}
+
+	public enum OutlineColorMode
+	{
+		FixedColor,
+		MixedLighting,
 	}
 
 	public enum RenderMode
@@ -28,7 +35,8 @@ public class MToonInspector : ShaderGUI
 	}
 
 	private MaterialProperty _debugMode;
-	private MaterialProperty _outlineMode;
+	private MaterialProperty _outlineWidthMode;
+	private MaterialProperty _outlineColorMode;
 	private MaterialProperty _blendMode;
 	private MaterialProperty _cullMode;
 	private MaterialProperty _cutoff;
@@ -55,7 +63,8 @@ public class MToonInspector : ShaderGUI
 	public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
 	{
 		_debugMode = FindProperty("_DebugMode", properties);
-		_outlineMode = FindProperty("_OutlineMode", properties);
+		_outlineWidthMode = FindProperty("_OutlineWidthMode", properties);
+		_outlineColorMode = FindProperty("_OutlineColorMode", properties);
 		_blendMode = FindProperty("_BlendMode", properties);
 		_cullMode = FindProperty("_CullMode", properties);
 		_cutoff = FindProperty("_Cutoff", properties);
@@ -92,16 +101,6 @@ public class MToonInspector : ShaderGUI
 		if (_isFirstSetup.floatValue > 0.5f)
 		{
 			_isFirstSetup.floatValue = 0.0f;
-			foreach (var obj in materialEditor.targets)
-			{
-				var mat = (Material) obj;
-				SetupBlendMode(mat, (RenderMode) mat.GetFloat(_blendMode.name));
-				SetupNormalMode(mat, mat.GetTexture(_bumpMap.name));
-				SetupOutlineMode(mat, (OutlineMode) mat.GetFloat(_outlineMode.name));
-				SetupDebugMode(mat, (DebugMode) mat.GetFloat(_debugMode.name));
-				SetupCullMode(mat, (CullMode) mat.GetFloat(_cullMode.name));
-			}
-			
             if (_mainTex.textureValue != null && _shadeTexture.textureValue == null)
             {
                 _shadeTexture.textureValue = _mainTex.textureValue;
@@ -111,6 +110,19 @@ public class MToonInspector : ShaderGUI
                 _mainTex.textureValue = _shadeTexture.textureValue;
             }
 		}
+		
+        foreach (var obj in materialEditor.targets)
+        {
+            var mat = (Material) obj;
+            SetupBlendMode(mat, (RenderMode) mat.GetFloat(_blendMode.name));
+            SetupNormalMode(mat, mat.GetTexture(_bumpMap.name));
+	        SetupOutlineMode(mat,
+		        (OutlineWidthMode) mat.GetFloat(_outlineWidthMode.name),
+		        (OutlineColorMode) mat.GetFloat(_outlineColorMode.name));
+            SetupDebugMode(mat, (DebugMode) mat.GetFloat(_debugMode.name));
+            SetupCullMode(mat, (CullMode) mat.GetFloat(_cullMode.name));
+        }
+			
 
 		EditorGUI.BeginChangeCheck();
 		{
@@ -118,15 +130,10 @@ public class MToonInspector : ShaderGUI
 			EditorGUILayout.BeginVertical(GUI.skin.box);
 			{
 				EditorGUILayout.LabelField("Mode", EditorStyles.boldLabel);
-				EditorGUI.showMixedValue = _blendMode.hasMixedValue;
-				EditorGUI.BeginChangeCheck();
-				var bm = (RenderMode) EditorGUILayout.Popup("Rendering Type", (int) _blendMode.floatValue,
-					Enum.GetNames(typeof(RenderMode)));
-				if (EditorGUI.EndChangeCheck())
+				var bm = (RenderMode) _blendMode.floatValue;
+				if (PopupEnum<RenderMode>("Rendering Type", _blendMode, materialEditor))
 				{
-					materialEditor.RegisterPropertyChangeUndo("RenderType");
-					_blendMode.floatValue = (float) bm;
-
+					bm = (RenderMode) _blendMode.floatValue;
 					foreach (var obj in materialEditor.targets)
 					{
 						SetupBlendMode((Material) obj, bm);
@@ -134,15 +141,9 @@ public class MToonInspector : ShaderGUI
 				}
 				EditorGUI.showMixedValue = false;
 
-				EditorGUI.showMixedValue = _cullMode.hasMixedValue;
-				EditorGUI.BeginChangeCheck();
-				var cm = (CullMode) EditorGUILayout.Popup("Cull Mode", (int) _cullMode.floatValue,
-					Enum.GetNames(typeof(CullMode)));
-				if (EditorGUI.EndChangeCheck())
+				if (PopupEnum<CullMode>("Cull Mode", _cullMode, materialEditor))
 				{
-					materialEditor.RegisterPropertyChangeUndo("CullType");
-					_cullMode.floatValue = (float) cm;
-
+					var cm = (CullMode) _cullMode.floatValue;
 					foreach (var obj in materialEditor.targets)
 					{
 						SetupCullMode((Material) obj, cm);
@@ -238,35 +239,56 @@ public class MToonInspector : ShaderGUI
 			EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
 
-			EditorGUILayout.LabelField("Geometry", EditorStyles.boldLabel);
+			EditorGUILayout.LabelField("Outline", EditorStyles.boldLabel);
 			EditorGUILayout.BeginVertical(GUI.skin.box);
 			{
-				EditorGUILayout.LabelField("Outline", EditorStyles.boldLabel);
+				EditorGUILayout.LabelField("Width", EditorStyles.boldLabel);
 				{
 					// Outline
-					EditorGUI.showMixedValue = _outlineMode.hasMixedValue;
 					EditorGUI.BeginChangeCheck();
-					var om = (OutlineMode) EditorGUILayout.Popup("Mode", (int) _outlineMode.floatValue,
-						Enum.GetNames(typeof(OutlineMode)));
+
+					PopupEnum<OutlineWidthMode>("Mode", _outlineWidthMode, materialEditor);
+					var widthMode = (OutlineWidthMode) _outlineWidthMode.floatValue;
+					if (widthMode != OutlineWidthMode.None)
+					{
+						materialEditor.TexturePropertySingleLine(new GUIContent("Width (cm)", "Outline Width Texture (RGB)"),
+							_outlineWidthTexture, _outlineWidth);
+					}
+					
 					if (EditorGUI.EndChangeCheck())
 					{
-						materialEditor.RegisterPropertyChangeUndo("OutlineType");
-						_outlineMode.floatValue = (float) om;
-
+                        var colorMode = (OutlineColorMode) _outlineColorMode.floatValue;
 						foreach (var obj in materialEditor.targets)
 						{
-							SetupOutlineMode((Material) obj, om);
+							SetupOutlineMode((Material) obj, widthMode, colorMode);
 						}
 					}
+				}
+				EditorGUILayout.Space();
 
-					EditorGUI.showMixedValue = false;
-
-					if (om != OutlineMode.None)
+				EditorGUILayout.LabelField("Color", EditorStyles.boldLabel);
+				{
+                    var widthMode = (OutlineWidthMode) _outlineWidthMode.floatValue;
+					if (widthMode != OutlineWidthMode.None)
 					{
-						materialEditor.TexturePropertySingleLine(new GUIContent("Width", "Outline Width Texture (RGB)"),
-							_outlineWidthTexture, _outlineWidth);
+						EditorGUI.BeginChangeCheck();
+
+						PopupEnum<OutlineColorMode>("Mode", _outlineColorMode, materialEditor);
+						var colorMode = (OutlineColorMode) _outlineColorMode.floatValue;
+
 						materialEditor.ShaderProperty(_outlineColor, "Color");
-						materialEditor.DefaultShaderProperty(_outlineLightingMix, "Lighting Mix");
+						if (colorMode == OutlineColorMode.MixedLighting)
+						{
+							materialEditor.DefaultShaderProperty(_outlineLightingMix, "Lighting Mix");
+						}
+
+						if (EditorGUI.EndChangeCheck())
+						{
+							foreach (var obj in materialEditor.targets)
+							{
+								SetupOutlineMode((Material) obj, widthMode, colorMode);
+							}
+						}
 					}
 				}
 			}
@@ -292,22 +314,14 @@ public class MToonInspector : ShaderGUI
 
 				EditorGUILayout.LabelField("Debugging Options", EditorStyles.boldLabel);
 				{
-					EditorGUI.showMixedValue = _debugMode.hasMixedValue;
-					EditorGUI.BeginChangeCheck();
-					var dm = (DebugMode) EditorGUILayout.Popup("Visualize", (int) _debugMode.floatValue,
-						Enum.GetNames(typeof(DebugMode)));
-					if (EditorGUI.EndChangeCheck())
+					if (PopupEnum<DebugMode>("Visualize", _debugMode, materialEditor))
 					{
-						materialEditor.RegisterPropertyChangeUndo("DebugType");
-						_debugMode.floatValue = (float) dm;
-
+						var mode = (DebugMode) _debugMode.floatValue;
 						foreach (var obj in materialEditor.targets)
 						{
-							SetupDebugMode((Material) obj, dm);
+							SetupDebugMode((Material) obj, mode);
 						}
 					}
-
-					EditorGUI.showMixedValue = false;
 				}
 				EditorGUILayout.Space();
 
@@ -322,6 +336,21 @@ public class MToonInspector : ShaderGUI
 			EditorGUILayout.Space();
 		}
 		EditorGUI.EndChangeCheck();
+	}
+
+	private bool PopupEnum<T>(string name, MaterialProperty property, MaterialEditor editor) where T : struct
+	{
+		EditorGUI.showMixedValue = property.hasMixedValue;
+		EditorGUI.BeginChangeCheck();
+		var ret = EditorGUILayout.Popup(name, (int) property.floatValue, Enum.GetNames(typeof(T)));
+		var changed = EditorGUI.EndChangeCheck();
+		if (changed)
+		{
+			editor.RegisterPropertyChangeUndo("EnumPopUp");
+			property.floatValue = (float) ret;
+		}
+		EditorGUI.showMixedValue = false;
+		return changed;
 	}
 
 	private void SetupDebugMode(Material material, DebugMode debugMode)
@@ -374,15 +403,27 @@ public class MToonInspector : ShaderGUI
 		}
 	}
 
-	private void SetupOutlineMode(Material material, OutlineMode outlineMode)
+	private void SetupOutlineMode(Material material, OutlineWidthMode outlineWidthMode, OutlineColorMode outlineColorMode)
 	{
-		switch (outlineMode)
+		switch (outlineWidthMode)
 		{
-			case OutlineMode.None:
-                SetKeyword(material, "MTOON_OUTLINE_COLORED", false);
+			case OutlineWidthMode.None:
+                SetKeyword(material, "MTOON_OUTLINE_WIDTH_WORLD", false);
+				SetKeyword(material, "MTOON_OUTLINE_WIDTH_SCREEN", false);
+                SetKeyword(material, "MTOON_OUTLINE_COLOR_FIXED", false);
+				SetKeyword(material, "MTOON_OUTLINE_COLOR_MIXED", false);
 				break;
-			case OutlineMode.Colored:
-                SetKeyword(material, "MTOON_OUTLINE_COLORED", true);
+			case OutlineWidthMode.WorldCoordinates:
+                SetKeyword(material, "MTOON_OUTLINE_WIDTH_WORLD", true);
+				SetKeyword(material, "MTOON_OUTLINE_WIDTH_SCREEN", false);
+                SetKeyword(material, "MTOON_OUTLINE_COLOR_FIXED", outlineColorMode == OutlineColorMode.FixedColor);
+				SetKeyword(material, "MTOON_OUTLINE_COLOR_MIXED", outlineColorMode == OutlineColorMode.MixedLighting);
+				break;
+			case OutlineWidthMode.ScreenCoordinates:
+                SetKeyword(material, "MTOON_OUTLINE_WIDTH_WORLD", false);
+				SetKeyword(material, "MTOON_OUTLINE_WIDTH_SCREEN", true);
+                SetKeyword(material, "MTOON_OUTLINE_COLOR_FIXED", outlineColorMode == OutlineColorMode.FixedColor);
+				SetKeyword(material, "MTOON_OUTLINE_COLOR_MIXED", outlineColorMode == OutlineColorMode.MixedLighting);
 				break;
 		}
 	}

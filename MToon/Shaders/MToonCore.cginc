@@ -84,7 +84,7 @@ void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
 	IN[1].normal = normalize(IN[1].normal);
 	IN[2].normal = normalize(IN[2].normal);
 
-#ifdef MTOON_OUTLINE_COLORED
+#ifdef MTOON_OUTLINE_WIDTH_WORLD
 	for (int i = 2; i >= 0; --i)
 	{
 		appdata_full v = IN[i];
@@ -210,7 +210,12 @@ float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
 #endif
 
 	// outline
+#ifdef MTOON_OUTLINE_COLOR_FIXED
+	col = lerp(col, _OutlineColor, i.isOutline);
+#elif MTOON_OUTLINE_COLOR_MIXED
 	col = lerp(col, _OutlineColor * lerp(tint.xxx, col, _OutlineLightingMix), i.isOutline);
+#else
+#endif
 
 	half4 result = half4(col, alpha);
 	UNITY_APPLY_FOG(i.fogCoord, result);

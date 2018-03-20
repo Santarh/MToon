@@ -24,7 +24,8 @@ Shader "VRM/MToon"
 
 		[HideInInspector] _DebugMode ("_DebugMode", Float) = 0.0
 		[HideInInspector] _BlendMode ("_BlendMode", Float) = 0.0
-		[HideInInspector] _OutlineMode ("_OutlineMode", Float) = 0.0
+		[HideInInspector] _OutlineWidthMode ("_OutlineWidthMode", Float) = 0.0
+		[HideInInspector] _OutlineColorMode ("_OutlineColorMode", Float) = 0.0
 		[HideInInspector] _CullMode ("_CullMode", Float) = 2.0
 		[HideInInspector] _SrcBlend ("_SrcBlend", Float) = 1.0
 		[HideInInspector] _DstBlend ("_DstBlend", Float) = 0.0
@@ -49,7 +50,8 @@ Shader "VRM/MToon"
 			CGPROGRAM
             #pragma target 4.0
 			#pragma shader_feature MTOON_DEBUG_NORMAL
-			#pragma shader_feature MTOON_OUTLINE_COLORED
+			#pragma shader_feature _ MTOON_OUTLINE_WIDTH_WORLD MTOON_OUTLINE_WIDTH_SCREEN
+			#pragma shader_feature _ MTOON_OUTLINE_COLOR_FIXED MTOON_OUTLINE_COLOR_MIXED
 			#pragma shader_feature _NORMALMAP
 			#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
 			#include "MToonCore.cginc"
