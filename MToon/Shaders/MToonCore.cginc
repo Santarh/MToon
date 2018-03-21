@@ -85,6 +85,9 @@ void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
     IN[2].normal = normalize(IN[2].normal);
 
 #if defined(MTOON_OUTLINE_WIDTH_WORLD) || defined(MTOON_OUTLINE_WIDTH_SCREEN)
+    float4 nearUpperRight = mul(unity_CameraInvProjection, float4(1, 1, UNITY_NEAR_CLIP_VALUE, _ProjectionParams.y));
+    float aspect = abs(nearUpperRight.y / nearUpperRight.x);
+    
     for (int i = 2; i >= 0; --i)
     {
         appdata_full v = IN[i];
@@ -98,7 +101,6 @@ void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
         float3 viewNormal = mul((float3x3)UNITY_MATRIX_IT_MV, v.normal.xyz);
         float2 projectedNormal = normalize(TransformViewToProjection(viewNormal.xy));
         projectedNormal *= min(vertex.w, _OutlineScaledMaxDistance);
-        float aspect = _ScreenParams.y / _ScreenParams.x;
         projectedNormal.x *= aspect;
         vertex.xy += 0.01 * _OutlineWidth * outlineTex * projectedNormal.xy;
      #endif
