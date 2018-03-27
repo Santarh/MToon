@@ -79,10 +79,12 @@ inline float4 CalculateOutlineVertexClipPosition(appdata_full v)
  #elif defined(MTOON_OUTLINE_WIDTH_SCREEN)
     float4 vertex = UnityObjectToClipPos(v.vertex);
     float3 viewNormal = mul((float3x3)UNITY_MATRIX_IT_MV, v.normal.xyz);
-    float2 projectedNormal = normalize(TransformViewToProjection(viewNormal.xy));
+    float3 clipNormal = TransformViewToProjection(viewNormal.xyz);
+    float2 projectedNormal = normalize(clipNormal.xy);
     projectedNormal *= min(vertex.w, _OutlineScaledMaxDistance);
     projectedNormal.x *= aspect;
     vertex.xy += 0.01 * _OutlineWidth * outlineTex * projectedNormal.xy;
+    vertex.z += clipNormal.z;
  #else
     float4 vertex = UnityObjectToClipPos(v.vertex);
  #endif
