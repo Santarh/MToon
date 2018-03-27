@@ -18,7 +18,7 @@ Shader "VRM/MToon"
         _EmissionColor ("Color", Color) = (0,0,0)
         [NoScaleOffset] _EmissionMap ("Emission", 2D) = "white" {}
         [NoScaleOffset] _OutlineWidthTexture ("Outline Width Tex", 2D) = "white" {}
-        _OutlineWidth ("Outline Width", Range(0, 1)) = 0.5
+        _OutlineWidth ("Outline Width", Range(0.01, 1)) = 0.5
         _OutlineScaledMaxDistance ("Outline Scaled Max Distance", Range(1, 10)) = 1
         _OutlineColor ("Outline Color", Color) = (0,0,0,1)
         _OutlineLightingMix ("Outline Lighting Mix", Range(0, 1)) = 1
