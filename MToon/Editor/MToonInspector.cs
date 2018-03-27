@@ -36,6 +36,7 @@ public class MToonInspector : ShaderGUI
     private MaterialProperty _bumpScale;
     private MaterialProperty _color;
     private MaterialProperty _cullMode;
+    private MaterialProperty _outlineCullMode;
     private MaterialProperty _cutoff;
 
     private MaterialProperty _debugMode;
@@ -66,6 +67,7 @@ public class MToonInspector : ShaderGUI
         _outlineColorMode = FindProperty("_OutlineColorMode", properties);
         _blendMode = FindProperty("_BlendMode", properties);
         _cullMode = FindProperty("_CullMode", properties);
+        _outlineCullMode = FindProperty("_OutlineCullMode", properties);
         _cutoff = FindProperty("_Cutoff", properties);
         _color = FindProperty("_Color", properties);
         _shadeColor = FindProperty("_ShadeColor", properties);
@@ -436,13 +438,16 @@ public class MToonInspector : ShaderGUI
         switch (cullMode)
         {
             case CullMode.Back:
-                material.SetInt("_CullMode", (int) CullMode.Back);
+                material.SetInt(_cullMode.name, (int) CullMode.Back);
+                material.SetInt(_outlineCullMode.name, (int) CullMode.Front);
                 break;
             case CullMode.Front:
-                material.SetInt("_CullMode", (int) CullMode.Front);
+                material.SetInt(_cullMode.name, (int) CullMode.Front);
+                material.SetInt(_outlineCullMode.name, (int) CullMode.Back);
                 break;
             case CullMode.Off:
-                material.SetInt("_CullMode", (int) CullMode.Off);
+                material.SetInt(_cullMode.name, (int) CullMode.Off);
+                material.SetInt(_outlineCullMode.name, (int) CullMode.Front);
                 break;
         }
     }

@@ -28,22 +28,25 @@ Shader "VRM/MToon"
         [HideInInspector] _OutlineWidthMode ("_OutlineWidthMode", Float) = 0.0
         [HideInInspector] _OutlineColorMode ("_OutlineColorMode", Float) = 0.0
         [HideInInspector] _CullMode ("_CullMode", Float) = 2.0
+        [HideInInspector] _OutlineCullMode ("_OutlineCullMode", Float) = 1.0
         [HideInInspector] _SrcBlend ("_SrcBlend", Float) = 1.0
         [HideInInspector] _DstBlend ("_DstBlend", Float) = 0.0
         [HideInInspector] _ZWrite ("_ZWrite", Float) = 1.0
         [HideInInspector] _IsFirstSetup ("_IsFirstSetup", Float) = 1.0
     }
 
+    // for SM 4.0
     SubShader
     {
         Tags { "RenderType" = "Opaque"  "Queue" = "Geometry" }
-        Cull [_CullMode]
-
+        
+        // Forward Base using Geometry shader
         Pass 
         {
-            Name "FORWARD"
+            Name "FORWARD_BASE"
             Tags { "LightMode" = "ForwardBase" }
 
+            Cull [_CullMode]
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
             ZTest LEqual
@@ -64,13 +67,104 @@ Shader "VRM/MToon"
             #pragma multi_compile_instancing
             ENDCG
         }
-
+        
+        // Forward Add
         Pass 
         {
-            Name "FORWARD_DELTA"
+            Name "FORWARD_ADD"
             Tags { "LightMode" = "ForwardAdd" }
 
             Fog { Color (0,0,0,0) }
+            Cull [_CullMode]
+            Blend [_SrcBlend] One
+            ZWrite Off
+            ZTest LEqual
+
+            CGPROGRAM
+            #pragma target 4.0
+            #pragma shader_feature MTOON_DEBUG_NORMAL
+            #pragma shader_feature _NORMALMAP
+            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #define MTOON_FORWARD_ADD
+            #include "MToonCore.cginc"
+            #pragma vertex vert_forward_add
+            #pragma fragment frag_forward
+            #pragma multi_compile_fwdadd_fullshadows
+            #pragma multi_compile_fog
+            ENDCG
+        }
+        
+        // Cast transparent shadow
+        UsePass "Standard/SHADOWCASTER"
+    }
+    
+    // for SM 3.0
+    SubShader
+    {
+        Tags { "RenderType" = "Opaque"  "Queue" = "Geometry" }
+        
+        // Forward Base
+        Pass 
+        {
+            Name "FORWARD_BASE"
+            Tags { "LightMode" = "ForwardBase" }
+
+            Cull [_CullMode]
+            Blend [_SrcBlend] [_DstBlend]
+            ZWrite [_ZWrite]
+            ZTest LEqual
+
+            CGPROGRAM
+            #pragma target 3.0
+            #pragma shader_feature MTOON_DEBUG_NORMAL
+            #pragma shader_feature _NORMALMAP
+            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #include "MToonCore.cginc"
+            #pragma vertex vert_forward_base
+            #pragma fragment frag_forward
+            #pragma multi_compile_fwdbase
+            #pragma multi_compile_fog
+            #pragma multi_compile_instancing
+            ENDCG
+        }
+        
+        
+        // Forward Base Outline Pass
+        Pass 
+        {
+            Name "FORWARD_BASE_ONLY_OUTLINE"
+            Tags { "LightMode" = "ForwardBase" }
+
+            Cull [_OutlineCullMode]
+            Blend [_SrcBlend] [_DstBlend]
+            ZWrite [_ZWrite]
+            ZTest LEqual
+
+            CGPROGRAM
+            #pragma target 3.0
+            #pragma shader_feature MTOON_DEBUG_NORMAL
+            #pragma shader_feature _ MTOON_OUTLINE_WIDTH_WORLD MTOON_OUTLINE_WIDTH_SCREEN
+            #pragma shader_feature _ MTOON_OUTLINE_COLOR_FIXED MTOON_OUTLINE_COLOR_MIXED
+            #pragma shader_feature _NORMALMAP
+            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #include "MToonCore.cginc"
+            #pragma vertex vert_forward_base_outline
+            #pragma fragment frag_forward
+            #pragma multi_compile_fwdbase
+            #pragma multi_compile_fog
+            #pragma multi_compile_instancing
+            ENDCG
+        }
+
+        
+        // Forward Add
+        Pass 
+        {
+            Name "FORWARD_ADD"
+            Tags { "LightMode" = "ForwardAdd" }
+
+            Fog { Color (0,0,0,0) }
+            Cull [_CullMode]
             Blend [_SrcBlend] One
             ZWrite Off
             ZTest LEqual
@@ -92,6 +186,7 @@ Shader "VRM/MToon"
         // Cast transparent shadow
         UsePass "Standard/SHADOWCASTER"
     }
+    
     Fallback "Unlit/Texture"
     CustomEditor "MToonInspector"
 }

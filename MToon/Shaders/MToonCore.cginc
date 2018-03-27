@@ -1,4 +1,5 @@
-// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+#ifndef MTOON_CORE_INCLUDED
+#define MTOON_CORE_INCLUDED
 
 #include "Lighting.cginc"
 #include "AutoLight.cginc"
@@ -65,14 +66,51 @@ inline v2f InitializeV2F(appdata_full v, float4 projectedVertex, float isOutline
     return o;
 }
 
-v2f vert_forward_add(appdata_full v)
+inline float4 CalculateOutlineVertexClipPosition(appdata_full v)
 {
-    return InitializeV2F(v, UnityObjectToClipPos(v.vertex), 0);
+    float4 nearUpperRight = mul(unity_CameraInvProjection, float4(1, 1, UNITY_NEAR_CLIP_VALUE, _ProjectionParams.y));
+    float aspect = abs(nearUpperRight.y / nearUpperRight.x);
+    
+    float outlineTex = tex2Dlod(_OutlineWidthTexture, float4(TRANSFORM_TEX(v.texcoord, _OutlineWidthTexture), 0, 0)).r;
+    
+ #if defined(MTOON_OUTLINE_WIDTH_WORLD)
+    float3 outlineOffset = 0.01 * _OutlineWidth * outlineTex * v.normal;
+    float4 vertex = UnityObjectToClipPos(v.vertex + outlineOffset);
+ #elif defined(MTOON_OUTLINE_WIDTH_SCREEN)
+    float4 vertex = UnityObjectToClipPos(v.vertex);
+    float3 viewNormal = mul((float3x3)UNITY_MATRIX_IT_MV, v.normal.xyz);
+    float2 projectedNormal = normalize(TransformViewToProjection(viewNormal.xy));
+    projectedNormal *= min(vertex.w, _OutlineScaledMaxDistance);
+    projectedNormal.x *= aspect;
+    vertex.xy += 0.01 * _OutlineWidth * outlineTex * projectedNormal.xy;
+ #else
+    float4 vertex = UnityObjectToClipPos(v.vertex);
+ #endif
+    return vertex;
 }
 
 appdata_full vert_forward_base_with_outline(appdata_full v)
 {
+    v.normal = normalize(v.normal);
     return v;
+}
+
+v2f vert_forward_base(appdata_full v)
+{
+    v.normal = normalize(v.normal);
+    return InitializeV2F(v, UnityObjectToClipPos(v.vertex), 0);
+}
+
+v2f vert_forward_base_outline(appdata_full v)
+{
+    v.normal = normalize(v.normal);
+    return InitializeV2F(v, CalculateOutlineVertexClipPosition(v), 1);
+}
+
+v2f vert_forward_add(appdata_full v)
+{
+    v.normal = normalize(v.normal);
+    return InitializeV2F(v, UnityObjectToClipPos(v.vertex), 0);
 }
 
 [maxvertexcount(6)]
@@ -80,31 +118,11 @@ void geom_forward_base(triangle appdata_full IN[3], inout TriangleStream<v2f> st
 {
     v2f o;
     
-    IN[0].normal = normalize(IN[0].normal);
-    IN[1].normal = normalize(IN[1].normal);
-    IN[2].normal = normalize(IN[2].normal);
-
 #if defined(MTOON_OUTLINE_WIDTH_WORLD) || defined(MTOON_OUTLINE_WIDTH_SCREEN)
-    float4 nearUpperRight = mul(unity_CameraInvProjection, float4(1, 1, UNITY_NEAR_CLIP_VALUE, _ProjectionParams.y));
-    float aspect = abs(nearUpperRight.y / nearUpperRight.x);
-    
     for (int i = 2; i >= 0; --i)
     {
         appdata_full v = IN[i];
-        float outlineTex = tex2Dlod(_OutlineWidthTexture, float4(TRANSFORM_TEX(v.texcoord, _OutlineWidthTexture), 0, 0)).r;
-        
-     #if defined(MTOON_OUTLINE_WIDTH_WORLD)
-        float3 outlineOffset = 0.01 * _OutlineWidth * outlineTex * v.normal;
-        float4 vertex = UnityObjectToClipPos(v.vertex + outlineOffset);
-     #elif defined(MTOON_OUTLINE_WIDTH_SCREEN)
-        float4 vertex = UnityObjectToClipPos(v.vertex);
-        float3 viewNormal = mul((float3x3)UNITY_MATRIX_IT_MV, v.normal.xyz);
-        float2 projectedNormal = normalize(TransformViewToProjection(viewNormal.xy));
-        projectedNormal *= min(vertex.w, _OutlineScaledMaxDistance);
-        projectedNormal.x *= aspect;
-        vertex.xy += 0.01 * _OutlineWidth * outlineTex * projectedNormal.xy;
-     #endif
-        v2f o = InitializeV2F(v, vertex, 1);
+        v2f o = InitializeV2F(v, CalculateOutlineVertexClipPosition(v), 1);
         stream.Append(o);
     }
     stream.RestartStrip();
@@ -235,3 +253,5 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
     UNITY_APPLY_FOG(i.fogCoord, result);
     return result;
 }
+
+#endif // MTOON_CORE_INCLUDED
