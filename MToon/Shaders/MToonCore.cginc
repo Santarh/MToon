@@ -65,18 +65,18 @@ inline v2f InitializeV2F(appdata_full v, float4 projectedVertex, float isOutline
     return o;
 }
 
-v2f vert_without_geom(appdata_full v)
+v2f vert_forward_add(appdata_full v)
 {
     return InitializeV2F(v, UnityObjectToClipPos(v.vertex), 0);
 }
 
-appdata_full vert_with_geom(appdata_full v)
+appdata_full vert_forward_base_with_outline(appdata_full v)
 {
     return v;
 }
 
 [maxvertexcount(6)]
-void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
+void geom_forward_base(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
 {
     v2f o;
     
@@ -119,7 +119,7 @@ void geom(triangle appdata_full IN[3], inout TriangleStream<v2f> stream)
     stream.RestartStrip();
 }
 
-float4 frag(v2f i, fixed facing : VFACE) : SV_TARGET
+float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
 {
     //UNITY_TRANSFER_INSTANCE_ID(v, o);
     
