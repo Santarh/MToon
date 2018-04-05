@@ -321,8 +321,10 @@ public class MToonInspector : ShaderGUI
 
                 EditorGUILayout.LabelField("Advanced Options", EditorStyles.boldLabel);
                 {
+                #if UNITY_5_6_OR_NEWER
                     materialEditor.EnableInstancingField();
                     materialEditor.DoubleSidedGIField();
+                #endif
                     materialEditor.RenderQueueField();
                 }
             }
