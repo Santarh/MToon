@@ -118,7 +118,7 @@ public class MToonInspector : ShaderGUI
         foreach (var obj in materialEditor.targets)
         {
             var mat = (Material) obj;
-            SetupBlendMode(mat, (RenderMode) mat.GetFloat(_blendMode.name));
+            SetupBlendMode(mat, (RenderMode) mat.GetFloat(_blendMode.name), setRenderQueueAsDefault: false);
             SetupNormalMode(mat, mat.GetTexture(_bumpMap.name));
             SetupOutlineMode(mat,
                 (OutlineWidthMode) mat.GetFloat(_outlineWidthMode.name),
@@ -138,7 +138,10 @@ public class MToonInspector : ShaderGUI
                 if (PopupEnum<RenderMode>("Rendering Type", _blendMode, materialEditor))
                 {
                     bm = (RenderMode) _blendMode.floatValue;
-                    foreach (var obj in materialEditor.targets) SetupBlendMode((Material) obj, bm);
+                    foreach (var obj in materialEditor.targets)
+                    {
+                        SetupBlendMode((Material) obj, bm, setRenderQueueAsDefault: true);
+                    }
                 }
 
                 EditorGUI.showMixedValue = false;
@@ -367,8 +370,10 @@ public class MToonInspector : ShaderGUI
         }
     }
 
-    private void SetupBlendMode(Material material, RenderMode renderMode)
+    private void SetupBlendMode(Material material, RenderMode renderMode, bool setRenderQueueAsDefault)
     {
+        setRenderQueueAsDefault |= material.renderQueue == (int) RenderQueue.Geometry;
+        
         switch (renderMode)
         {
             case RenderMode.Opaque:
@@ -379,7 +384,10 @@ public class MToonInspector : ShaderGUI
                 SetKeyword(material, "_ALPHATEST_ON", false);
                 SetKeyword(material, "_ALPHABLEND_ON", false);
                 SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
-                material.renderQueue = -1;
+                if (setRenderQueueAsDefault)
+                {
+                    material.renderQueue = -1;
+                }
                 break;
             case RenderMode.Cutout:
                 material.SetOverrideTag("RenderType", "TransparentCutout");
@@ -389,7 +397,10 @@ public class MToonInspector : ShaderGUI
                 SetKeyword(material, "_ALPHATEST_ON", true);
                 SetKeyword(material, "_ALPHABLEND_ON", false);
                 SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
-                material.renderQueue = (int) RenderQueue.AlphaTest;
+                if (setRenderQueueAsDefault)
+                {
+                    material.renderQueue = (int) RenderQueue.AlphaTest;
+                }
                 break;
             case RenderMode.Transparent:
                 material.SetOverrideTag("RenderType", "Transparent");
@@ -399,7 +410,10 @@ public class MToonInspector : ShaderGUI
                 SetKeyword(material, "_ALPHATEST_ON", false);
                 SetKeyword(material, "_ALPHABLEND_ON", true);
                 SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
-                material.renderQueue = (int) RenderQueue.Transparent;
+                if (setRenderQueueAsDefault)
+                {
+                    material.renderQueue = (int) RenderQueue.Transparent;
+                }
                 break;
         }
     }
