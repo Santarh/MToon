@@ -217,7 +217,7 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
     half3 col = lerp(shade.rgb, lit.rgb, lighting);
 #endif
 
-    // rim
+    // additive matcap
 #ifdef MTOON_FORWARD_ADD
 #else
     half3 worldCameraUp = normalize(UNITY_MATRIX_V[1].xyz);

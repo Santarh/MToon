@@ -206,10 +206,10 @@ public class MToonInspector : ShaderGUI
                 }
                 EditorGUILayout.Space();
 
-                EditorGUILayout.LabelField("Rim", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("MatCap", EditorStyles.boldLabel);
                 {
-                    // Rim Light
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Additive", "Rim Additive Texture (RGB)"),
+                    // MatCap Light
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Additive", "Additive MatCap Texture (RGB)"),
                         _sphereAdd);
                 }
                 EditorGUILayout.Space();
