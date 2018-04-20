@@ -58,7 +58,7 @@ Shader "VRM/MToon"
             #pragma shader_feature _ MTOON_OUTLINE_COLOR_FIXED MTOON_OUTLINE_COLOR_MIXED
             #pragma shader_feature _NORMALMAP
             #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #include "MToonCore.cginc"
+            #include "MToonSM4.cginc"
             #pragma vertex vert_forward_base_with_outline
             #pragma geometry geom_forward_base
             #pragma fragment frag_forward
@@ -86,7 +86,7 @@ Shader "VRM/MToon"
             #pragma shader_feature _NORMALMAP
             #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #define MTOON_FORWARD_ADD
-            #include "MToonCore.cginc"
+            #include "MToonSM4.cginc"
             #pragma vertex vert_forward_add
             #pragma fragment frag_forward
             #pragma multi_compile_fwdadd_fullshadows
@@ -119,7 +119,7 @@ Shader "VRM/MToon"
             #pragma shader_feature MTOON_DEBUG_NORMAL
             #pragma shader_feature _NORMALMAP
             #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #include "MToonCore.cginc"
+            #include "MToonSM3.cginc"
             #pragma vertex vert_forward_base
             #pragma fragment frag_forward
             #pragma multi_compile_fwdbase
@@ -147,7 +147,7 @@ Shader "VRM/MToon"
             #pragma shader_feature _ MTOON_OUTLINE_COLOR_FIXED MTOON_OUTLINE_COLOR_MIXED
             #pragma shader_feature _NORMALMAP
             #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #include "MToonCore.cginc"
+            #include "MToonSM3.cginc"
             #pragma vertex vert_forward_base_outline
             #pragma fragment frag_forward
             #pragma multi_compile_fwdbase
@@ -175,7 +175,7 @@ Shader "VRM/MToon"
             #pragma shader_feature _NORMALMAP
             #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #define MTOON_FORWARD_ADD
-            #include "MToonCore.cginc"
+            #include "MToonSM3.cginc"
             #pragma vertex vert_forward_add
             #pragma fragment frag_forward
             #pragma multi_compile_fwdadd_fullshadows
