@@ -147,6 +147,7 @@ Shader "VRM/MToon"
             #pragma shader_feature _ MTOON_OUTLINE_COLOR_FIXED MTOON_OUTLINE_COLOR_MIXED
             #pragma shader_feature _NORMALMAP
             #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #define MTOON_CLIP_IF_OUTLINE_IS_NONE
             #include "MToonSM3.cginc"
             #pragma vertex vert_forward_base_outline
             #pragma fragment frag_forward

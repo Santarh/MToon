@@ -93,6 +93,14 @@ inline float4 CalculateOutlineVertexClipPosition(appdata_full v)
 
 float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
 {
+#ifdef MTOON_CLIP_IF_OUTLINE_IS_NONE
+    #ifdef MTOON_OUTLINE_WIDTH_WORLD
+    #elif MTOON_OUTLINE_WIDTH_SCREEN
+    #else
+        clip(-1);
+    #endif
+#endif
+
     //UNITY_TRANSFER_INSTANCE_ID(v, o);
     
     // main tex
