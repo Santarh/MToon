@@ -84,7 +84,6 @@ inline float4 CalculateOutlineVertexClipPosition(appdata_full v)
     projectedNormal *= min(vertex.w, _OutlineScaledMaxDistance);
     projectedNormal.x *= aspect;
     vertex.xy += 0.01 * _OutlineWidth * outlineTex * projectedNormal.xy;
-    vertex.z += clipNormal.z;
  #else
     float4 vertex = UnityObjectToClipPos(v.vertex);
  #endif
