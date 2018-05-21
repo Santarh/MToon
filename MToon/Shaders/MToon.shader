@@ -53,11 +53,11 @@ Shader "VRM/MToon"
 
             CGPROGRAM
             #pragma target 4.0
-            #pragma shader_feature MTOON_DEBUG_NORMAL
-            #pragma shader_feature _ MTOON_OUTLINE_WIDTH_WORLD MTOON_OUTLINE_WIDTH_SCREEN
-            #pragma shader_feature _ MTOON_OUTLINE_COLOR_FIXED MTOON_OUTLINE_COLOR_MIXED
-            #pragma shader_feature _NORMALMAP
-            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #pragma multi_compile _ MTOON_DEBUG_NORMAL
+            #pragma multi_compile _ MTOON_OUTLINE_WIDTH_WORLD MTOON_OUTLINE_WIDTH_SCREEN
+            #pragma multi_compile _ MTOON_OUTLINE_COLOR_FIXED MTOON_OUTLINE_COLOR_MIXED
+            #pragma multi_compile _ _NORMALMAP
+            #pragma multi_compile _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #include "MToonSM4.cginc"
             #pragma vertex vert_forward_base_with_outline
             #pragma geometry geom_forward_base
@@ -82,9 +82,9 @@ Shader "VRM/MToon"
 
             CGPROGRAM
             #pragma target 4.0
-            #pragma shader_feature MTOON_DEBUG_NORMAL
-            #pragma shader_feature _NORMALMAP
-            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #pragma multi_compile _ MTOON_DEBUG_NORMAL
+            #pragma multi_compile _ _NORMALMAP
+            #pragma multi_compile _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #define MTOON_FORWARD_ADD
             #include "MToonSM4.cginc"
             #pragma vertex vert_forward_add
@@ -116,9 +116,9 @@ Shader "VRM/MToon"
 
             CGPROGRAM
             #pragma target 3.0
-            #pragma shader_feature MTOON_DEBUG_NORMAL
-            #pragma shader_feature _NORMALMAP
-            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #pragma multi_compile _ MTOON_DEBUG_NORMAL
+            #pragma multi_compile _ _NORMALMAP
+            #pragma multi_compile _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #include "MToonSM3.cginc"
             #pragma vertex vert_forward_base
             #pragma fragment frag_forward
@@ -142,11 +142,11 @@ Shader "VRM/MToon"
 
             CGPROGRAM
             #pragma target 3.0
-            #pragma shader_feature MTOON_DEBUG_NORMAL
-            #pragma shader_feature _ MTOON_OUTLINE_WIDTH_WORLD MTOON_OUTLINE_WIDTH_SCREEN
-            #pragma shader_feature _ MTOON_OUTLINE_COLOR_FIXED MTOON_OUTLINE_COLOR_MIXED
-            #pragma shader_feature _NORMALMAP
-            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #pragma multi_compile _ MTOON_DEBUG_NORMAL
+            #pragma multi_compile _ MTOON_OUTLINE_WIDTH_WORLD MTOON_OUTLINE_WIDTH_SCREEN
+            #pragma multi_compile _ MTOON_OUTLINE_COLOR_FIXED MTOON_OUTLINE_COLOR_MIXED
+            #pragma multi_compile _ _NORMALMAP
+            #pragma multi_compile _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #define MTOON_CLIP_IF_OUTLINE_IS_NONE
             #include "MToonSM3.cginc"
             #pragma vertex vert_forward_base_outline
@@ -172,9 +172,9 @@ Shader "VRM/MToon"
 
             CGPROGRAM
             #pragma target 3.0
-            #pragma shader_feature MTOON_DEBUG_NORMAL
-            #pragma shader_feature _NORMALMAP
-            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #pragma multi_compile _ MTOON_DEBUG_NORMAL
+            #pragma multi_compile _ _NORMALMAP
+            #pragma multi_compile _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #define MTOON_FORWARD_ADD
             #include "MToonSM3.cginc"
             #pragma vertex vert_forward_add
