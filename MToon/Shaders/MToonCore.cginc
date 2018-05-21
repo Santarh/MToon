@@ -139,14 +139,10 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
 
     // information for lighting
     half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
-    float atten = LIGHT_ATTENUATION(i);
-    half receiveShadow = 1 - _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, TRANSFORM_TEX(i.uv0, _ReceiveShadowTexture)).a;
-#ifdef MTOON_FORWARD_ADD
-    // FIXME atten is distance function when tranparent && point light
-    half shadow = atten;
-#else
-    half shadow = max(atten, receiveShadow);
-#endif
+    half receiveShadowRate = _ReceiveShadowRate * min(1.0, (_ShadeShift + 1.0));
+    half receiveShadow = 1 - receiveShadowRate * tex2D(_ReceiveShadowTexture, TRANSFORM_TEX(i.uv0, _ReceiveShadowTexture)).a;
+    UNITY_LIGHT_ATTENUATION(atten, i, i.posWorld.xyz);
+    atten = 1.0 - (1.0 - atten) * (1.0 - receiveShadow);
 
     // ambient
     half3 indirect = ShadeSH9(half4(worldNormal, 1));
@@ -155,13 +151,13 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
     
     // direct lighting
     half directLighting = dot(lightDir, worldNormal); // neutral
-    directLighting = lerp(0, directLighting, shadow); // receive shadow
+    directLighting = lerp(0, directLighting, atten); // receive shadow
     directLighting = smoothstep(_ShadeShift, _ShadeShift + (1.0 - _ShadeToony), directLighting); // shade & tooned
     
     // brightness
     half brightness = directLighting + indirectLighting;
     brightness = smoothstep(_ShadeShift, _ShadeShift + (1.0 - _ShadeToony), brightness); // shade & tooned
-    brightness = lerp(0, brightness, shadow); // receive shadow
+    brightness = lerp(0, brightness, atten); // receive shadow
     
     // colored
     half3 colorShift = lerp(indirectColor, _LightColor0.rgb, saturate(directLighting / indirectLighting));
