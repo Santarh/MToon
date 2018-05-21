@@ -34,69 +34,6 @@ Shader "VRM/MToon"
         [HideInInspector] _ZWrite ("_ZWrite", Float) = 1.0
         [HideInInspector] _IsFirstSetup ("_IsFirstSetup", Float) = 1.0
     }
-
-    // for SM 4.0
-    SubShader
-    {
-        Tags { "RenderType" = "Opaque"  "Queue" = "Geometry" }
-        
-        // Forward Base using Geometry shader
-        Pass 
-        {
-            Name "FORWARD_BASE"
-            Tags { "LightMode" = "ForwardBase" }
-
-            Cull [_CullMode]
-            Blend [_SrcBlend] [_DstBlend]
-            ZWrite [_ZWrite]
-            ZTest LEqual
-
-            CGPROGRAM
-            #pragma target 4.0
-            #pragma multi_compile _ MTOON_DEBUG_NORMAL
-            #pragma multi_compile _ MTOON_OUTLINE_WIDTH_WORLD MTOON_OUTLINE_WIDTH_SCREEN
-            #pragma multi_compile _ MTOON_OUTLINE_COLOR_FIXED MTOON_OUTLINE_COLOR_MIXED
-            #pragma multi_compile _ _NORMALMAP
-            #pragma multi_compile _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #include "MToonSM4.cginc"
-            #pragma vertex vert_forward_base_with_outline
-            #pragma geometry geom_forward_base
-            #pragma fragment frag_forward
-            #pragma multi_compile_fwdbase
-            #pragma multi_compile_fog
-            #pragma multi_compile_instancing
-            ENDCG
-        }
-        
-        // Forward Add
-        Pass 
-        {
-            Name "FORWARD_ADD"
-            Tags { "LightMode" = "ForwardAdd" }
-
-            Fog { Color (0,0,0,0) }
-            Cull [_CullMode]
-            Blend [_SrcBlend] One
-            ZWrite Off
-            ZTest LEqual
-
-            CGPROGRAM
-            #pragma target 4.0
-            #pragma multi_compile _ MTOON_DEBUG_NORMAL
-            #pragma multi_compile _ _NORMALMAP
-            #pragma multi_compile _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #define MTOON_FORWARD_ADD
-            #include "MToonSM4.cginc"
-            #pragma vertex vert_forward_add
-            #pragma fragment frag_forward
-            #pragma multi_compile_fwdadd_fullshadows
-            #pragma multi_compile_fog
-            ENDCG
-        }
-        
-        // Cast transparent shadow
-        UsePass "Standard/SHADOWCASTER"
-    }
     
     // for SM 3.0
     SubShader
