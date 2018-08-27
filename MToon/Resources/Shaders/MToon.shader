@@ -50,6 +50,7 @@ Shader "VRM/MToon"
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
             ZTest LEqual
+            BlendOp Add, Max
 
             CGPROGRAM
             #pragma target 3.0
@@ -76,6 +77,7 @@ Shader "VRM/MToon"
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
             ZTest LEqual
+            BlendOp Add, Max
 
             CGPROGRAM
             #pragma target 3.0
@@ -106,6 +108,7 @@ Shader "VRM/MToon"
             Blend [_SrcBlend] One
             ZWrite Off
             ZTest LEqual
+            BlendOp Add, Max
 
             CGPROGRAM
             #pragma target 3.0
