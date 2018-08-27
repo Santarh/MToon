@@ -57,7 +57,7 @@ Shader "VRM/MToon"
             #pragma multi_compile _ MTOON_DEBUG_NORMAL
             #pragma multi_compile _ _NORMALMAP
             #pragma multi_compile _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #include "MToonSM3.cginc"
+            #include "./MToonSM3.cginc"
             #pragma vertex vert_forward_base
             #pragma fragment frag_forward
             #pragma multi_compile_fwdbase
@@ -87,7 +87,7 @@ Shader "VRM/MToon"
             #pragma multi_compile _ _NORMALMAP
             #pragma multi_compile _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #define MTOON_CLIP_IF_OUTLINE_IS_NONE
-            #include "MToonSM3.cginc"
+            #include "./MToonSM3.cginc"
             #pragma vertex vert_forward_base_outline
             #pragma fragment frag_forward
             #pragma multi_compile_fwdbase
@@ -116,7 +116,7 @@ Shader "VRM/MToon"
             #pragma multi_compile _ _NORMALMAP
             #pragma multi_compile _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #define MTOON_FORWARD_ADD
-            #include "MToonSM3.cginc"
+            #include "./MToonSM3.cginc"
             #pragma vertex vert_forward_add
             #pragma fragment frag_forward
             #pragma multi_compile_fwdadd_fullshadows
