@@ -220,10 +220,12 @@ public class MToonInspector : ShaderGUI
             EditorGUILayout.BeginVertical(GUI.skin.box);
             {
                 // Outline
-                EditorGUI.BeginChangeCheck();
                 EditorGUILayout.LabelField("Width", EditorStyles.boldLabel);
                 {
-                    PopupEnum<OutlineWidthMode>("Mode", _outlineWidthMode, materialEditor);
+                    if (PopupEnum<OutlineWidthMode>("Mode", _outlineWidthMode, materialEditor))
+                    {
+                        ModeChanged(materials);
+                    }
                     var widthMode = (OutlineWidthMode) _outlineWidthMode.floatValue;
                     if (widthMode != OutlineWidthMode.None)
                     {
@@ -246,18 +248,16 @@ public class MToonInspector : ShaderGUI
                     {
                         EditorGUI.BeginChangeCheck();
 
-                        PopupEnum<OutlineColorMode>("Mode", _outlineColorMode, materialEditor);
+                        if (PopupEnum<OutlineColorMode>("Mode", _outlineColorMode, materialEditor))
+                        {
+                            ModeChanged(materials);
+                        }
                         var colorMode = (OutlineColorMode) _outlineColorMode.floatValue;
 
                         materialEditor.ShaderProperty(_outlineColor, "Color");
                         if (colorMode == OutlineColorMode.MixedLighting)
                             materialEditor.DefaultShaderProperty(_outlineLightingMix, "Lighting Mix");
                     }
-                }
-                
-                if (EditorGUI.EndChangeCheck())
-                {
-                    ModeChanged(materials);
                 }
             }
             EditorGUILayout.EndVertical();
