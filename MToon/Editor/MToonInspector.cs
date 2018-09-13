@@ -348,7 +348,7 @@ public class MToonInspector : ShaderGUI
     {
     }
 
-    private bool PopupEnum<T>(string name, MaterialProperty property, MaterialEditor editor) where T : struct
+    private static bool PopupEnum<T>(string name, MaterialProperty property, MaterialEditor editor) where T : struct
     {
         EditorGUI.showMixedValue = property.hasMixedValue;
         EditorGUI.BeginChangeCheck();
@@ -359,12 +359,11 @@ public class MToonInspector : ShaderGUI
             editor.RegisterPropertyChangeUndo("EnumPopUp");
             property.floatValue = ret;
         }
-
         EditorGUI.showMixedValue = false;
         return changed;
     }
 
-    private void SetupDebugMode(Material material, DebugMode debugMode)
+    private static void SetupDebugMode(Material material, DebugMode debugMode)
     {
         switch (debugMode)
         {
@@ -383,7 +382,7 @@ public class MToonInspector : ShaderGUI
         }
     }
 
-    private void SetupBlendMode(Material material, RenderMode renderMode, bool setRenderQueueAsDefault)
+    private static void SetupBlendMode(Material material, RenderMode renderMode, bool setRenderQueueAsDefault)
     {
         setRenderQueueAsDefault |= material.renderQueue == (int) RenderQueue.Geometry;
         
@@ -431,7 +430,7 @@ public class MToonInspector : ShaderGUI
         }
     }
 
-    private void SetupOutlineMode(Material material, OutlineWidthMode outlineWidthMode,
+    private static void SetupOutlineMode(Material material, OutlineWidthMode outlineWidthMode,
         OutlineColorMode outlineColorMode)
     {
         switch (outlineWidthMode)
@@ -457,31 +456,31 @@ public class MToonInspector : ShaderGUI
         }
     }
 
-    private void SetupNormalMode(Material material, bool requireNormalMapping)
+    private static void SetupNormalMode(Material material, bool requireNormalMapping)
     {
         SetKeyword(material, "_NORMALMAP", requireNormalMapping);
     }
 
-    private void SetupCullMode(Material material, CullMode cullMode)
+    private static void SetupCullMode(Material material, CullMode cullMode)
     {
         switch (cullMode)
         {
             case CullMode.Back:
-                material.SetInt(_cullMode.name, (int) CullMode.Back);
-                material.SetInt(_outlineCullMode.name, (int) CullMode.Front);
+                material.SetInt("_CullMode", (int) CullMode.Back);
+                material.SetInt("_OutlineCullMode", (int) CullMode.Front);
                 break;
             case CullMode.Front:
-                material.SetInt(_cullMode.name, (int) CullMode.Front);
-                material.SetInt(_outlineCullMode.name, (int) CullMode.Back);
+                material.SetInt("_CullMode", (int) CullMode.Front);
+                material.SetInt("_OutlineCullMode", (int) CullMode.Back);
                 break;
             case CullMode.Off:
-                material.SetInt(_cullMode.name, (int) CullMode.Off);
-                material.SetInt(_outlineCullMode.name, (int) CullMode.Front);
+                material.SetInt("_CullMode", (int) CullMode.Off);
+                material.SetInt("_OutlineCullMode", (int) CullMode.Front);
                 break;
         }
     }
 
-    private void SetKeyword(Material mat, string keyword, bool required)
+    private static void SetKeyword(Material mat, string keyword, bool required)
     {
         if (required)
             mat.EnableKeyword(keyword);
