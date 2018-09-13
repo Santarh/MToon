@@ -317,7 +317,7 @@ public class MToonInspector : ShaderGUI
     
     private static void ModeChanged(Material material, bool isBlendModeChangedByUser = false)
     {
-        SetupBlendMode(material, (RenderMode) material.GetFloat("_BlendMode"), isChangedByUser: false);
+        SetupBlendMode(material, (RenderMode) material.GetFloat("_BlendMode"), isBlendModeChangedByUser);
         SetupNormalMode(material, material.GetTexture("_BumpMap"));
         SetupOutlineMode(material,
             (OutlineWidthMode) material.GetFloat("_OutlineWidthMode"),
