@@ -128,32 +128,21 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
     worldNormal *= facing;
     worldNormal = normalize(worldNormal);
 
-    // information for lighting
+    // lighting intensity
     half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
-    half receiveShadowRate = _ReceiveShadowRate * min(1.0, (_ShadeShift + 1.0));
-    half receiveShadow = 1 - receiveShadowRate * tex2D(_ReceiveShadowTexture, TRANSFORM_TEX(i.uv0, _ReceiveShadowTexture)).a;
+    half receiveShadow = _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, TRANSFORM_TEX(i.uv0, _ReceiveShadowTexture)).a;
     UNITY_LIGHT_ATTENUATION(atten, i, i.posWorld.xyz);
-    atten = 1.0 - (1.0 - atten) * (1.0 - receiveShadow);
+    half lightIntensity = dot(lightDir, worldNormal);
+    lightIntensity = lightIntensity * 0.5 + 0.5; // from [-1, +1] to [0, 1]
+    lightIntensity = lightIntensity * (1.0 - receiveShadow * (1.0 - (atten * 0.5 + 0.5))); // receive shadow
+    lightIntensity = lightIntensity * 2.0 - 1.0; // from [0, 1] to [-1, +1]
+    lightIntensity = smoothstep(_ShadeShift, _ShadeShift + (1.0 - _ShadeToony), lightIntensity); // shade & tooned
 
-    // ambient
-    half3 indirect = ShadeSH9(half4(worldNormal, 1));
-    half indirectLighting = max(0.001, max(indirect.x, max(indirect.y, indirect.z)));
-    half3 indirectColor = indirect;
-    
-    // direct lighting
-    half directLighting = dot(lightDir, worldNormal); // neutral
-    directLighting = lerp(0, directLighting, atten); // receive shadow
-    directLighting = smoothstep(_ShadeShift, _ShadeShift + (1.0 - _ShadeToony), directLighting); // shade & tooned
-    
-    // brightness
-    half brightness = directLighting + indirectLighting;
-    brightness = smoothstep(_ShadeShift, _ShadeShift + (1.0 - _ShadeToony), brightness); // shade & tooned
-    brightness = lerp(0, brightness, atten); // receive shadow
-    
-    // colored
-    half3 colorShift = lerp(indirectColor, _LightColor0.rgb, saturate(directLighting / indirectLighting));
-    half colorShiftBrightness = max(0.001, max(colorShift.x, max(colorShift.y, colorShift.z)));
-    half3 lighting = brightness * lerp(colorShift, colorShiftBrightness.xxx, _LightColorAttenuation); // color atten
+    // lighting with color
+    half3 directLighting = lightIntensity * _LightColor0.rgb; // direct
+    half3 indirectLighting = ShadeSH9(half4(worldNormal, 1)); // ambient
+    half3 lighting = directLighting + indirectLighting * 0.1;
+    lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
     
     // color lerp
     half4 shade = _ShadeColor * tex2D(_ShadeTexture, TRANSFORM_TEX(i.uv0, _ShadeTexture));
