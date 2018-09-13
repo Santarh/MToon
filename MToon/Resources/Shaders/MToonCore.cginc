@@ -18,6 +18,7 @@ half _ShadingGradeRate;
 half _ShadeShift;
 half _ShadeToony;
 half _LightColorAttenuation;
+half _IndirectLightIntensity;
 sampler2D _SphereAdd;
 fixed4 _EmissionColor;
 sampler2D _EmissionMap; float4 _EmissionMap_ST;
@@ -144,8 +145,8 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
 
     // lighting with color
     half3 directLighting = lightIntensity * _LightColor0.rgb; // direct
-    half3 indirectLighting = ShadeSH9(half4(worldNormal, 1)); // ambient
-    half3 lighting = directLighting + indirectLighting * 0.1;
+    half3 indirectLighting = _IndirectLightIntensity * ShadeSH9(half4(worldNormal, 1)); // ambient
+    half3 lighting = directLighting + indirectLighting;
     lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
     
     // color lerp
@@ -170,7 +171,7 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
 #endif
 
     // energy conservation
-    half3 energy = ShadeSH9(half4(0, 1, 0, 1)) + _LightColor0.rgb;
+    half3 energy = _IndirectLightIntensity * ShadeSH9(half4(0, 1, 0, 1)) + _LightColor0.rgb;
     half energyV = max(0.001, max(energy.r, max(energy.g, energy.b)));
     half colV = max(0.001, max(col.r, max(col.g, col.b)));
     half tint = min(energyV, colV) / colV;

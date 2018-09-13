@@ -45,6 +45,7 @@ public class MToonInspector : ShaderGUI
     private MaterialProperty _emissionColor;
     private MaterialProperty _emissionMap;
     private MaterialProperty _lightColorAttenuation;
+    private MaterialProperty _indirectLightIntensity;
     private MaterialProperty _mainTex;
     private MaterialProperty _outlineColor;
     private MaterialProperty _outlineColorMode;
@@ -85,6 +86,7 @@ public class MToonInspector : ShaderGUI
         _shadeShift = FindProperty("_ShadeShift", properties);
         _shadeToony = FindProperty("_ShadeToony", properties);
         _lightColorAttenuation = FindProperty("_LightColorAttenuation", properties);
+        _indirectLightIntensity = FindProperty("_IndirectLightIntensity", properties);
         _sphereAdd = FindProperty("_SphereAdd", properties);
         _emissionColor = FindProperty("_EmissionColor", properties);
         _emissionMap = FindProperty("_EmissionMap", properties);
@@ -183,6 +185,7 @@ public class MToonInspector : ShaderGUI
                 EditorGUILayout.LabelField("Light Color", EditorStyles.boldLabel);
                 {
                     materialEditor.ShaderProperty(_lightColorAttenuation, "LightColor Attenuation");
+                    materialEditor.ShaderProperty(_indirectLightIntensity, "GI Intensity");
                 }
                 EditorGUILayout.Space();
 

@@ -16,6 +16,7 @@ Shader "VRM/MToon"
         _ShadeShift ("Shade Shift", Range(-1, 1)) = 0
         _ShadeToony ("Shade Toony", Range(0, 1)) = 0.9
         _LightColorAttenuation ("Light Color Attenuation", Range(0, 1)) = 0
+        _IndirectLightIntensity ("Indirect Light Intensity", Range(0, 1)) = 0.1
         [NoScaleOffset] _SphereAdd ("Sphere Texture(Add)", 2D) = "black" {}
         _EmissionColor ("Color", Color) = (0,0,0)
         [NoScaleOffset] _EmissionMap ("Emission", 2D) = "white" {}
