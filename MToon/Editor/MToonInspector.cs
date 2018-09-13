@@ -30,7 +30,8 @@ public class MToonInspector : ShaderGUI
     {
         Opaque,
         Cutout,
-        Transparent
+        Transparent,
+        TransparentWithZWrite,
     }
 
     private MaterialProperty _blendMode;
@@ -408,6 +409,19 @@ public class MToonInspector : ShaderGUI
                 if (isChangedByUser)
                 {
                     material.renderQueue = (int) RenderQueue.Transparent;
+                }
+                break;
+            case RenderMode.TransparentWithZWrite:
+                material.SetOverrideTag("RenderType", "Transparent");
+                material.SetInt("_SrcBlend", (int) BlendMode.SrcAlpha);
+                material.SetInt("_DstBlend", (int) BlendMode.OneMinusSrcAlpha);
+                material.SetInt("_ZWrite", 1);
+                SetKeyword(material, "_ALPHATEST_ON", false);
+                SetKeyword(material, "_ALPHABLEND_ON", true);
+                SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
+                if (isChangedByUser)
+                {
+                    material.renderQueue = (int) RenderQueue.AlphaTest + 50;
                 }
                 break;
         }
