@@ -128,14 +128,6 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
     worldNormal *= facing;
     worldNormal = normalize(worldNormal);
 
-#ifdef MTOON_DEBUG_NORMAL
-    #ifdef MTOON_FORWARD_ADD
-        return float4(0, 0, 0, 0);
-    #else
-        return float4(worldNormal * 0.5 + 0.5, 1);
-    #endif
-#endif
-
     // information for lighting
     half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
     half receiveShadowRate = _ReceiveShadowRate * min(1.0, (_ShadeShift + 1.0));
@@ -205,6 +197,22 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
     col = lerp(col, _OutlineColor * lerp(tint.xxx, col, _OutlineLightingMix), i.isOutline);
 #else
 #endif
+
+    // debug
+#ifdef MTOON_DEBUG_NORMAL
+    #ifdef MTOON_FORWARD_ADD
+        return float4(0, 0, 0, 0);
+    #else
+        return float4(worldNormal * 0.5 + 0.5, 1);
+    #endif
+#elif MTOON_DEBUG_LITSHADERATE
+    #ifdef MTOON_FORWARD_ADD
+        return float4(0, 0, 0, 0);
+    #else
+        return float4(lighting, 1);
+    #endif
+#endif
+
 
     half4 result = half4(col, alpha);
     UNITY_APPLY_FOG(i.fogCoord, result);

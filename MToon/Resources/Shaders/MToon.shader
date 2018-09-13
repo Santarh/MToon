@@ -54,7 +54,7 @@ Shader "VRM/MToon"
 
             CGPROGRAM
             #pragma target 3.0
-            #pragma multi_compile _ MTOON_DEBUG_NORMAL
+            #pragma multi_compile _ MTOON_DEBUG_NORMAL MTOON_DEBUG_LITSHADERATE
             #pragma multi_compile _ _NORMALMAP
             #pragma multi_compile _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #include "./MToonSM3.cginc"
@@ -81,7 +81,7 @@ Shader "VRM/MToon"
 
             CGPROGRAM
             #pragma target 3.0
-            #pragma multi_compile _ MTOON_DEBUG_NORMAL
+            #pragma multi_compile _ MTOON_DEBUG_NORMAL MTOON_DEBUG_LITSHADERATE
             #pragma multi_compile _ MTOON_OUTLINE_WIDTH_WORLD MTOON_OUTLINE_WIDTH_SCREEN
             #pragma multi_compile _ MTOON_OUTLINE_COLOR_FIXED MTOON_OUTLINE_COLOR_MIXED
             #pragma multi_compile _ _NORMALMAP
@@ -112,7 +112,7 @@ Shader "VRM/MToon"
 
             CGPROGRAM
             #pragma target 3.0
-            #pragma multi_compile _ MTOON_DEBUG_NORMAL
+            #pragma multi_compile _ MTOON_DEBUG_NORMAL MTOON_DEBUG_LITSHADERATE
             #pragma multi_compile _ _NORMALMAP
             #pragma multi_compile _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #define MTOON_FORWARD_ADD

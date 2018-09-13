@@ -8,7 +8,8 @@ public class MToonInspector : ShaderGUI
     public enum DebugMode
     {
         None,
-        Normal
+        Normal,
+        LitShadeRate,
     }
 
     public enum OutlineColorMode
@@ -363,9 +364,15 @@ public class MToonInspector : ShaderGUI
         {
             case DebugMode.None:
                 SetKeyword(material, "MTOON_DEBUG_NORMAL", false);
+                SetKeyword(material, "MTOON_DEBUG_LITSHADERATE", false);
                 break;
             case DebugMode.Normal:
                 SetKeyword(material, "MTOON_DEBUG_NORMAL", true);
+                SetKeyword(material, "MTOON_DEBUG_LITSHADERATE", false);
+                break;
+            case DebugMode.LitShadeRate:
+                SetKeyword(material, "MTOON_DEBUG_NORMAL", false);
+                SetKeyword(material, "MTOON_DEBUG_LITSHADERATE", true);
                 break;
         }
     }
