@@ -11,6 +11,8 @@ Shader "VRM/MToon"
         [Normal] _BumpMap ("Normal Texture", 2D) = "bump" {}
         _ReceiveShadowRate ("Receive Shadow", Range(0, 1)) = 1
         [NoScaleOffset] _ReceiveShadowTexture ("Receive Shadow Texture", 2D) = "white" {}
+        _ShadingGradeRate ("Shading Grade", Range(0, 1)) = 1
+        [NoScaleOffset] _ShadingGradeTexture ("Shading Grade Texture", 2D) = "white" {}
         _ShadeShift ("Shade Shift", Range(-1, 1)) = 0
         _ShadeToony ("Shade Toony", Range(0, 1)) = 0.9
         _LightColorAttenuation ("Light Color Attenuation", Range(0, 1)) = 0

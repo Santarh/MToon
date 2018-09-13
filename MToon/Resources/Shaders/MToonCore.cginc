@@ -13,6 +13,8 @@ half _BumpScale;
 sampler2D _BumpMap; float4 _BumpMap_ST;
 sampler2D _ReceiveShadowTexture; float4 _ReceiveShadowTexture_ST;
 half _ReceiveShadowRate;
+sampler2D _ShadingGradeTexture; float4 _ShadingGradeTexture_ST;
+half _ShadingGradeRate;
 half _ShadeShift;
 half _ShadeToony;
 half _LightColorAttenuation;
@@ -131,10 +133,12 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
     // lighting intensity
     half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
     half receiveShadow = _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, TRANSFORM_TEX(i.uv0, _ReceiveShadowTexture)).a;
+    half shadingGrade = 1.0 - _ShadingGradeRate * (1.0 - tex2D(_ShadingGradeTexture, TRANSFORM_TEX(i.uv0, _ShadingGradeTexture)).r);
     UNITY_LIGHT_ATTENUATION(atten, i, i.posWorld.xyz);
     half lightIntensity = dot(lightDir, worldNormal);
     lightIntensity = lightIntensity * 0.5 + 0.5; // from [-1, +1] to [0, 1]
     lightIntensity = lightIntensity * (1.0 - receiveShadow * (1.0 - (atten * 0.5 + 0.5))); // receive shadow
+    lightIntensity = lightIntensity * shadingGrade; // darker
     lightIntensity = lightIntensity * 2.0 - 1.0; // from [0, 1] to [-1, +1]
     lightIntensity = smoothstep(_ShadeShift, _ShadeShift + (1.0 - _ShadeToony), lightIntensity); // shade & tooned
 

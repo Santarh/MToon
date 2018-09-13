@@ -55,6 +55,8 @@ public class MToonInspector : ShaderGUI
     private MaterialProperty _outlineWidthTexture;
     private MaterialProperty _receiveShadowRate;
     private MaterialProperty _receiveShadowTexture;
+    private MaterialProperty _shadingGradeRate;
+    private MaterialProperty _shadingGradeTexture;
     private MaterialProperty _shadeColor;
     private MaterialProperty _shadeShift;
     private MaterialProperty _shadeTexture;
@@ -78,6 +80,8 @@ public class MToonInspector : ShaderGUI
         _bumpMap = FindProperty("_BumpMap", properties);
         _receiveShadowRate = FindProperty("_ReceiveShadowRate", properties);
         _receiveShadowTexture = FindProperty("_ReceiveShadowTexture", properties);
+        _shadingGradeRate = FindProperty("_ShadingGradeRate", properties);
+        _shadingGradeTexture = FindProperty("_ShadingGradeTexture", properties);
         _shadeShift = FindProperty("_ShadeShift", properties);
         _shadeToony = FindProperty("_ShadeToony", properties);
         _lightColorAttenuation = FindProperty("_LightColorAttenuation", properties);
@@ -97,8 +101,9 @@ public class MToonInspector : ShaderGUI
             _shadeTexture,
             _bumpMap,
             _receiveShadowTexture,
+            _shadingGradeTexture,
             _emissionMap,
-            _outlineWidthTexture
+            _outlineWidthTexture,
         };
 
         foreach (var obj in materialEditor.targets)
@@ -193,6 +198,9 @@ public class MToonInspector : ShaderGUI
                     materialEditor.ShaderProperty(_shadeShift, "Shift");
                     materialEditor.ShaderProperty(_shadeToony, "Toony");
                     materialEditor.ShaderProperty(_lightColorAttenuation, "LightColor Attenuation");
+                    materialEditor.TexturePropertySingleLine(
+                        new GUIContent("Shading Grade", "Shading Grade Texture (R)"),
+                        _shadingGradeTexture, _shadingGradeRate);
                 }
                 EditorGUILayout.Space();
 
