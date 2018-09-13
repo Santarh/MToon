@@ -304,22 +304,15 @@ public class MToonInspector : ShaderGUI
         ModeChanged(material, isBlendModeChangedByUser: true);
     }
 
-    private void ModeChanged(Material[] materials, bool isBlendModeChangedByUser = false)
+    private static void ModeChanged(Material[] materials, bool isBlendModeChangedByUser = false)
     {
         foreach (var material in materials)
         {
             ModeChanged(material, isBlendModeChangedByUser);
-            
-            var mainTex = material.GetTexture(_mainTex.name);
-            var shadeTex = material.GetTexture(_shadeTexture.name);
-            if (mainTex != null && shadeTex == null)
-            {
-                material.SetTexture(_shadeTexture.name, mainTex);
-            }
         }
     }
     
-    private void ModeChanged(Material material, bool isBlendModeChangedByUser = false)
+    private static void ModeChanged(Material material, bool isBlendModeChangedByUser = false)
     {
         SetupBlendMode(material, (RenderMode) material.GetFloat("_BlendMode"), isChangedByUser: false);
         SetupNormalMode(material, material.GetTexture("_BumpMap"));
@@ -328,6 +321,13 @@ public class MToonInspector : ShaderGUI
             (OutlineColorMode) material.GetFloat("_OutlineColorMode"));
         SetupDebugMode(material, (DebugMode) material.GetFloat("_DebugMode"));
         SetupCullMode(material, (CullMode) material.GetFloat("_CullMode"));
+        
+        var mainTex = material.GetTexture("_MainTex");
+        var shadeTex = material.GetTexture("_ShadeTexture");
+        if (mainTex != null && shadeTex == null)
+        {
+            material.SetTexture("_ShadeTexture", mainTex);
+        }
     }
 
     private static bool PopupEnum<T>(string name, MaterialProperty property, MaterialEditor editor) where T : struct
