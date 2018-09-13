@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -43,7 +44,6 @@ public class MToonInspector : ShaderGUI
     private MaterialProperty _debugMode;
     private MaterialProperty _emissionColor;
     private MaterialProperty _emissionMap;
-    private MaterialProperty _isFirstSetup;
     private MaterialProperty _lightColorAttenuation;
     private MaterialProperty _mainTex;
     private MaterialProperty _outlineColor;
@@ -93,7 +93,6 @@ public class MToonInspector : ShaderGUI
         _outlineScaledMaxDistance = FindProperty("_OutlineScaledMaxDistance", properties);
         _outlineColor = FindProperty("_OutlineColor", properties);
         _outlineLightingMix = FindProperty("_OutlineLightingMix", properties);
-        _isFirstSetup = FindProperty("_IsFirstSetup", properties);
 
         var uvMappedTextureProperties = new[]
         {
@@ -106,60 +105,26 @@ public class MToonInspector : ShaderGUI
             _outlineWidthTexture,
         };
 
-        foreach (var obj in materialEditor.targets)
-        {
-            var mat = (Material) obj;
-            var isFirstSetup = mat.GetFloat(_isFirstSetup.name);
-            if (isFirstSetup < 0.5f) continue;
-            
-            mat.SetFloat(_isFirstSetup.name, 0.0f);
-            var mainTex = mat.GetTexture(_mainTex.name);
-            var shadeTex = mat.GetTexture(_shadeTexture.name);
-            if (mainTex != null && shadeTex == null)
-            {
-                mat.SetTexture(_shadeTexture.name, mainTex);
-            }
-        }
+        var materials = materialEditor.targets.Select(x => x as Material).ToArray();
+        Draw(materialEditor, materials, uvMappedTextureProperties);
+    }
 
-        foreach (var obj in materialEditor.targets)
-        {
-            var mat = (Material) obj;
-            SetupBlendMode(mat, (RenderMode) mat.GetFloat(_blendMode.name), setRenderQueueAsDefault: false);
-            SetupNormalMode(mat, mat.GetTexture(_bumpMap.name));
-            SetupOutlineMode(mat,
-                (OutlineWidthMode) mat.GetFloat(_outlineWidthMode.name),
-                (OutlineColorMode) mat.GetFloat(_outlineColorMode.name));
-            SetupDebugMode(mat, (DebugMode) mat.GetFloat(_debugMode.name));
-            SetupCullMode(mat, (CullMode) mat.GetFloat(_cullMode.name));
-        }
-
-
+    private void Draw(MaterialEditor materialEditor, Material[] materials, MaterialProperty[] uvMappedTextureProperties)
+    {
         EditorGUI.BeginChangeCheck();
         {
             EditorGUILayout.LabelField("Rendering", EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical(GUI.skin.box);
             {
                 EditorGUILayout.LabelField("Mode", EditorStyles.boldLabel);
-                var bm = (RenderMode) _blendMode.floatValue;
                 if (PopupEnum<RenderMode>("Rendering Type", _blendMode, materialEditor))
                 {
-                    bm = (RenderMode) _blendMode.floatValue;
-                    foreach (var obj in materialEditor.targets)
-                    {
-                        SetupBlendMode((Material) obj, bm, setRenderQueueAsDefault: true);
-                    }
+                    ModeChanged(materials, isBlendModeChangedByUser: true);
                 }
-
-                EditorGUI.showMixedValue = false;
-
                 if (PopupEnum<CullMode>("Cull Mode", _cullMode, materialEditor))
                 {
-                    var cm = (CullMode) _cullMode.floatValue;
-                    foreach (var obj in materialEditor.targets) SetupCullMode((Material) obj, cm);
+                    ModeChanged(materials);
                 }
-
-                EditorGUI.showMixedValue = false;
-                EditorGUILayout.Space();
             }
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
@@ -171,6 +136,7 @@ public class MToonInspector : ShaderGUI
                 {
                     materialEditor.TexturePropertySingleLine(new GUIContent("Lit & Alpha", "Lit (RGB), Alpha (A)"),
                         _mainTex, _color);
+                    
                     materialEditor.TexturePropertySingleLine(new GUIContent("Shade", "Shade (RGB)"), _shadeTexture,
                         _shadeColor);
                 }
@@ -240,12 +206,7 @@ public class MToonInspector : ShaderGUI
                     if (EditorGUI.EndChangeCheck())
                     {
                         materialEditor.RegisterPropertyChangeUndo("BumpEnabledDisabled");
-
-                        foreach (var obj in materialEditor.targets)
-                        {
-                            var mat = (Material) obj;
-                            SetupNormalMode(mat, mat.GetTexture(_bumpMap.name));
-                        }
+                        ModeChanged(materials);
                     }
                 }
             }
@@ -255,11 +216,10 @@ public class MToonInspector : ShaderGUI
             EditorGUILayout.LabelField("Outline", EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical(GUI.skin.box);
             {
+                // Outline
+                EditorGUI.BeginChangeCheck();
                 EditorGUILayout.LabelField("Width", EditorStyles.boldLabel);
                 {
-                    // Outline
-                    EditorGUI.BeginChangeCheck();
-
                     PopupEnum<OutlineWidthMode>("Mode", _outlineWidthMode, materialEditor);
                     var widthMode = (OutlineWidthMode) _outlineWidthMode.floatValue;
                     if (widthMode != OutlineWidthMode.None)
@@ -272,13 +232,6 @@ public class MToonInspector : ShaderGUI
                     if (widthMode == OutlineWidthMode.ScreenCoordinates)
                     {
                         materialEditor.ShaderProperty(_outlineScaledMaxDistance, "Width Scaled Max Distance");
-                    }
-
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        var colorMode = (OutlineColorMode) _outlineColorMode.floatValue;
-                        foreach (var obj in materialEditor.targets)
-                            SetupOutlineMode((Material) obj, widthMode, colorMode);
                     }
                 }
                 EditorGUILayout.Space();
@@ -296,11 +249,12 @@ public class MToonInspector : ShaderGUI
                         materialEditor.ShaderProperty(_outlineColor, "Color");
                         if (colorMode == OutlineColorMode.MixedLighting)
                             materialEditor.DefaultShaderProperty(_outlineLightingMix, "Lighting Mix");
-
-                        if (EditorGUI.EndChangeCheck())
-                            foreach (var obj in materialEditor.targets)
-                                SetupOutlineMode((Material) obj, widthMode, colorMode);
                     }
+                }
+                
+                if (EditorGUI.EndChangeCheck())
+                {
+                    ModeChanged(materials);
                 }
             }
             EditorGUILayout.EndVertical();
@@ -323,8 +277,7 @@ public class MToonInspector : ShaderGUI
                 {
                     if (PopupEnum<DebugMode>("Visualize", _debugMode, materialEditor))
                     {
-                        var mode = (DebugMode) _debugMode.floatValue;
-                        foreach (var obj in materialEditor.targets) SetupDebugMode((Material) obj, mode);
+                        ModeChanged(materials);
                     }
                 }
                 EditorGUILayout.Space();
@@ -344,8 +297,37 @@ public class MToonInspector : ShaderGUI
         EditorGUI.EndChangeCheck();
     }
 
-    private void DrawWidthProperties()
+    public override void AssignNewShaderToMaterial(Material material, Shader oldShader, Shader newShader)
     {
+        base.AssignNewShaderToMaterial(material, oldShader, newShader);
+
+        ModeChanged(material, isBlendModeChangedByUser: true);
+    }
+
+    private void ModeChanged(Material[] materials, bool isBlendModeChangedByUser = false)
+    {
+        foreach (var material in materials)
+        {
+            ModeChanged(material, isBlendModeChangedByUser);
+            
+            var mainTex = material.GetTexture(_mainTex.name);
+            var shadeTex = material.GetTexture(_shadeTexture.name);
+            if (mainTex != null && shadeTex == null)
+            {
+                material.SetTexture(_shadeTexture.name, mainTex);
+            }
+        }
+    }
+    
+    private void ModeChanged(Material material, bool isBlendModeChangedByUser = false)
+    {
+        SetupBlendMode(material, (RenderMode) material.GetFloat("_BlendMode"), isChangedByUser: false);
+        SetupNormalMode(material, material.GetTexture("_BumpMap"));
+        SetupOutlineMode(material,
+            (OutlineWidthMode) material.GetFloat("_OutlineWidthMode"),
+            (OutlineColorMode) material.GetFloat("_OutlineColorMode"));
+        SetupDebugMode(material, (DebugMode) material.GetFloat("_DebugMode"));
+        SetupCullMode(material, (CullMode) material.GetFloat("_CullMode"));
     }
 
     private static bool PopupEnum<T>(string name, MaterialProperty property, MaterialEditor editor) where T : struct
@@ -382,10 +364,8 @@ public class MToonInspector : ShaderGUI
         }
     }
 
-    private static void SetupBlendMode(Material material, RenderMode renderMode, bool setRenderQueueAsDefault)
+    private static void SetupBlendMode(Material material, RenderMode renderMode, bool isChangedByUser)
     {
-        setRenderQueueAsDefault |= material.renderQueue == (int) RenderQueue.Geometry;
-        
         switch (renderMode)
         {
             case RenderMode.Opaque:
@@ -396,7 +376,7 @@ public class MToonInspector : ShaderGUI
                 SetKeyword(material, "_ALPHATEST_ON", false);
                 SetKeyword(material, "_ALPHABLEND_ON", false);
                 SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
-                if (setRenderQueueAsDefault)
+                if (isChangedByUser)
                 {
                     material.renderQueue = -1;
                 }
@@ -409,7 +389,7 @@ public class MToonInspector : ShaderGUI
                 SetKeyword(material, "_ALPHATEST_ON", true);
                 SetKeyword(material, "_ALPHABLEND_ON", false);
                 SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
-                if (setRenderQueueAsDefault)
+                if (isChangedByUser)
                 {
                     material.renderQueue = (int) RenderQueue.AlphaTest;
                 }
@@ -422,7 +402,7 @@ public class MToonInspector : ShaderGUI
                 SetKeyword(material, "_ALPHATEST_ON", false);
                 SetKeyword(material, "_ALPHABLEND_ON", true);
                 SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
-                if (setRenderQueueAsDefault)
+                if (isChangedByUser)
                 {
                     material.renderQueue = (int) RenderQueue.Transparent;
                 }
