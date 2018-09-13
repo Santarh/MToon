@@ -136,7 +136,7 @@ public class MToonInspector : ShaderGUI
 
         EditorGUI.BeginChangeCheck();
         {
-            EditorGUILayout.LabelField("Basic", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Rendering", EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical(GUI.skin.box);
             {
                 EditorGUILayout.LabelField("Mode", EditorStyles.boldLabel);
@@ -160,30 +160,31 @@ public class MToonInspector : ShaderGUI
 
                 EditorGUI.showMixedValue = false;
                 EditorGUILayout.Space();
-
-                if (bm != RenderMode.Opaque)
+            }
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
+            EditorGUILayout.LabelField("Color", EditorStyles.boldLabel);
+            EditorGUILayout.BeginVertical(GUI.skin.box);
+            {
+                EditorGUILayout.LabelField("Texture", EditorStyles.boldLabel);
                 {
-                    EditorGUILayout.LabelField("Alpha", EditorStyles.boldLabel);
-                    {
-                        if (bm == RenderMode.Transparent)
-                            EditorGUILayout.TextField("Ensure your lit color and texture have alpha channels.");
-
-                        if (bm == RenderMode.Cutout)
-                        {
-                            EditorGUILayout.TextField("Ensure your lit color and texture have alpha channels.");
-                            materialEditor.ShaderProperty(_cutoff, "Cutoff");
-                        }
-                    }
-                    EditorGUILayout.Space();
-                }
-
-                EditorGUILayout.LabelField("Color", EditorStyles.boldLabel);
-                {
-                    // Color
                     materialEditor.TexturePropertySingleLine(new GUIContent("Lit & Alpha", "Lit (RGB), Alpha (A)"),
                         _mainTex, _color);
                     materialEditor.TexturePropertySingleLine(new GUIContent("Shade", "Shade (RGB)"), _shadeTexture,
                         _shadeColor);
+                }
+                var bm = (RenderMode) _blendMode.floatValue;
+                if (bm != RenderMode.Opaque)
+                {
+                    EditorGUILayout.Space();
+                    EditorGUILayout.LabelField("Alpha", EditorStyles.boldLabel);
+                    {
+                        if (bm == RenderMode.Cutout)
+                        {
+                            materialEditor.ShaderProperty(_cutoff, "Cutoff");
+                        }
+                    }
                 }
             }
             EditorGUILayout.EndVertical();
@@ -192,44 +193,40 @@ public class MToonInspector : ShaderGUI
             EditorGUILayout.LabelField("Lighting", EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical(GUI.skin.box);
             {
-                EditorGUILayout.LabelField("Shade", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("Lit & Shade Mixing", EditorStyles.boldLabel);
                 {
-                    // Shade
-                    materialEditor.ShaderProperty(_shadeShift, "Shift");
-                    materialEditor.ShaderProperty(_shadeToony, "Toony");
+                    materialEditor.ShaderProperty(_shadeShift,
+                        new GUIContent("Shading Shift",
+                            "Zero is Default. Negative value increase lit area. Positive value increase shade area."));
+                    materialEditor.ShaderProperty(_shadeToony,
+                        new GUIContent("Shading Toony",
+                            "0.0 is Lambert. Higher value get toony shading."));
+                    materialEditor.TexturePropertySingleLine(
+                        new GUIContent("Shadow Receive Multiplier",
+                            "Texture (A) * Rate. White is Default. Black attenuates shadows."),
+                        _receiveShadowTexture,
+                        _receiveShadowRate);
+                    materialEditor.TexturePropertySingleLine(
+                        new GUIContent("Lit & Shade Mixing Multiplier",
+                            "Texture (R) * Rate. Compatible with UTS2 ShadingGradeMap. White is Default. Black amplifies shade."),
+                        _shadingGradeTexture,
+                        _shadingGradeRate);
+                }
+                EditorGUILayout.Space();
+
+                EditorGUILayout.LabelField("Light Color", EditorStyles.boldLabel);
+                {
                     materialEditor.ShaderProperty(_lightColorAttenuation, "LightColor Attenuation");
-                    materialEditor.TexturePropertySingleLine(
-                        new GUIContent("Shading Grade", "Shading Grade Texture (R)"),
-                        _shadingGradeTexture, _shadingGradeRate);
-                }
-                EditorGUILayout.Space();
-
-                EditorGUILayout.LabelField("Shadow", EditorStyles.boldLabel);
-                {
-                    // Shadow
-                    if (((Material) materialEditor.target).GetFloat("_ShadeShift") < 0f)
-                        EditorGUILayout.LabelField(
-                            "Receive rate should be lower value when Shade Shift is lower than 0.",
-                            EditorStyles.wordWrappedLabel);
-
-                    materialEditor.TexturePropertySingleLine(
-                        new GUIContent("Receive Rate", "Receive Shadow Rate Map (A)"),
-                        _receiveShadowTexture, _receiveShadowRate);
-                }
-                EditorGUILayout.Space();
-
-                EditorGUILayout.LabelField("MatCap", EditorStyles.boldLabel);
-                {
-                    // MatCap Light
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Additive", "Additive MatCap Texture (RGB)"),
-                        _sphereAdd);
                 }
                 EditorGUILayout.Space();
 
                 EditorGUILayout.LabelField("Emission", EditorStyles.boldLabel);
                 {
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Emission", "Emission (RGB)"), _emissionMap,
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Emission", "Emission (RGB)"),
+                        _emissionMap,
                         _emissionColor);
+                    materialEditor.TexturePropertySingleLine(new GUIContent("MatCap", "MatCap Texture (RGB)"),
+                        _sphereAdd);
                 }
                 EditorGUILayout.Space();
 
@@ -237,7 +234,8 @@ public class MToonInspector : ShaderGUI
                 {
                     // Normal
                     EditorGUI.BeginChangeCheck();
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map (RGB)"), _bumpMap,
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map (RGB)"),
+                        _bumpMap,
                         _bumpScale);
                     if (EditorGUI.EndChangeCheck())
                     {
