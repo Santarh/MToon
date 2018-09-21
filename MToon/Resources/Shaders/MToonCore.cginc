@@ -191,13 +191,13 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
     #ifdef MTOON_FORWARD_ADD
         return float4(0, 0, 0, 0);
     #else
-        return float4(worldNormal * 0.5 + 0.5, 1);
+        return float4(worldNormal * 0.5 + 0.5, alpha);
     #endif
 #elif MTOON_DEBUG_LITSHADERATE
     #ifdef MTOON_FORWARD_ADD
         return float4(0, 0, 0, 0);
     #else
-        return float4(lighting, 1);
+        return float4(lighting, alpha);
     #endif
 #endif
 
