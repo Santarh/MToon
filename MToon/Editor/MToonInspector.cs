@@ -144,15 +144,12 @@ public class MToonInspector : ShaderGUI
                         _shadeColor);
                 }
                 var bm = (RenderMode) _blendMode.floatValue;
-                if (bm != RenderMode.Opaque)
+                if (bm == RenderMode.Cutout)
                 {
                     EditorGUILayout.Space();
                     EditorGUILayout.LabelField("Alpha", EditorStyles.boldLabel);
                     {
-                        if (bm == RenderMode.Cutout)
-                        {
-                            materialEditor.ShaderProperty(_cutoff, "Cutoff");
-                        }
+                        materialEditor.ShaderProperty(_cutoff, "Cutoff");
                     }
                 }
             }
