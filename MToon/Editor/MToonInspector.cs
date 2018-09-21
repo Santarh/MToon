@@ -8,34 +8,6 @@ namespace MToon
 {
     public class MToonInspector : ShaderGUI
     {
-        public enum DebugMode
-        {
-            None,
-            Normal,
-            LitShadeRate,
-        }
-
-        public enum OutlineColorMode
-        {
-            FixedColor,
-            MixedLighting
-        }
-
-        public enum OutlineWidthMode
-        {
-            None,
-            WorldCoordinates,
-            ScreenCoordinates
-        }
-
-        public enum RenderMode
-        {
-            Opaque,
-            Cutout,
-            Transparent,
-            TransparentWithZWrite,
-        }
-        
         private MaterialProperty _blendMode;
         private MaterialProperty _bumpMap;
         private MaterialProperty _bumpScale;
