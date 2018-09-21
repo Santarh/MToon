@@ -171,13 +171,6 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
     col += lerp(rimLighting, half3(0, 0, 0), i.isOutline);
 #endif
 
-    // energy conservation
-    half3 energy = _IndirectLightIntensity * ShadeSH9(half4(0, 1, 0, 1)) + _LightColor0.rgb;
-    half energyV = max(0.001, max(energy.r, max(energy.g, energy.b)));
-    half colV = max(0.001, max(col.r, max(col.g, col.b)));
-    half tint = min(energyV, colV) / colV;
-    col *= tint;
-    
     // Emission
 #ifdef MTOON_FORWARD_ADD
 #else
