@@ -142,6 +142,7 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
     lightIntensity = lightIntensity * shadingGrade; // darker
     lightIntensity = lightIntensity * 2.0 - 1.0; // from [0, 1] to [-1, +1]
     lightIntensity = smoothstep(_ShadeShift, _ShadeShift + (1.0 - _ShadeToony), lightIntensity); // shade & tooned
+    lightIntensity = smoothstep(_ShadeShift, _ShadeShift + (1.0 - _ShadeToony), lightIntensity); // Double smoothed (for compatibility)
 
     // lighting with color
     half3 directLighting = lightIntensity * _LightColor0.rgb; // direct
