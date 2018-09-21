@@ -13,7 +13,7 @@ namespace MToon
         private MaterialProperty _bumpScale;
         private MaterialProperty _color;
         private MaterialProperty _cullMode;
-        private MaterialProperty _outlineCullMode;
+//        private MaterialProperty _outlineCullMode;
         private MaterialProperty _cutoff;
 
         private MaterialProperty _debugMode;
@@ -46,7 +46,7 @@ namespace MToon
             _outlineColorMode = FindProperty(Utils.PropOutlineColorMode, properties);
             _blendMode = FindProperty(Utils.PropBlendMode, properties);
             _cullMode = FindProperty(Utils.PropCullMode, properties);
-            _outlineCullMode = FindProperty(Utils.PropOutlineCullMode, properties);
+//            _outlineCullMode = FindProperty(Utils.PropOutlineCullMode, properties);
             _cutoff = FindProperty(Utils.PropCutoff, properties);
             _color = FindProperty(Utils.PropColor, properties);
             _shadeColor = FindProperty(Utils.PropShadeColor, properties);
