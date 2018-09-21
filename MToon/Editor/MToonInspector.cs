@@ -113,10 +113,10 @@ namespace MToon
                 {
                     EditorGUILayout.LabelField("Texture", EditorStyles.boldLabel);
                     {
-                        materialEditor.TexturePropertySingleLine(new GUIContent("Lit & Alpha", "Lit (RGB), Alpha (A)"),
+                        materialEditor.TexturePropertySingleLine(new GUIContent("Lit Color, Alpha", "Lit (RGB), Alpha (A)"),
                             _mainTex, _color);
 
-                        materialEditor.TexturePropertySingleLine(new GUIContent("Shade", "Shade (RGB)"), _shadeTexture,
+                        materialEditor.TexturePropertySingleLine(new GUIContent("Shade Color", "Shade (RGB)"), _shadeTexture,
                             _shadeColor);
                     }
                     var bm = (RenderMode) _blendMode.floatValue;
