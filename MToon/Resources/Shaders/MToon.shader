@@ -131,5 +131,5 @@ Shader "VRM/MToon"
     }
     
     Fallback "Unlit/Texture"
-    CustomEditor "MToonInspector"
+    CustomEditor "MToon.MToonInspector"
 }
