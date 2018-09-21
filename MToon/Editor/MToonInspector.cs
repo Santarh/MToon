@@ -280,32 +280,14 @@ namespace MToon
         {
             base.AssignNewShaderToMaterial(material, oldShader, newShader);
 
-            ModeChanged(material, isBlendModeChangedByUser: true);
+            Utils.ValidateProperties(material, isBlendModeChangedByUser: true);
         }
 
         private static void ModeChanged(Material[] materials, bool isBlendModeChangedByUser = false)
         {
             foreach (var material in materials)
             {
-                ModeChanged(material, isBlendModeChangedByUser);
-            }
-        }
-
-        private static void ModeChanged(Material material, bool isBlendModeChangedByUser = false)
-        {
-            SetupBlendMode(material, (RenderMode) material.GetFloat(Utils.PropBlendMode), isBlendModeChangedByUser);
-            SetupNormalMode(material, material.GetTexture(Utils.PropBumpMap));
-            SetupOutlineMode(material,
-                (OutlineWidthMode) material.GetFloat(Utils.PropOutlineWidthMode),
-                (OutlineColorMode) material.GetFloat(Utils.PropOutlineColorMode));
-            SetupDebugMode(material, (DebugMode) material.GetFloat(Utils.PropDebugMode));
-            SetupCullMode(material, (CullMode) material.GetFloat(Utils.PropCullMode));
-
-            var mainTex = material.GetTexture(Utils.PropMainTex);
-            var shadeTex = material.GetTexture(Utils.PropShadeTexture);
-            if (mainTex != null && shadeTex == null)
-            {
-                material.SetTexture(Utils.PropShadeTexture, mainTex);
+                Utils.ValidateProperties(material, isBlendModeChangedByUser);
             }
         }
 
@@ -325,147 +307,5 @@ namespace MToon
             return changed;
         }
 
-        private static void SetupDebugMode(Material material, DebugMode debugMode)
-        {
-            switch (debugMode)
-            {
-                case DebugMode.None:
-                    SetKeyword(material, Utils.KeyDebugNormal, false);
-                    SetKeyword(material, Utils.KeyDebugLitShadeRate, false);
-                    break;
-                case DebugMode.Normal:
-                    SetKeyword(material, Utils.KeyDebugNormal, true);
-                    SetKeyword(material, Utils.KeyDebugLitShadeRate, false);
-                    break;
-                case DebugMode.LitShadeRate:
-                    SetKeyword(material, Utils.KeyDebugNormal, false);
-                    SetKeyword(material, Utils.KeyDebugLitShadeRate, true);
-                    break;
-            }
-        }
-
-        private static void SetupBlendMode(Material material, RenderMode renderMode, bool isChangedByUser)
-        {
-            switch (renderMode)
-            {
-                case RenderMode.Opaque:
-                    material.SetOverrideTag(Utils.TagRenderTypeKey, Utils.TagRenderTypeValueOpaque);
-                    material.SetInt(Utils.PropSrcBlend, (int) BlendMode.One);
-                    material.SetInt(Utils.PropDstBlend, (int) BlendMode.Zero);
-                    material.SetInt(Utils.PropZWrite, 1);
-                    SetKeyword(material, Utils.KeyAlphaTestOn, false);
-                    SetKeyword(material, Utils.KeyAlphaBlendOn, false);
-                    SetKeyword(material, Utils.KeyAlphaPremultiplyOn, false);
-                    if (isChangedByUser)
-                    {
-                        material.renderQueue = -1;
-                    }
-
-                    break;
-                case RenderMode.Cutout:
-                    material.SetOverrideTag(Utils.TagRenderTypeKey, Utils.TagRenderTypeValueTransparentCutout);
-                    material.SetInt(Utils.PropSrcBlend, (int) BlendMode.One);
-                    material.SetInt(Utils.PropDstBlend, (int) BlendMode.Zero);
-                    material.SetInt(Utils.PropZWrite, 1);
-                    SetKeyword(material, Utils.KeyAlphaTestOn, true);
-                    SetKeyword(material, Utils.KeyAlphaBlendOn, false);
-                    SetKeyword(material, Utils.KeyAlphaPremultiplyOn, false);
-                    if (isChangedByUser)
-                    {
-                        material.renderQueue = (int) RenderQueue.AlphaTest;
-                    }
-
-                    break;
-                case RenderMode.Transparent:
-                    material.SetOverrideTag(Utils.TagRenderTypeKey, Utils.TagRenderTypeValueTransparent);
-                    material.SetInt(Utils.PropSrcBlend, (int) BlendMode.SrcAlpha);
-                    material.SetInt(Utils.PropDstBlend, (int) BlendMode.OneMinusSrcAlpha);
-                    material.SetInt(Utils.PropZWrite, 0);
-                    SetKeyword(material, Utils.KeyAlphaTestOn, false);
-                    SetKeyword(material, Utils.KeyAlphaBlendOn, true);
-                    SetKeyword(material, Utils.KeyAlphaPremultiplyOn, false);
-                    if (isChangedByUser)
-                    {
-                        material.renderQueue = (int) RenderQueue.Transparent;
-                    }
-
-                    break;
-                case RenderMode.TransparentWithZWrite:
-                    material.SetOverrideTag(Utils.TagRenderTypeKey, Utils.TagRenderTypeValueTransparent);
-                    material.SetInt(Utils.PropSrcBlend, (int) BlendMode.SrcAlpha);
-                    material.SetInt(Utils.PropDstBlend, (int) BlendMode.OneMinusSrcAlpha);
-                    material.SetInt(Utils.PropZWrite, 1);
-                    SetKeyword(material, Utils.KeyAlphaTestOn, false);
-                    SetKeyword(material, Utils.KeyAlphaBlendOn, true);
-                    SetKeyword(material, Utils.KeyAlphaPremultiplyOn, false);
-                    if (isChangedByUser)
-                    {
-                        material.renderQueue = (int) RenderQueue.AlphaTest + 50;
-                    }
-
-                    break;
-            }
-        }
-
-        private static void SetupOutlineMode(Material material, OutlineWidthMode outlineWidthMode,
-            OutlineColorMode outlineColorMode)
-        {
-            var isFixed = outlineColorMode == OutlineColorMode.FixedColor;
-            var isMixed = outlineColorMode == OutlineColorMode.MixedLighting;
-            
-            switch (outlineWidthMode)
-            {
-                case OutlineWidthMode.None:
-                    SetKeyword(material, Utils.KeyOutlineWidthWorld, false);
-                    SetKeyword(material, Utils.KeyOutlineWidthScreen, false);
-                    SetKeyword(material, Utils.KeyOutlineColorFixed, false);
-                    SetKeyword(material, Utils.KeyOutlineColorMixed, false);
-                    break;
-                case OutlineWidthMode.WorldCoordinates:
-                    SetKeyword(material, Utils.KeyOutlineWidthWorld, true);
-                    SetKeyword(material, Utils.KeyOutlineWidthScreen, false);
-                    SetKeyword(material, Utils.KeyOutlineColorFixed, isFixed);
-                    SetKeyword(material, Utils.KeyOutlineColorMixed, isMixed);
-                    break;
-                case OutlineWidthMode.ScreenCoordinates:
-                    SetKeyword(material, Utils.KeyOutlineWidthWorld, false);
-                    SetKeyword(material, Utils.KeyOutlineWidthScreen, true);
-                    SetKeyword(material, Utils.KeyOutlineColorFixed, isFixed);
-                    SetKeyword(material, Utils.KeyOutlineColorMixed, isMixed);
-                    break;
-            }
-        }
-
-        private static void SetupNormalMode(Material material, bool requireNormalMapping)
-        {
-            SetKeyword(material, Utils.KeyNormalMap, requireNormalMapping);
-        }
-
-        private static void SetupCullMode(Material material, CullMode cullMode)
-        {
-            switch (cullMode)
-            {
-                case CullMode.Back:
-                    material.SetInt(Utils.PropCullMode, (int) CullMode.Back);
-                    material.SetInt(Utils.PropOutlineCullMode, (int) CullMode.Front);
-                    break;
-                case CullMode.Front:
-                    material.SetInt(Utils.PropCullMode, (int) CullMode.Front);
-                    material.SetInt(Utils.PropOutlineCullMode, (int) CullMode.Back);
-                    break;
-                case CullMode.Off:
-                    material.SetInt(Utils.PropCullMode, (int) CullMode.Off);
-                    material.SetInt(Utils.PropOutlineCullMode, (int) CullMode.Front);
-                    break;
-            }
-        }
-
-        private static void SetKeyword(Material mat, string keyword, bool required)
-        {
-            if (required)
-                mat.EnableKeyword(keyword);
-            else
-                mat.DisableKeyword(keyword);
-        }
     }
 }
