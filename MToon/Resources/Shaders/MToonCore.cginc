@@ -129,6 +129,7 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
     half3 worldNormal = half3(i.tspace0.z, i.tspace1.z, i.tspace2.z);
 #endif
     worldNormal *= facing;
+    worldNormal *= lerp(+1.0, -1.0, i.isOutline);
     worldNormal = normalize(worldNormal);
 
     // lighting intensity
@@ -181,7 +182,7 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
 #ifdef MTOON_OUTLINE_COLOR_FIXED
     col = lerp(col, _OutlineColor, i.isOutline);
 #elif MTOON_OUTLINE_COLOR_MIXED
-    col = lerp(col, _OutlineColor * lerp(half3(0, 0, 0), col, _OutlineLightingMix), i.isOutline);
+    col = lerp(col, _OutlineColor * lerp(half3(1, 1, 1), col, _OutlineLightingMix), i.isOutline);
 #else
 #endif
 

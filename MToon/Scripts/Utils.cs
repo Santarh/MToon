@@ -70,10 +70,10 @@ namespace MToon
         public const string KeyAlphaTestOn = "_ALPHATEST_ON";
         public const string KeyAlphaBlendOn = "_ALPHABLEND_ON";
         public const string KeyAlphaPremultiplyOn = "_ALPHAPREMULTIPLY_ON";
-        public const string KeyOutlineWidthWorld = "_MTOON_OUTLINE_WIDTH_WORLD";
-        public const string KeyOutlineWidthScreen = "_MTOON_OUTLINE_WIDTH_SCREEN";
-        public const string KeyOutlineColorFixed = "_MTOON_OUTLINE_COLOR_FIXED";
-        public const string KeyOutlineColorMixed = "_MTOON_OUTLINE_COLOR_MIXED";
+        public const string KeyOutlineWidthWorld = "MTOON_OUTLINE_WIDTH_WORLD";
+        public const string KeyOutlineWidthScreen = "MTOON_OUTLINE_WIDTH_SCREEN";
+        public const string KeyOutlineColorFixed = "MTOON_OUTLINE_COLOR_FIXED";
+        public const string KeyOutlineColorMixed = "MTOON_OUTLINE_COLOR_MIXED";
         public const string KeyDebugNormal = "MTOON_DEBUG_NORMAL";
         public const string KeyDebugLitShadeRate = "MTOON_DEBUG_LITSHADERATE";
 
