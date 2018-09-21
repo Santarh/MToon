@@ -182,7 +182,7 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
 #ifdef MTOON_OUTLINE_COLOR_FIXED
     col = lerp(col, _OutlineColor, i.isOutline);
 #elif MTOON_OUTLINE_COLOR_MIXED
-    col = lerp(col, _OutlineColor * lerp(tint.xxx, col, _OutlineLightingMix), i.isOutline);
+    col = lerp(col, _OutlineColor * lerp(half3(0, 0, 0), col, _OutlineLightingMix), i.isOutline);
 #else
 #endif
 
