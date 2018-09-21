@@ -41,35 +41,35 @@ namespace MToon
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
-            _debugMode = FindProperty("_DebugMode", properties);
-            _outlineWidthMode = FindProperty("_OutlineWidthMode", properties);
-            _outlineColorMode = FindProperty("_OutlineColorMode", properties);
-            _blendMode = FindProperty("_BlendMode", properties);
-            _cullMode = FindProperty("_CullMode", properties);
-            _outlineCullMode = FindProperty("_OutlineCullMode", properties);
-            _cutoff = FindProperty("_Cutoff", properties);
-            _color = FindProperty("_Color", properties);
-            _shadeColor = FindProperty("_ShadeColor", properties);
-            _mainTex = FindProperty("_MainTex", properties);
-            _shadeTexture = FindProperty("_ShadeTexture", properties);
-            _bumpScale = FindProperty("_BumpScale", properties);
-            _bumpMap = FindProperty("_BumpMap", properties);
-            _receiveShadowRate = FindProperty("_ReceiveShadowRate", properties);
-            _receiveShadowTexture = FindProperty("_ReceiveShadowTexture", properties);
-            _shadingGradeRate = FindProperty("_ShadingGradeRate", properties);
-            _shadingGradeTexture = FindProperty("_ShadingGradeTexture", properties);
-            _shadeShift = FindProperty("_ShadeShift", properties);
-            _shadeToony = FindProperty("_ShadeToony", properties);
-            _lightColorAttenuation = FindProperty("_LightColorAttenuation", properties);
-            _indirectLightIntensity = FindProperty("_IndirectLightIntensity", properties);
-            _sphereAdd = FindProperty("_SphereAdd", properties);
-            _emissionColor = FindProperty("_EmissionColor", properties);
-            _emissionMap = FindProperty("_EmissionMap", properties);
-            _outlineWidthTexture = FindProperty("_OutlineWidthTexture", properties);
-            _outlineWidth = FindProperty("_OutlineWidth", properties);
-            _outlineScaledMaxDistance = FindProperty("_OutlineScaledMaxDistance", properties);
-            _outlineColor = FindProperty("_OutlineColor", properties);
-            _outlineLightingMix = FindProperty("_OutlineLightingMix", properties);
+            _debugMode = FindProperty(Utils.PropDebugMode, properties);
+            _outlineWidthMode = FindProperty(Utils.PropOutlineWidthMode, properties);
+            _outlineColorMode = FindProperty(Utils.PropOutlineColorMode, properties);
+            _blendMode = FindProperty(Utils.PropBlendMode, properties);
+            _cullMode = FindProperty(Utils.PropCullMode, properties);
+            _outlineCullMode = FindProperty(Utils.PropOutlineCullMode, properties);
+            _cutoff = FindProperty(Utils.PropCutoff, properties);
+            _color = FindProperty(Utils.PropColor, properties);
+            _shadeColor = FindProperty(Utils.PropShadeColor, properties);
+            _mainTex = FindProperty(Utils.PropMainTex, properties);
+            _shadeTexture = FindProperty(Utils.PropShadeTexture, properties);
+            _bumpScale = FindProperty(Utils.PropBumpScale, properties);
+            _bumpMap = FindProperty(Utils.PropBumpMap, properties);
+            _receiveShadowRate = FindProperty(Utils.PropReceiveShadowRate, properties);
+            _receiveShadowTexture = FindProperty(Utils.PropReceiveShadowTexture, properties);
+            _shadingGradeRate = FindProperty(Utils.PropShadingGradeRate, properties);
+            _shadingGradeTexture = FindProperty(Utils.PropShadingGradeTexture, properties);
+            _shadeShift = FindProperty(Utils.PropShadeShift, properties);
+            _shadeToony = FindProperty(Utils.PropShadeToony, properties);
+            _lightColorAttenuation = FindProperty(Utils.PropLightColorAttenuation, properties);
+            _indirectLightIntensity = FindProperty(Utils.PropIndirectLightIntensity, properties);
+            _sphereAdd = FindProperty(Utils.PropSphereAdd, properties);
+            _emissionColor = FindProperty(Utils.PropEmissionColor, properties);
+            _emissionMap = FindProperty(Utils.PropEmissionMap, properties);
+            _outlineWidthTexture = FindProperty(Utils.PropOutlineWidthTexture, properties);
+            _outlineWidth = FindProperty(Utils.PropOutlineWidth, properties);
+            _outlineScaledMaxDistance = FindProperty(Utils.PropOutlineScaledMaxDistance, properties);
+            _outlineColor = FindProperty(Utils.PropOutlineColor, properties);
+            _outlineLightingMix = FindProperty(Utils.PropOutlineLightingMix, properties);
 
             var uvMappedTextureProperties = new[]
             {
@@ -293,19 +293,19 @@ namespace MToon
 
         private static void ModeChanged(Material material, bool isBlendModeChangedByUser = false)
         {
-            SetupBlendMode(material, (RenderMode) material.GetFloat("_BlendMode"), isBlendModeChangedByUser);
-            SetupNormalMode(material, material.GetTexture("_BumpMap"));
+            SetupBlendMode(material, (RenderMode) material.GetFloat(Utils.PropBlendMode), isBlendModeChangedByUser);
+            SetupNormalMode(material, material.GetTexture(Utils.PropBumpMap));
             SetupOutlineMode(material,
-                (OutlineWidthMode) material.GetFloat("_OutlineWidthMode"),
-                (OutlineColorMode) material.GetFloat("_OutlineColorMode"));
-            SetupDebugMode(material, (DebugMode) material.GetFloat("_DebugMode"));
-            SetupCullMode(material, (CullMode) material.GetFloat("_CullMode"));
+                (OutlineWidthMode) material.GetFloat(Utils.PropOutlineWidthMode),
+                (OutlineColorMode) material.GetFloat(Utils.PropOutlineColorMode));
+            SetupDebugMode(material, (DebugMode) material.GetFloat(Utils.PropDebugMode));
+            SetupCullMode(material, (CullMode) material.GetFloat(Utils.PropCullMode));
 
-            var mainTex = material.GetTexture("_MainTex");
-            var shadeTex = material.GetTexture("_ShadeTexture");
+            var mainTex = material.GetTexture(Utils.PropMainTex);
+            var shadeTex = material.GetTexture(Utils.PropShadeTexture);
             if (mainTex != null && shadeTex == null)
             {
-                material.SetTexture("_ShadeTexture", mainTex);
+                material.SetTexture(Utils.PropShadeTexture, mainTex);
             }
         }
 
@@ -330,16 +330,16 @@ namespace MToon
             switch (debugMode)
             {
                 case DebugMode.None:
-                    SetKeyword(material, "MTOON_DEBUG_NORMAL", false);
-                    SetKeyword(material, "MTOON_DEBUG_LITSHADERATE", false);
+                    SetKeyword(material, Utils.KeyDebugNormal, false);
+                    SetKeyword(material, Utils.KeyDebugLitShadeRate, false);
                     break;
                 case DebugMode.Normal:
-                    SetKeyword(material, "MTOON_DEBUG_NORMAL", true);
-                    SetKeyword(material, "MTOON_DEBUG_LITSHADERATE", false);
+                    SetKeyword(material, Utils.KeyDebugNormal, true);
+                    SetKeyword(material, Utils.KeyDebugLitShadeRate, false);
                     break;
                 case DebugMode.LitShadeRate:
-                    SetKeyword(material, "MTOON_DEBUG_NORMAL", false);
-                    SetKeyword(material, "MTOON_DEBUG_LITSHADERATE", true);
+                    SetKeyword(material, Utils.KeyDebugNormal, false);
+                    SetKeyword(material, Utils.KeyDebugLitShadeRate, true);
                     break;
             }
         }
@@ -349,13 +349,13 @@ namespace MToon
             switch (renderMode)
             {
                 case RenderMode.Opaque:
-                    material.SetOverrideTag("RenderType", "Opaque");
-                    material.SetInt("_SrcBlend", (int) BlendMode.One);
-                    material.SetInt("_DstBlend", (int) BlendMode.Zero);
-                    material.SetInt("_ZWrite", 1);
-                    SetKeyword(material, "_ALPHATEST_ON", false);
-                    SetKeyword(material, "_ALPHABLEND_ON", false);
-                    SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
+                    material.SetOverrideTag(Utils.TagRenderTypeKey, Utils.TagRenderTypeValueOpaque);
+                    material.SetInt(Utils.PropSrcBlend, (int) BlendMode.One);
+                    material.SetInt(Utils.PropDstBlend, (int) BlendMode.Zero);
+                    material.SetInt(Utils.PropZWrite, 1);
+                    SetKeyword(material, Utils.KeyAlphaTestOn, false);
+                    SetKeyword(material, Utils.KeyAlphaBlendOn, false);
+                    SetKeyword(material, Utils.KeyAlphaPremultiplyOn, false);
                     if (isChangedByUser)
                     {
                         material.renderQueue = -1;
@@ -363,13 +363,13 @@ namespace MToon
 
                     break;
                 case RenderMode.Cutout:
-                    material.SetOverrideTag("RenderType", "TransparentCutout");
-                    material.SetInt("_SrcBlend", (int) BlendMode.One);
-                    material.SetInt("_DstBlend", (int) BlendMode.Zero);
-                    material.SetInt("_ZWrite", 1);
-                    SetKeyword(material, "_ALPHATEST_ON", true);
-                    SetKeyword(material, "_ALPHABLEND_ON", false);
-                    SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
+                    material.SetOverrideTag(Utils.TagRenderTypeKey, Utils.TagRenderTypeValueTransparentCutout);
+                    material.SetInt(Utils.PropSrcBlend, (int) BlendMode.One);
+                    material.SetInt(Utils.PropDstBlend, (int) BlendMode.Zero);
+                    material.SetInt(Utils.PropZWrite, 1);
+                    SetKeyword(material, Utils.KeyAlphaTestOn, true);
+                    SetKeyword(material, Utils.KeyAlphaBlendOn, false);
+                    SetKeyword(material, Utils.KeyAlphaPremultiplyOn, false);
                     if (isChangedByUser)
                     {
                         material.renderQueue = (int) RenderQueue.AlphaTest;
@@ -377,13 +377,13 @@ namespace MToon
 
                     break;
                 case RenderMode.Transparent:
-                    material.SetOverrideTag("RenderType", "Transparent");
-                    material.SetInt("_SrcBlend", (int) BlendMode.SrcAlpha);
-                    material.SetInt("_DstBlend", (int) BlendMode.OneMinusSrcAlpha);
-                    material.SetInt("_ZWrite", 0);
-                    SetKeyword(material, "_ALPHATEST_ON", false);
-                    SetKeyword(material, "_ALPHABLEND_ON", true);
-                    SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
+                    material.SetOverrideTag(Utils.TagRenderTypeKey, Utils.TagRenderTypeValueTransparent);
+                    material.SetInt(Utils.PropSrcBlend, (int) BlendMode.SrcAlpha);
+                    material.SetInt(Utils.PropDstBlend, (int) BlendMode.OneMinusSrcAlpha);
+                    material.SetInt(Utils.PropZWrite, 0);
+                    SetKeyword(material, Utils.KeyAlphaTestOn, false);
+                    SetKeyword(material, Utils.KeyAlphaBlendOn, true);
+                    SetKeyword(material, Utils.KeyAlphaPremultiplyOn, false);
                     if (isChangedByUser)
                     {
                         material.renderQueue = (int) RenderQueue.Transparent;
@@ -391,13 +391,13 @@ namespace MToon
 
                     break;
                 case RenderMode.TransparentWithZWrite:
-                    material.SetOverrideTag("RenderType", "Transparent");
-                    material.SetInt("_SrcBlend", (int) BlendMode.SrcAlpha);
-                    material.SetInt("_DstBlend", (int) BlendMode.OneMinusSrcAlpha);
-                    material.SetInt("_ZWrite", 1);
-                    SetKeyword(material, "_ALPHATEST_ON", false);
-                    SetKeyword(material, "_ALPHABLEND_ON", true);
-                    SetKeyword(material, "_ALPHAPREMULTIPLY_ON", false);
+                    material.SetOverrideTag(Utils.TagRenderTypeKey, Utils.TagRenderTypeValueTransparent);
+                    material.SetInt(Utils.PropSrcBlend, (int) BlendMode.SrcAlpha);
+                    material.SetInt(Utils.PropDstBlend, (int) BlendMode.OneMinusSrcAlpha);
+                    material.SetInt(Utils.PropZWrite, 1);
+                    SetKeyword(material, Utils.KeyAlphaTestOn, false);
+                    SetKeyword(material, Utils.KeyAlphaBlendOn, true);
+                    SetKeyword(material, Utils.KeyAlphaPremultiplyOn, false);
                     if (isChangedByUser)
                     {
                         material.renderQueue = (int) RenderQueue.AlphaTest + 50;
@@ -410,34 +410,35 @@ namespace MToon
         private static void SetupOutlineMode(Material material, OutlineWidthMode outlineWidthMode,
             OutlineColorMode outlineColorMode)
         {
+            var isFixed = outlineColorMode == OutlineColorMode.FixedColor;
+            var isMixed = outlineColorMode == OutlineColorMode.MixedLighting;
+            
             switch (outlineWidthMode)
             {
                 case OutlineWidthMode.None:
-                    SetKeyword(material, "MTOON_OUTLINE_WIDTH_WORLD", false);
-                    SetKeyword(material, "MTOON_OUTLINE_WIDTH_SCREEN", false);
-                    SetKeyword(material, "MTOON_OUTLINE_COLOR_FIXED", false);
-                    SetKeyword(material, "MTOON_OUTLINE_COLOR_MIXED", false);
+                    SetKeyword(material, Utils.KeyOutlineWidthWorld, false);
+                    SetKeyword(material, Utils.KeyOutlineWidthScreen, false);
+                    SetKeyword(material, Utils.KeyOutlineColorFixed, false);
+                    SetKeyword(material, Utils.KeyOutlineColorMixed, false);
                     break;
                 case OutlineWidthMode.WorldCoordinates:
-                    SetKeyword(material, "MTOON_OUTLINE_WIDTH_WORLD", true);
-                    SetKeyword(material, "MTOON_OUTLINE_WIDTH_SCREEN", false);
-                    SetKeyword(material, "MTOON_OUTLINE_COLOR_FIXED", outlineColorMode == OutlineColorMode.FixedColor);
-                    SetKeyword(material, "MTOON_OUTLINE_COLOR_MIXED",
-                        outlineColorMode == OutlineColorMode.MixedLighting);
+                    SetKeyword(material, Utils.KeyOutlineWidthWorld, true);
+                    SetKeyword(material, Utils.KeyOutlineWidthScreen, false);
+                    SetKeyword(material, Utils.KeyOutlineColorFixed, isFixed);
+                    SetKeyword(material, Utils.KeyOutlineColorMixed, isMixed);
                     break;
                 case OutlineWidthMode.ScreenCoordinates:
-                    SetKeyword(material, "MTOON_OUTLINE_WIDTH_WORLD", false);
-                    SetKeyword(material, "MTOON_OUTLINE_WIDTH_SCREEN", true);
-                    SetKeyword(material, "MTOON_OUTLINE_COLOR_FIXED", outlineColorMode == OutlineColorMode.FixedColor);
-                    SetKeyword(material, "MTOON_OUTLINE_COLOR_MIXED",
-                        outlineColorMode == OutlineColorMode.MixedLighting);
+                    SetKeyword(material, Utils.KeyOutlineWidthWorld, false);
+                    SetKeyword(material, Utils.KeyOutlineWidthScreen, true);
+                    SetKeyword(material, Utils.KeyOutlineColorFixed, isFixed);
+                    SetKeyword(material, Utils.KeyOutlineColorMixed, isMixed);
                     break;
             }
         }
 
         private static void SetupNormalMode(Material material, bool requireNormalMapping)
         {
-            SetKeyword(material, "_NORMALMAP", requireNormalMapping);
+            SetKeyword(material, Utils.KeyNormalMap, requireNormalMapping);
         }
 
         private static void SetupCullMode(Material material, CullMode cullMode)
@@ -445,16 +446,16 @@ namespace MToon
             switch (cullMode)
             {
                 case CullMode.Back:
-                    material.SetInt("_CullMode", (int) CullMode.Back);
-                    material.SetInt("_OutlineCullMode", (int) CullMode.Front);
+                    material.SetInt(Utils.PropCullMode, (int) CullMode.Back);
+                    material.SetInt(Utils.PropOutlineCullMode, (int) CullMode.Front);
                     break;
                 case CullMode.Front:
-                    material.SetInt("_CullMode", (int) CullMode.Front);
-                    material.SetInt("_OutlineCullMode", (int) CullMode.Back);
+                    material.SetInt(Utils.PropCullMode, (int) CullMode.Front);
+                    material.SetInt(Utils.PropOutlineCullMode, (int) CullMode.Back);
                     break;
                 case CullMode.Off:
-                    material.SetInt("_CullMode", (int) CullMode.Off);
-                    material.SetInt("_OutlineCullMode", (int) CullMode.Front);
+                    material.SetInt(Utils.PropCullMode, (int) CullMode.Off);
+                    material.SetInt(Utils.PropOutlineCullMode, (int) CullMode.Front);
                     break;
             }
         }
