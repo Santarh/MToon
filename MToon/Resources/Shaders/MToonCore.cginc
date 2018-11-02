@@ -93,7 +93,7 @@ inline float4 CalculateOutlineVertexClipPosition(appdata_full v)
     return vertex;
 }
 
-float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
+float4 frag_forward(v2f i) : SV_TARGET
 {
 #ifdef MTOON_CLIP_IF_OUTLINE_IS_NONE
     #ifdef MTOON_OUTLINE_WIDTH_WORLD
@@ -128,7 +128,7 @@ float4 frag_forward(v2f i, fixed facing : VFACE) : SV_TARGET
 #else
     half3 worldNormal = half3(i.tspace0.z, i.tspace1.z, i.tspace2.z);
 #endif
-    worldNormal *= facing;
+    worldNormal *= step(0, dot(_WorldSpaceCameraPos.xyz - i.posWorld.xyz, worldNormal)) * 2 - 1;
     worldNormal *= lerp(+1.0, -1.0, i.isOutline);
     worldNormal = normalize(worldNormal);
 
