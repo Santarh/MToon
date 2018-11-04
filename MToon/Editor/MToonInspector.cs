@@ -71,23 +71,11 @@ namespace MToon
             _outlineColor = FindProperty(Utils.PropOutlineColor, properties);
             _outlineLightingMix = FindProperty(Utils.PropOutlineLightingMix, properties);
 
-            var uvMappedTextureProperties = new[]
-            {
-                _mainTex,
-                _shadeTexture,
-                _bumpMap,
-                _receiveShadowTexture,
-                _shadingGradeTexture,
-                _emissionMap,
-                _outlineWidthTexture,
-            };
-
             var materials = materialEditor.targets.Select(x => x as Material).ToArray();
-            Draw(materialEditor, materials, uvMappedTextureProperties);
+            Draw(materialEditor, materials);
         }
 
-        private void Draw(MaterialEditor materialEditor, Material[] materials,
-            MaterialProperty[] uvMappedTextureProperties)
+        private void Draw(MaterialEditor materialEditor, Material[] materials)
         {
             EditorGUI.BeginChangeCheck();
             {
@@ -244,11 +232,7 @@ namespace MToon
                 {
                     EditorGUILayout.LabelField("Texture Options", EditorStyles.boldLabel);
                     {
-                        EditorGUI.BeginChangeCheck();
                         materialEditor.TextureScaleOffsetProperty(_mainTex);
-                        if (EditorGUI.EndChangeCheck())
-                            foreach (var textureProperty in uvMappedTextureProperties)
-                                textureProperty.textureScaleAndOffset = _mainTex.textureScaleAndOffset;
                     }
                     EditorGUILayout.Space();
 

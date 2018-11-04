@@ -8,12 +8,12 @@ half _Cutoff;
 fixed4 _Color;
 fixed4 _ShadeColor;
 sampler2D _MainTex; float4 _MainTex_ST;
-sampler2D _ShadeTexture; float4 _ShadeTexture_ST;
+sampler2D _ShadeTexture;
 half _BumpScale;
-sampler2D _BumpMap; float4 _BumpMap_ST;
-sampler2D _ReceiveShadowTexture; float4 _ReceiveShadowTexture_ST;
+sampler2D _BumpMap;
+sampler2D _ReceiveShadowTexture; 
 half _ReceiveShadowRate;
-sampler2D _ShadingGradeTexture; float4 _ShadingGradeTexture_ST;
+sampler2D _ShadingGradeTexture;
 half _ShadingGradeRate;
 half _ShadeShift;
 half _ShadeToony;
@@ -21,8 +21,8 @@ half _LightColorAttenuation;
 half _IndirectLightIntensity;
 sampler2D _SphereAdd;
 fixed4 _EmissionColor;
-sampler2D _EmissionMap; float4 _EmissionMap_ST;
-sampler2D _OutlineWidthTexture; float4 _OutlineWidthTexture_ST;
+sampler2D _EmissionMap;
+sampler2D _OutlineWidthTexture;
 half _OutlineWidth;
 half _OutlineScaledMaxDistance;
 fixed4 _OutlineColor;
@@ -74,7 +74,7 @@ inline float4 CalculateOutlineVertexClipPosition(appdata_full v)
     float4 nearUpperRight = mul(unity_CameraInvProjection, float4(1, 1, UNITY_NEAR_CLIP_VALUE, _ProjectionParams.y));
     float aspect = abs(nearUpperRight.y / nearUpperRight.x);
     
-    float outlineTex = tex2Dlod(_OutlineWidthTexture, float4(TRANSFORM_TEX(v.texcoord, _OutlineWidthTexture), 0, 0)).r;
+    float outlineTex = tex2Dlod(_OutlineWidthTexture, float4(TRANSFORM_TEX(v.texcoord, _MainTex), 0, 0)).r;
     
  #if defined(MTOON_OUTLINE_WIDTH_WORLD)
     float3 outlineOffset = 0.01 * _OutlineWidth * outlineTex * v.normal;
@@ -106,7 +106,8 @@ float4 frag_forward(v2f i) : SV_TARGET
     //UNITY_TRANSFER_INSTANCE_ID(v, o);
     
     // main tex
-    half4 mainTex = tex2D(_MainTex, TRANSFORM_TEX(i.uv0, _MainTex));
+    float2 mainUv = TRANSFORM_TEX(i.uv0, _MainTex);
+    half4 mainTex = tex2D(_MainTex, mainUv);
     
     // alpha
     half alpha = 1;
@@ -120,7 +121,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     
     // normal
 #ifdef _NORMALMAP
-    half3 tangentNormal = UnpackScaleNormal(tex2D(_BumpMap, TRANSFORM_TEX(i.uv0, _BumpMap)), _BumpScale);
+    half3 tangentNormal = UnpackScaleNormal(tex2D(_BumpMap, mainUv), _BumpScale);
     half3 worldNormal;
     worldNormal.x = dot(i.tspace0, tangentNormal);
     worldNormal.y = dot(i.tspace1, tangentNormal);
@@ -134,8 +135,8 @@ float4 frag_forward(v2f i) : SV_TARGET
 
     // lighting intensity
     half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
-    half receiveShadow = _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, TRANSFORM_TEX(i.uv0, _ReceiveShadowTexture)).a;
-    half shadingGrade = 1.0 - _ShadingGradeRate * (1.0 - tex2D(_ShadingGradeTexture, TRANSFORM_TEX(i.uv0, _ShadingGradeTexture)).r);
+    half receiveShadow = _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, mainUv).a;
+    half shadingGrade = 1.0 - _ShadingGradeRate * (1.0 - tex2D(_ShadingGradeTexture, mainUv).r);
     UNITY_LIGHT_ATTENUATION(atten, i, i.posWorld.xyz);
     half lightIntensity = dot(lightDir, worldNormal);
     lightIntensity = lightIntensity * 0.5 + 0.5; // from [-1, +1] to [0, 1]
@@ -151,7 +152,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
     
     // color lerp
-    half4 shade = _ShadeColor * tex2D(_ShadeTexture, TRANSFORM_TEX(i.uv0, _ShadeTexture));
+    half4 shade = _ShadeColor * tex2D(_ShadeTexture, mainUv);
     half4 lit = _Color * mainTex;
 #ifdef MTOON_FORWARD_ADD
     half3 col = lerp(half3(0,0,0), saturate(lit.rgb - shade.rgb), lighting);
@@ -174,7 +175,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     // Emission
 #ifdef MTOON_FORWARD_ADD
 #else
-    half3 emission = tex2D(_EmissionMap, TRANSFORM_TEX(i.uv0, _EmissionMap)).rgb * _EmissionColor.rgb;
+    half3 emission = tex2D(_EmissionMap, mainUv).rgb * _EmissionColor.rgb;
     col += lerp(emission, half3(0, 0, 0), i.isOutline);
 #endif
 
