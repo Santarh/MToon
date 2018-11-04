@@ -77,7 +77,8 @@ inline float4 CalculateOutlineVertexClipPosition(appdata_full v)
     float outlineTex = tex2Dlod(_OutlineWidthTexture, float4(TRANSFORM_TEX(v.texcoord, _MainTex), 0, 0)).r;
     
  #if defined(MTOON_OUTLINE_WIDTH_WORLD)
-    float3 outlineOffset = 0.01 * _OutlineWidth * outlineTex * v.normal;
+    float3 worldNormalLength = length(mul((float3x3)transpose(unity_WorldToObject), v.normal));
+    float3 outlineOffset = 0.01 * _OutlineWidth * outlineTex * worldNormalLength * v.normal;
     float4 vertex = UnityObjectToClipPos(v.vertex + outlineOffset);
  #elif defined(MTOON_OUTLINE_WIDTH_SCREEN)
     float4 vertex = UnityObjectToClipPos(v.vertex);
