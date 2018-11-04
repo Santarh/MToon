@@ -251,7 +251,12 @@ namespace MToon
 //                    materialEditor.EnableInstancingField();
                         materialEditor.DoubleSidedGIField();
 #endif
+                        EditorGUI.BeginChangeCheck();
                         materialEditor.RenderQueueField();
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            ModeChanged(materials);
+                        }
                     }
                 }
                 EditorGUILayout.EndVertical();

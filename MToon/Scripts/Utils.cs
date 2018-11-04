@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace MToon
@@ -29,6 +30,13 @@ namespace MToon
         Cutout,
         Transparent,
         TransparentWithZWrite,
+    }
+
+    public struct RenderQueueRequirement
+    {
+        public int DefaultValue;
+        public int MinValue;
+        public int MaxValue;
     }
 
     public static class Utils
@@ -105,6 +113,47 @@ namespace MToon
                 material.SetTexture(PropShadeTexture, mainTex);
             }
         }
+
+        public static RenderQueueRequirement GetRenderQueueRequirement(RenderMode renderMode)
+        {
+            const int shaderDefaultQueue = -1;
+            const int firstTransparentQueue = 2501;
+            const int spanOfQueue = 50;
+            
+            switch (renderMode)
+            {
+                case RenderMode.Opaque:
+                    return new RenderQueueRequirement()
+                    {
+                        DefaultValue = shaderDefaultQueue,
+                        MinValue = shaderDefaultQueue,
+                        MaxValue = shaderDefaultQueue,
+                    };
+                case RenderMode.Cutout:
+                    return new RenderQueueRequirement()
+                    {
+                        DefaultValue = (int) RenderQueue.AlphaTest,
+                        MinValue = (int) RenderQueue.AlphaTest,
+                        MaxValue = (int) RenderQueue.AlphaTest,
+                    };
+                case RenderMode.Transparent:
+                    return new RenderQueueRequirement()
+                    {
+                        DefaultValue = (int) RenderQueue.Transparent,
+                        MinValue = (int) RenderQueue.Transparent - spanOfQueue + 1,
+                        MaxValue = (int) RenderQueue.Transparent,
+                    };
+                case RenderMode.TransparentWithZWrite:
+                    return new RenderQueueRequirement()
+                    {
+                        DefaultValue = firstTransparentQueue,
+                        MinValue = firstTransparentQueue,
+                        MaxValue = firstTransparentQueue + spanOfQueue - 1,
+                    };
+                default:
+                    throw new ArgumentOutOfRangeException("renderMode", renderMode, null);
+            }
+        }
         
         private static void ValidateDebugMode(Material material, DebugMode debugMode)
         {
@@ -137,11 +186,6 @@ namespace MToon
                     SetKeyword(material, KeyAlphaTestOn, false);
                     SetKeyword(material, KeyAlphaBlendOn, false);
                     SetKeyword(material, KeyAlphaPremultiplyOn, false);
-                    if (isChangedByUser)
-                    {
-                        material.renderQueue = -1;
-                    }
-
                     break;
                 case RenderMode.Cutout:
                     material.SetOverrideTag(TagRenderTypeKey, TagRenderTypeValueTransparentCutout);
@@ -151,11 +195,6 @@ namespace MToon
                     SetKeyword(material, KeyAlphaTestOn, true);
                     SetKeyword(material, KeyAlphaBlendOn, false);
                     SetKeyword(material, KeyAlphaPremultiplyOn, false);
-                    if (isChangedByUser)
-                    {
-                        material.renderQueue = (int) RenderQueue.AlphaTest;
-                    }
-
                     break;
                 case RenderMode.Transparent:
                     material.SetOverrideTag(TagRenderTypeKey, TagRenderTypeValueTransparent);
@@ -165,11 +204,6 @@ namespace MToon
                     SetKeyword(material, KeyAlphaTestOn, false);
                     SetKeyword(material, KeyAlphaBlendOn, true);
                     SetKeyword(material, KeyAlphaPremultiplyOn, false);
-                    if (isChangedByUser)
-                    {
-                        material.renderQueue = (int) RenderQueue.Transparent;
-                    }
-
                     break;
                 case RenderMode.TransparentWithZWrite:
                     material.SetOverrideTag(TagRenderTypeKey, TagRenderTypeValueTransparent);
@@ -179,12 +213,17 @@ namespace MToon
                     SetKeyword(material, KeyAlphaTestOn, false);
                     SetKeyword(material, KeyAlphaBlendOn, true);
                     SetKeyword(material, KeyAlphaPremultiplyOn, false);
-                    if (isChangedByUser)
-                    {
-                        material.renderQueue = (int) RenderQueue.AlphaTest + 50;
-                    }
-
                     break;
+            }
+
+            var requirement = GetRenderQueueRequirement(renderMode);
+            if (isChangedByUser)
+            {
+                material.renderQueue = requirement.DefaultValue;
+            }
+            else
+            {
+                material.renderQueue = Mathf.Clamp(material.renderQueue, requirement.MinValue, requirement.MaxValue);
             }
         }
 
