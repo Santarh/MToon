@@ -71,9 +71,6 @@ inline v2f InitializeV2F(appdata_full v, float4 projectedVertex, float isOutline
 
 inline float4 CalculateOutlineVertexClipPosition(appdata_full v)
 {
-    float4 nearUpperRight = mul(unity_CameraInvProjection, float4(1, 1, UNITY_NEAR_CLIP_VALUE, _ProjectionParams.y));
-    float aspect = abs(nearUpperRight.y / nearUpperRight.x);
-    
     float outlineTex = tex2Dlod(_OutlineWidthTexture, float4(TRANSFORM_TEX(v.texcoord, _MainTex), 0, 0)).r;
     
  #if defined(MTOON_OUTLINE_WIDTH_WORLD)
@@ -81,6 +78,8 @@ inline float4 CalculateOutlineVertexClipPosition(appdata_full v)
     float3 outlineOffset = 0.01 * _OutlineWidth * outlineTex * worldNormalLength * v.normal;
     float4 vertex = UnityObjectToClipPos(v.vertex + outlineOffset);
  #elif defined(MTOON_OUTLINE_WIDTH_SCREEN)
+    float4 nearUpperRight = mul(unity_CameraInvProjection, float4(1, 1, UNITY_NEAR_CLIP_VALUE, _ProjectionParams.y));
+    float aspect = abs(nearUpperRight.y / nearUpperRight.x);
     float4 vertex = UnityObjectToClipPos(v.vertex);
     float3 viewNormal = mul((float3x3)UNITY_MATRIX_IT_MV, v.normal.xyz);
     float3 clipNormal = TransformViewToProjection(viewNormal.xyz);
@@ -89,7 +88,7 @@ inline float4 CalculateOutlineVertexClipPosition(appdata_full v)
     projectedNormal.x *= aspect;
     vertex.xy += 0.01 * _OutlineWidth * outlineTex * projectedNormal.xy;
  #else
-    float4 vertex = UnityObjectToClipPos(v.vertex);
+    float4 vertex = 0;
  #endif
     return vertex;
 }
