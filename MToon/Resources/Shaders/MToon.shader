@@ -105,7 +105,6 @@ Shader "VRM/MToon"
             Name "FORWARD_ADD"
             Tags { "LightMode" = "ForwardAdd" }
 
-            Fog { Color (0,0,0,0) }
             Cull [_CullMode]
             Blend [_SrcBlend] One
             ZWrite Off
