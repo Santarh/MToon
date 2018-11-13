@@ -153,9 +153,10 @@ namespace MToon
 
                     EditorGUILayout.LabelField("Emission", EditorStyles.boldLabel);
                     {
-                        materialEditor.TexturePropertySingleLine(new GUIContent("Emission", "Emission (RGB)"),
+                        materialEditor.TexturePropertyWithHDRColor(new GUIContent("Emission", "Emission (RGB)"),
                             _emissionMap,
-                            _emissionColor);
+                            _emissionColor,
+                            showAlpha: false);
                         materialEditor.TexturePropertySingleLine(new GUIContent("MatCap", "MatCap Texture (RGB)"),
                             _sphereAdd);
                     }

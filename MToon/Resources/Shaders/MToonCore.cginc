@@ -20,7 +20,7 @@ half _ShadeToony;
 half _LightColorAttenuation;
 half _IndirectLightIntensity;
 sampler2D _SphereAdd;
-fixed4 _EmissionColor;
+half4 _EmissionColor;
 sampler2D _EmissionMap;
 sampler2D _OutlineWidthTexture;
 half _OutlineWidth;
