@@ -156,7 +156,13 @@ namespace MToon
                         materialEditor.TexturePropertyWithHDRColor(new GUIContent("Emission", "Emission (RGB)"),
                             _emissionMap,
                             _emissionColor,
+#if UNITY_2018_1_OR_NEWER
+#else
+                            new ColorPickerHDRConfig(minBrightness: 0, maxBrightness: 10, minExposureValue: -10,
+                                maxExposureValue: 10),
+#endif
                             showAlpha: false);
+                        
                         materialEditor.TexturePropertySingleLine(new GUIContent("MatCap", "MatCap Texture (RGB)"),
                             _sphereAdd);
                     }
