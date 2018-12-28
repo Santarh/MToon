@@ -161,14 +161,8 @@ float4 frag_forward(v2f i) : SV_TARGET
     // color lerp
     half4 shade = _ShadeColor * tex2D(_ShadeTexture, mainUv);
     half4 lit = _Color * mainTex;
-    
     half3 col = lerp(shade.rgb, lit.rgb, lightIntensity);
     col *= lighting;
-
-    // energy conservation
-    half3 lightPower = _LightColor0.rgb + ShadeSH9(half4(0, 1, 0, 1));
-    half lightPowerV = max(0.001, max(lightPower.x, max(lightPower.y, lightPower.z)));
-    col *= saturate(lightPowerV);
 
     // additive matcap
 #ifdef MTOON_FORWARD_ADD
