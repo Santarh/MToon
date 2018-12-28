@@ -146,7 +146,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     lightIntensity = smoothstep(_ShadeShift, _ShadeShift + (1.0 - _ShadeToony), lightIntensity); // shade & tooned
 
     // lighting with color
-    half3 directLighting = lightIntensity * _LightColor0.rgb; // direct
+    half3 directLighting = _LightColor0.rgb; // direct
     half3 indirectLighting = _IndirectLightIntensity * ShadeSH9(half4(worldNormal, 1)); // ambient
     half3 lighting = directLighting + indirectLighting;
     lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
@@ -154,11 +154,9 @@ float4 frag_forward(v2f i) : SV_TARGET
     // color lerp
     half4 shade = _ShadeColor * tex2D(_ShadeTexture, mainUv);
     half4 lit = _Color * mainTex;
-#ifdef MTOON_FORWARD_ADD
-    half3 col = lerp(half3(0,0,0), lit.rgb, lighting);
-#else
-    half3 col = lerp(shade.rgb, lit.rgb, lighting);
-#endif
+    
+    half3 col = lerp(shade.rgb, lit.rgb, lightIntensity);
+    col *= lighting;
 
     // energy conservation
     half3 lightPower = _LightColor0.rgb + ShadeSH9(half4(0, 1, 0, 1));
