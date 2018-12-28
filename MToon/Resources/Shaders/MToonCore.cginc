@@ -151,6 +151,13 @@ float4 frag_forward(v2f i) : SV_TARGET
     half3 lighting = directLighting + indirectLighting;
     lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
     
+#ifdef POINT
+    lighting *= tex2D(_LightTexture0, dot(lightCoord, lightCoord).rr).r;
+#endif
+#ifdef SPOT
+    lighting *= (lightCoord.z > 0) * UnitySpotCookie(lightCoord) * UnitySpotAttenuate(lightCoord.xyz);
+#endif
+
     // color lerp
     half4 shade = _ShadeColor * tex2D(_ShadeTexture, mainUv);
     half4 lit = _Color * mainTex;
