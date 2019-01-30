@@ -32,6 +32,13 @@ namespace MToon
         TransparentWithZWrite,
     }
 
+    public enum CullMode
+    {
+        Off,
+        Front,
+        Back,
+    }
+
     public struct RenderQueueRequirement
     {
         public int DefaultValue;
