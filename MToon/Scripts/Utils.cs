@@ -4,41 +4,6 @@ using UnityEngine.Rendering;
 
 namespace MToon
 {
-    public enum DebugMode
-    {
-        None,
-        Normal,
-        LitShadeRate,
-    }
-
-    public enum OutlineColorMode
-    {
-        FixedColor,
-        MixedLighting
-    }
-
-    public enum OutlineWidthMode
-    {
-        None,
-        WorldCoordinates,
-        ScreenCoordinates
-    }
-
-    public enum RenderMode
-    {
-        Opaque,
-        Cutout,
-        Transparent,
-        TransparentWithZWrite,
-    }
-
-    public struct RenderQueueRequirement
-    {
-        public int DefaultValue;
-        public int MinValue;
-        public int MaxValue;
-    }
-
     public static class Utils
     {
         public const string PropDebugMode = "_DebugMode";
@@ -89,6 +54,16 @@ namespace MToon
         public const string TagRenderTypeValueOpaque = "Opaque";
         public const string TagRenderTypeValueTransparentCutout = "TransparentCutout";
         public const string TagRenderTypeValueTransparent = "Transparent";
+
+        private static void SetMToonParametersToMaterial(Material material, MToonDefinition parameters)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static MToonDefinition GetMToonParametersFromMaterial(Material material)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Validate properties and Set hidden properties, keywords.
