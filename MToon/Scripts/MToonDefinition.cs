@@ -4,12 +4,18 @@ namespace MToon
 {
     public class MToonDefinition
     {
+        public MetaDefinition Meta;
         public RenderingDefinition Rendering;
         public ColorDefinition Color;
         public LightingDefinition Lighting;
         public OutlineDefinition Outline;
         public TextureUvCoordsDefinition TextureOption;
         public RenderQueueDefinition RenderQueue;
+    }
+
+    public class MetaDefinition
+    {
+        public int VersionNumber;
     }
 
     public class RenderingDefinition

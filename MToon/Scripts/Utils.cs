@@ -55,6 +55,16 @@ namespace MToon
         public const string TagRenderTypeValueTransparentCutout = "TransparentCutout";
         public const string TagRenderTypeValueTransparent = "Transparent";
 
+        private static void SetMToonParametersToMaterial(Material material, MToonDefinition parameters)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static MToonDefinition GetMToonParametersFromMaterial(Material material)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Validate properties and Set hidden properties, keywords.
         /// if isBlendModeChangedByUser is true, renderQueue will set specified render mode's default value.
