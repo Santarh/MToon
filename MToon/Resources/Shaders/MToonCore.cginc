@@ -162,8 +162,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     half4 shade = _ShadeColor * tex2D(_ShadeTexture, mainUv);
     half4 lit = _Color * mainTex;
     half3 col = lerp(shade.rgb, lit.rgb, lightIntensity);
-    col *= lighting;
-    col += indirectLighting;
+    col = col * lighting + indirectLighting * lit;
 
     // additive matcap
 #ifdef MTOON_FORWARD_ADD
