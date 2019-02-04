@@ -148,7 +148,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     // lighting with color
     half3 directLighting = _LightColor0.rgb; // direct
     half3 indirectLighting = _IndirectLightIntensity * ShadeSH9(half4(worldNormal, 1)); // ambient
-    half3 lighting = directLighting + indirectLighting;
+    half3 lighting = directLighting;
     lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
     
 #ifdef POINT
@@ -163,6 +163,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     half4 lit = _Color * mainTex;
     half3 col = lerp(shade.rgb, lit.rgb, lightIntensity);
     col *= lighting;
+    col += indirectLighting;
 
     // additive matcap
 #ifdef MTOON_FORWARD_ADD
