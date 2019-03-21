@@ -88,7 +88,7 @@ inline float4 CalculateOutlineVertexClipPosition(appdata_full v)
     projectedNormal.x *= aspect;
     vertex.xy += 0.01 * _OutlineWidth * outlineTex * projectedNormal.xy;
  #else
-    float4 vertex = 0;
+    float4 vertex = float4(0, 0, 2, 1);
  #endif
     return vertex;
 }
