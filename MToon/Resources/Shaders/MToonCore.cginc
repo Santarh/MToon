@@ -205,7 +205,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     #ifdef MTOON_FORWARD_ADD
         return float4(0, 0, 0, 0);
     #else
-        return float4(lighting, alpha);
+        return float4(lightIntensity * lighting, alpha);
     #endif
 #endif
 
