@@ -75,7 +75,7 @@ inline float4 CalculateOutlineVertexClipPosition(appdata_full v)
     
  #if defined(MTOON_OUTLINE_WIDTH_WORLD)
     float3 worldNormalLength = length(mul((float3x3)transpose(unity_WorldToObject), v.normal));
-    float3 outlineOffset = 0.01 * _OutlineWidth * outlineTex * worldNormalLength * v.normal;
+    float3 outlineOffset = 0.01 * clamp(_OutlineWidth * outlineTex, 0.01, 1) * worldNormalLength * v.normal;
     float4 vertex = UnityObjectToClipPos(v.vertex + outlineOffset);
  #elif defined(MTOON_OUTLINE_WIDTH_SCREEN)
     float4 nearUpperRight = mul(unity_CameraInvProjection, float4(1, 1, UNITY_NEAR_CLIP_VALUE, _ProjectionParams.y));
@@ -86,7 +86,7 @@ inline float4 CalculateOutlineVertexClipPosition(appdata_full v)
     float2 projectedNormal = normalize(clipNormal.xy);
     projectedNormal *= min(vertex.w, _OutlineScaledMaxDistance);
     projectedNormal.x *= aspect;
-    vertex.xy += 0.01 * _OutlineWidth * outlineTex * projectedNormal.xy;
+    vertex.xy += 0.01 * clamp(_OutlineWidth * outlineTex, 0.01, 1) * projectedNormal.xy;
  #else
     float4 vertex = float4(0, 0, 2, 1);
  #endif
