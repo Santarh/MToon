@@ -129,7 +129,8 @@ float4 frag_forward(v2f i) : SV_TARGET
 #else
     half3 worldNormal = half3(i.tspace0.z, i.tspace1.z, i.tspace2.z);
 #endif
-    worldNormal *= step(0, dot(_WorldSpaceCameraPos.xyz - i.posWorld.xyz, worldNormal)) * 2 - 1;
+    float3 viewDir = lerp(_WorldSpaceCameraPos.xyz - i.posWorld.xyz, UNITY_MATRIX_V[2].xyz, unity_OrthoParams.w);
+    worldNormal *= step(-0.1, dot(viewDir, worldNormal)) * 2 - 1; // flip if projection matrix is flipped
     worldNormal *= lerp(+1.0, -1.0, i.isOutline);
     worldNormal = normalize(worldNormal);
 
