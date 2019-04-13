@@ -174,9 +174,9 @@ float4 frag_forward(v2f i) : SV_TARGET
     half3 worldCameraUp = normalize(UNITY_MATRIX_V[1].xyz);
     half3 worldViewUp = normalize(worldCameraUp - worldView * dot(worldView, worldCameraUp));
     half3 worldViewRight = normalize(cross(worldView, worldViewUp));
-    half2 rimUv = half2(dot(worldViewRight, worldNormal), dot(worldViewUp, worldNormal)) * 0.5 + 0.5;
-    half3 rimLighting = tex2D(_SphereAdd, rimUv);
-    col += lerp(rimLighting, half3(0, 0, 0), i.isOutline);
+    half2 matcapUv = half2(dot(worldViewRight, worldNormal), dot(worldViewUp, worldNormal)) * 0.5 + 0.5;
+    half3 matcapLighting = tex2D(_SphereAdd, matcapUv);
+    col += lerp(matcapLighting, half3(0, 0, 0), i.isOutline);
 #endif
 
     // Emission
