@@ -27,6 +27,11 @@ namespace MToon
         public const string PropShadeToony = "_ShadeToony";
         public const string PropLightColorAttenuation = "_LightColorAttenuation";
         public const string PropIndirectLightIntensity = "_IndirectLightIntensity";
+        public const string PropRimColor = "_RimColor";
+        public const string PropRimTexture = "_RimTexture";
+        public const string PropRimLightingMix = "_RimLightingMix";
+        public const string PropRimFresnelPower = "_RimFresnelPower";
+        public const string PropRimLift = "_RimLift";
         public const string PropSphereAdd = "_SphereAdd";
         public const string PropEmissionColor = "_EmissionColor";
         public const string PropEmissionMap = "_EmissionMap";

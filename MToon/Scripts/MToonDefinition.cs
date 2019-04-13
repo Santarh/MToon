@@ -8,6 +8,9 @@ namespace MToon
         public RenderingDefinition Rendering;
         public ColorDefinition Color;
         public LightingDefinition Lighting;
+        public EmissionDefinition Emission;
+        public MatCapDefinition MatCap;
+        public RimDefinition Rim;
         public OutlineDefinition Outline;
         public TextureUvCoordsDefinition TextureOption;
         public RenderQueueDefinition RenderQueue;
@@ -37,8 +40,6 @@ namespace MToon
     {
         public LitAndShadeMixingDefinition LitAndShadeMixing;
         public LightingInfluenceDefinition LightingInfluence;
-        public EmissionDefinition Emission;
-        public MatCapDefinition MatCap;
         public NormalDefinition Normal;
     }
     
@@ -67,6 +68,15 @@ namespace MToon
     public class MatCapDefinition
     {
         public Texture2D AdditiveTexture;
+    }
+
+    public class RimDefinition
+    {
+        public Color RimColor;
+        public Color RimMultiplyTexture;
+        public float RimLightingMixValue;
+        public float RimFresnelPowerValue;
+        public float RimLiftValue;
     }
 
     public class NormalDefinition

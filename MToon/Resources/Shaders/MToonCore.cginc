@@ -19,6 +19,11 @@ half _ShadeShift;
 half _ShadeToony;
 half _LightColorAttenuation;
 half _IndirectLightIntensity;
+sampler2D _RimTexture;
+fixed4 _RimColor;
+half _RimLightingMix;
+half _RimFresnelPower;
+half _RimLift;
 sampler2D _SphereAdd;
 half4 _EmissionColor;
 sampler2D _EmissionMap;
@@ -167,6 +172,18 @@ float4 frag_forward(v2f i) : SV_TARGET
     half4 lit = _Color * mainTex;
     half3 col = lerp(shade.rgb, lit.rgb, lightIntensity);
     col = col * lighting + indirectLighting * lit;
+    
+    // pure light
+    half3 pureLight = lighting * lightIntensity + indirectLighting;
+    pureLight = lerp(pureLight, max(0.001, max(pureLight.x, max(pureLight.y, pureLight.z))), _LightColorAttenuation);
+    
+    // parametric rim lighting
+#ifdef MTOON_FORWARD_ADD
+#else
+    half3 rim = pow(saturate(1.0 - dot(worldNormal, worldView) + _RimLift), _RimFresnelPower) * _RimColor.rgb;
+    rim *= lerp(half3(1, 1, 1), pureLight, _RimLightingMix);
+    col += lerp(rim, half3(0, 0, 0), i.isOutline);
+#endif
 
     // additive matcap
 #ifdef MTOON_FORWARD_ADD

@@ -17,6 +17,11 @@ Shader "VRM/MToon"
         _ShadeToony ("Shade Toony", Range(0, 1)) = 0.9
         _LightColorAttenuation ("Light Color Attenuation", Range(0, 1)) = 0
         _IndirectLightIntensity ("Indirect Light Intensity", Range(0, 1)) = 0.1
+        _RimColor ("Rim Color", Color) = (0,0,0)
+        [NoScaleOffset] _RimTexture ("Rim Texture", 2D) = "white" {}
+        _RimLightingMix ("Rim Lighting Mix", Range(0, 1)) = 0
+        [PowerSlider(4.0)] _RimFresnelPower ("Rim Fresnel Power", Range(0, 100)) = 1
+        _RimLift ("Rim Lift", Range(0, 1)) = 0
         [NoScaleOffset] _SphereAdd ("Sphere Texture(Add)", 2D) = "black" {}
         _EmissionColor ("Color", Color) = (0,0,0)
         [NoScaleOffset] _EmissionMap ("Emission", 2D) = "white" {}

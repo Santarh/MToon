@@ -38,6 +38,11 @@ namespace MToon
         private MaterialProperty _shadeTexture;
         private MaterialProperty _shadeToony;
         private MaterialProperty _sphereAdd;
+        private MaterialProperty _rimColor;
+        private MaterialProperty _rimTexture;
+        private MaterialProperty _rimLightingMix;
+        private MaterialProperty _rimFresnelPower;
+        private MaterialProperty _rimLift;
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
@@ -62,6 +67,11 @@ namespace MToon
             _shadeToony = FindProperty(Utils.PropShadeToony, properties);
             _lightColorAttenuation = FindProperty(Utils.PropLightColorAttenuation, properties);
             _indirectLightIntensity = FindProperty(Utils.PropIndirectLightIntensity, properties);
+            _rimColor = FindProperty(Utils.PropRimColor, properties);
+            _rimTexture = FindProperty(Utils.PropRimTexture, properties);
+            _rimLightingMix = FindProperty(Utils.PropRimLightingMix, properties);
+            _rimFresnelPower = FindProperty(Utils.PropRimFresnelPower, properties);
+            _rimLift = FindProperty(Utils.PropRimLift, properties);
             _sphereAdd = FindProperty(Utils.PropSphereAdd, properties);
             _emissionColor = FindProperty(Utils.PropEmissionColor, properties);
             _emissionMap = FindProperty(Utils.PropEmissionMap, properties);
@@ -151,23 +161,6 @@ namespace MToon
                     }
                     EditorGUILayout.Space();
 
-                    EditorGUILayout.LabelField("Emission", EditorStyles.boldLabel);
-                    {
-                        materialEditor.TexturePropertyWithHDRColor(new GUIContent("Emission", "Emission (RGB)"),
-                            _emissionMap,
-                            _emissionColor,
-#if UNITY_2018_1_OR_NEWER
-#else
-                            new ColorPickerHDRConfig(minBrightness: 0, maxBrightness: 10, minExposureValue: -10,
-                                maxExposureValue: 10),
-#endif
-                            showAlpha: false);
-                        
-                        materialEditor.TexturePropertySingleLine(new GUIContent("MatCap", "MatCap Texture (RGB)"),
-                            _sphereAdd);
-                    }
-                    EditorGUILayout.Space();
-
                     EditorGUILayout.LabelField("Normal", EditorStyles.boldLabel);
                     {
                         // Normal
@@ -184,6 +177,45 @@ namespace MToon
                 }
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.Space();
+                
+                EditorGUILayout.LabelField("Emission", EditorStyles.boldLabel);
+                EditorGUILayout.BeginVertical(GUI.skin.box);
+                {
+                    materialEditor.TexturePropertyWithHDRColor(new GUIContent("Emission", "Emission (RGB)"),
+                        _emissionMap,
+                        _emissionColor,
+#if UNITY_2018_1_OR_NEWER
+#else
+                        new ColorPickerHDRConfig(minBrightness: 0, maxBrightness: 10, minExposureValue: -10,
+                            maxExposureValue: 10),
+#endif
+                        showAlpha: false);
+                    
+                    materialEditor.TexturePropertySingleLine(new GUIContent("MatCap", "MatCap Texture (RGB)"),
+                        _sphereAdd);
+                }
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.Space();
+                    
+                EditorGUILayout.LabelField("Rim", EditorStyles.boldLabel);
+                EditorGUILayout.BeginVertical(GUI.skin.box);
+                {
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Color", "Rim Color (RGB)"),
+                        _rimTexture, _rimColor);
+                    
+                    materialEditor.DefaultShaderProperty(_rimLightingMix, "Lighting Mix");
+
+                    materialEditor.ShaderProperty(_rimFresnelPower,
+                        new GUIContent("Fresnel Power",
+                            "If you increase this value, you get sharpness rim light."));
+
+                    materialEditor.ShaderProperty(_rimLift,
+                        new GUIContent("Lift",
+                            "If you increase this value, you can lift rim light."));
+                }
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.Space();
+
 
                 EditorGUILayout.LabelField("Outline", EditorStyles.boldLabel);
                 EditorGUILayout.BeginVertical(GUI.skin.box);
