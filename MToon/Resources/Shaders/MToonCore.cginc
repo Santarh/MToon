@@ -129,8 +129,8 @@ float4 frag_forward(v2f i) : SV_TARGET
 #else
     half3 worldNormal = half3(i.tspace0.z, i.tspace1.z, i.tspace2.z);
 #endif
-    float3 viewDir = lerp(_WorldSpaceCameraPos.xyz - i.posWorld.xyz, UNITY_MATRIX_V[2].xyz, unity_OrthoParams.w);
-    worldNormal *= step(-0.1, dot(viewDir, worldNormal)) * 2 - 1; // flip if projection matrix is flipped
+    float3 worldView = normalize(lerp(_WorldSpaceCameraPos.xyz - i.posWorld.xyz, UNITY_MATRIX_V[2].xyz, unity_OrthoParams.w));
+    worldNormal *= step(-0.1, dot(worldView, worldNormal)) * 2 - 1; // flip if projection matrix is flipped
     worldNormal *= lerp(+1.0, -1.0, i.isOutline);
     worldNormal = normalize(worldNormal);
 
@@ -172,7 +172,6 @@ float4 frag_forward(v2f i) : SV_TARGET
 #ifdef MTOON_FORWARD_ADD
 #else
     half3 worldCameraUp = normalize(UNITY_MATRIX_V[1].xyz);
-    half3 worldView = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
     half3 worldViewUp = normalize(worldCameraUp - worldView * dot(worldView, worldCameraUp));
     half3 worldViewRight = normalize(cross(worldView, worldViewUp));
     half2 rimUv = half2(dot(worldViewRight, worldNormal), dot(worldViewUp, worldNormal)) * 0.5 + 0.5;
