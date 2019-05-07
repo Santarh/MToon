@@ -130,28 +130,23 @@ Shader "VRM/MToon"
             ENDCG
         }
         
-        // ------------------------------------------------------------------
         //  Shadow rendering pass
-        Pass {
+        Pass
+        {
             Name "ShadowCaster"
             Tags { "LightMode" = "ShadowCaster" }
 
-            ZWrite On ZTest LEqual
+            Cull [_CullMode]
+            ZWrite On
+            ZTest LEqual
 
             CGPROGRAM
-            #pragma target 2.0
-
-            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature _METALLICGLOSSMAP
-            #pragma shader_feature _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-            #pragma skip_variants SHADOWS_SOFT
+            #pragma target 3.0
+            #pragma multi_compile _ _ALPHATEST_ON _ALPHABLEND_ON
             #pragma multi_compile_shadowcaster
-
             #pragma vertex vertShadowCaster
             #pragma fragment fragShadowCaster
-
             #include "UnityStandardShadow.cginc"
-
             ENDCG
         }
     }
