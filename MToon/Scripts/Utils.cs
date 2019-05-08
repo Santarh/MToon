@@ -64,6 +64,8 @@ namespace MToon
         {
             throw new NotImplementedException();
         }
+        public const int DisabledIntValue = 0;
+        public const int EnabledIntValue = 1;
 
         private static MToonDefinition GetMToonParametersFromMaterial(Material material)
         {
@@ -162,7 +164,7 @@ namespace MToon
                     material.SetOverrideTag(TagRenderTypeKey, TagRenderTypeValueOpaque);
                     material.SetInt(PropSrcBlend, (int) BlendMode.One);
                     material.SetInt(PropDstBlend, (int) BlendMode.Zero);
-                    material.SetInt(PropZWrite, 1);
+                    material.SetInt(PropZWrite, EnabledIntValue);
                     SetKeyword(material, KeyAlphaTestOn, false);
                     SetKeyword(material, KeyAlphaBlendOn, false);
                     SetKeyword(material, KeyAlphaPremultiplyOn, false);
@@ -171,7 +173,7 @@ namespace MToon
                     material.SetOverrideTag(TagRenderTypeKey, TagRenderTypeValueTransparentCutout);
                     material.SetInt(PropSrcBlend, (int) BlendMode.One);
                     material.SetInt(PropDstBlend, (int) BlendMode.Zero);
-                    material.SetInt(PropZWrite, 1);
+                    material.SetInt(PropZWrite, EnabledIntValue);
                     SetKeyword(material, KeyAlphaTestOn, true);
                     SetKeyword(material, KeyAlphaBlendOn, false);
                     SetKeyword(material, KeyAlphaPremultiplyOn, false);
@@ -180,7 +182,7 @@ namespace MToon
                     material.SetOverrideTag(TagRenderTypeKey, TagRenderTypeValueTransparent);
                     material.SetInt(PropSrcBlend, (int) BlendMode.SrcAlpha);
                     material.SetInt(PropDstBlend, (int) BlendMode.OneMinusSrcAlpha);
-                    material.SetInt(PropZWrite, 0);
+                    material.SetInt(PropZWrite, DisabledIntValue);
                     SetKeyword(material, KeyAlphaTestOn, false);
                     SetKeyword(material, KeyAlphaBlendOn, true);
                     SetKeyword(material, KeyAlphaPremultiplyOn, false);
@@ -189,7 +191,7 @@ namespace MToon
                     material.SetOverrideTag(TagRenderTypeKey, TagRenderTypeValueTransparent);
                     material.SetInt(PropSrcBlend, (int) BlendMode.SrcAlpha);
                     material.SetInt(PropDstBlend, (int) BlendMode.OneMinusSrcAlpha);
-                    material.SetInt(PropZWrite, 1);
+                    material.SetInt(PropZWrite, EnabledIntValue);
                     SetKeyword(material, KeyAlphaTestOn, false);
                     SetKeyword(material, KeyAlphaBlendOn, true);
                     SetKeyword(material, KeyAlphaPremultiplyOn, false);
