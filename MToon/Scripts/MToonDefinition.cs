@@ -13,7 +13,6 @@ namespace MToon
         public RimDefinition Rim;
         public OutlineDefinition Outline;
         public TextureUvCoordsDefinition TextureOption;
-        public RenderQueueDefinition RenderQueue;
     }
 
     public class MetaDefinition
@@ -25,6 +24,7 @@ namespace MToon
     {
         public RenderMode RenderMode;
         public CullMode CullMode;
+        public int RenderQueueOffsetNumber;
     }
 
     public class ColorDefinition
@@ -100,11 +100,5 @@ namespace MToon
     {
         public Vector2 MainTextureLeftBottomOriginScale;
         public Vector2 MainTextureLeftBottomOriginOffset;
-    }
-
-    public class RenderQueueDefinition
-    {
-        public RenderMode RenderQueueOriginMode;
-        public int RenderQueueOffsetNumber;
     }
 }

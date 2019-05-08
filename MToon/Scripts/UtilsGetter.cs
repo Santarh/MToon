@@ -5,7 +5,7 @@ namespace MToon
 {
     public static partial class Utils
     {
-        private static MToonDefinition GetMToonParametersFromMaterial(Material material)
+        public static MToonDefinition GetMToonParametersFromMaterial(Material material)
         {
             return new MToonDefinition
             {
@@ -17,6 +17,7 @@ namespace MToon
                 {
                     RenderMode = GetBlendMode(material),
                     CullMode = GetCullMode(material),
+                    RenderQueueOffsetNumber = GetRenderQueueOffset(material, GetRenderQueueOriginMode(material)),
                 },
                 Color = new ColorDefinition
                 {
@@ -79,11 +80,6 @@ namespace MToon
                 {
                     MainTextureLeftBottomOriginScale = material.GetTextureScale(PropMainTex),
                     MainTextureLeftBottomOriginOffset = material.GetTextureOffset(PropMainTex),
-                },
-                RenderQueue = new RenderQueueDefinition
-                {
-                    RenderQueueOriginMode = GetRenderQueueOriginMode(material),
-                    RenderQueueOffsetNumber = GetRenderQueueOffset(material, GetRenderQueueOriginMode(material)),
                 },
             };
         }

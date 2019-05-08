@@ -6,9 +6,75 @@ namespace MToon
 {
     public static partial class Utils
     {
-        private static void SetMToonParametersToMaterial(Material material, MToonDefinition parameters)
+        public static void SetMToonParametersToMaterial(Material material, MToonDefinition parameters)
         {
-            throw new NotImplementedException();
+            {
+                var rendering = parameters.Rendering;
+                ValidateBlendMode(material, rendering.RenderMode, isChangedByUser: true);
+                ValidateCullMode(material, rendering.CullMode);
+                ValidateRenderQueue(material, offset: rendering.RenderQueueOffsetNumber);
+            }
+            {
+                var color = parameters.Color;
+                SetColor(material, PropColor, color.LitColor);
+                SetTexture(material, PropMainTex, color.LitMultiplyTexture);
+                SetColor(material, PropShadeColor, color.ShadeColor);
+                SetTexture(material, PropShadeTexture, color.ShadeMultiplyTexture);
+                SetValue(material, PropCutoff, color.CutoutThresholdValue);
+            }
+            {
+                var lighting = parameters.Lighting;
+                {
+                    var prop = lighting.LitAndShadeMixing;
+                    SetValue(material, PropShadeShift, prop.ShadingShiftValue);
+                    SetValue(material, PropShadeToony, prop.ShadingToonyValue);
+                    SetValue(material, PropReceiveShadowRate, prop.ShadowReceiveMultiplierValue);
+                    SetTexture(material, PropReceiveShadowTexture, prop.ShadowReceiveMultiplierMultiplyTexture);
+                    SetValue(material, PropShadingGradeRate, prop.LitAndShadeMixingMultiplierValue);
+                    SetTexture(material, PropShadingGradeTexture, prop.LitAndShadeMixingMultiplierMultiplyTexture);
+                }
+                {
+                    var prop = lighting.LightingInfluence;
+                    SetValue(material, PropLightColorAttenuation, prop.LightColorAttenuationValue);
+                    SetValue(material, PropIndirectLightIntensity, prop.GiIntensityValue);
+                }
+                {
+                    var prop = lighting.Normal;
+                    SetTexture(material, PropBumpMap, prop.NormalTexture);
+                    SetValue(material, PropBumpScale, prop.NormalScaleValue);
+                }
+            }
+            {
+                var emission = parameters.Emission;
+                SetColor(material, PropEmissionColor, emission.EmissionColor);
+                SetTexture(material, PropEmissionMap, emission.EmissionMultiplyTexture);
+            }
+            {
+                var matcap = parameters.MatCap;
+                SetTexture(material, PropSphereAdd, matcap.AdditiveTexture);
+            }
+            {
+                var rim = parameters.Rim;
+                SetColor(material, PropRimColor, rim.RimColor);
+                SetTexture(material, PropRimTexture, rim.RimMultiplyTexture);
+                SetValue(material, PropRimLightingMix, rim.RimLightingMixValue);
+                SetValue(material, PropRimFresnelPower, rim.RimFresnelPowerValue);
+                SetValue(material, PropRimLift, rim.RimLiftValue);
+            }
+            {
+                var outline = parameters.Outline;
+                SetValue(material, PropOutlineWidth, outline.OutlineWidthValue);
+                SetTexture(material, PropOutlineWidthTexture, outline.OutlineWidthMultiplyTexture);
+                SetValue(material, PropOutlineScaledMaxDistance, outline.OutlineScaledMaxDistanceValue);
+                SetColor(material, PropOutlineColor, outline.OutlineColor);
+                SetValue(material, PropOutlineLightingMix, outline.OutlineLightingMixValue);
+                ValidateOutlineMode(material, outline.OutlineWidthMode, outline.OutlineColorMode);
+            }
+            {
+                var textureOptions = parameters.TextureOption;
+                material.SetTextureScale(PropMainTex, textureOptions.MainTextureLeftBottomOriginScale);
+                material.SetTextureOffset(PropMainTex, textureOptions.MainTextureLeftBottomOriginOffset);
+            }
         }
 
         /// <summary>
@@ -96,15 +162,22 @@ namespace MToon
                     break;
             }
 
-            var requirement = GetRenderQueueRequirement(renderMode);
             if (isChangedByUser)
             {
-                material.renderQueue = requirement.DefaultValue;
+                ValidateRenderQueue(material, offset: 0);
             }
             else
             {
-                material.renderQueue = Mathf.Clamp(material.renderQueue, requirement.MinValue, requirement.MaxValue);
+                var requirement = GetRenderQueueRequirement(renderMode);
+                ValidateRenderQueue(material, offset: material.renderQueue - requirement.DefaultValue);
             }
+        }
+
+        private static void ValidateRenderQueue(Material material, int offset)
+        {
+            var requirement = GetRenderQueueRequirement(GetBlendMode(material));
+            var value = Mathf.Clamp(requirement.DefaultValue + offset, requirement.MinValue, requirement.MaxValue);
+            material.renderQueue = value;
         }
 
         private static void ValidateOutlineMode(Material material, OutlineWidthMode outlineWidthMode,
@@ -158,6 +231,21 @@ namespace MToon
                     material.SetInt(PropOutlineCullMode, (int) CullMode.Front);
                     break;
             }
+        }
+
+        private static void SetValue(Material material, string propertyName, float val)
+        {
+            material.SetFloat(propertyName, val);
+        }
+
+        private static void SetColor(Material material, string propertyName, Color color)
+        {
+            material.SetColor(propertyName, color);
+        }
+
+        private static void SetTexture(Material material, string propertyName, Texture2D texture)
+        {
+            material.SetTexture(propertyName, texture);
         }
 
         private static void SetKeyword(Material mat, string keyword, bool required)
