@@ -73,7 +73,7 @@ namespace MToon
     public class RimDefinition
     {
         public Color RimColor;
-        public Color RimMultiplyTexture;
+        public Texture2D RimMultiplyTexture;
         public float RimLightingMixValue;
         public float RimFresnelPowerValue;
         public float RimLiftValue;
