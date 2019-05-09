@@ -84,6 +84,7 @@ Shader "VRM/MToon"
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
             ZTest LEqual
+            Offset 1, 1
             BlendOp Add, Max
 
             CGPROGRAM
