@@ -11,6 +11,7 @@ namespace MToon
             {
                 Meta = new MetaDefinition
                 {
+                    Implementation = Implementation,
                     VersionNumber = material.GetInt(PropVersion),
                 },
                 Rendering = new RenderingDefinition
