@@ -156,11 +156,15 @@ float4 frag_forward(v2f i) : SV_TARGET
     half3 lighting = directLighting;
     lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
     
-#ifdef POINT
-    lighting *= tex2D(_LightTexture0, dot(lightCoord, lightCoord).rr).r;
-#endif
-#ifdef SPOT
-    lighting *= (lightCoord.z > 0) * UnitySpotCookie(lightCoord) * UnitySpotAttenuate(lightCoord.xyz);
+    // light cookie from AutoLight.cginc ( LIGHT_ATTENUATION(i) / SHADOW_ATTENUATION(i) )
+#ifdef DIRECTIONAL_COOKIE
+    lighting *= tex2D(_LightTexture0, i._LightCoord).w;
+#elif POINT
+    lighting *= tex2D(_LightTexture0, dot(i._LightCoord,i._LightCoord).rr).r;
+#elif POINT_COOKIE
+    lighting *= tex2D(_LightTextureB0, dot(i._LightCoord,i._LightCoord).rr).r * texCUBE(_LightTexture0, i._LightCoord).w;
+#elif SPOT
+    lighting *= (i._LightCoord.z > 0) * UnitySpotCookie(i._LightCoord) * UnitySpotAttenuate(i._LightCoord.xyz);
 #endif
 
     // GI
