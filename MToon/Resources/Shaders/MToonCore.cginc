@@ -151,16 +151,15 @@ float4 frag_forward(v2f i) : SV_TARGET
     // lighting intensity
     half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
     half shadingGrade = 1.0 - _ShadingGradeRate * (1.0 - tex2D(_ShadingGradeTexture, mainUv).r);
-    half lightIntensity = dot(lightDir, worldNormal);
+    half lightIntensity = dot(lightDir, worldNormal); // [-1, +1]
     lightIntensity = lightIntensity * 0.5 + 0.5; // from [-1, +1] to [0, 1]
     lightIntensity = lightIntensity * lightAttenuation; // receive shadow
     lightIntensity = lightIntensity * shadingGrade; // darker
     lightIntensity = lightIntensity * 2.0 - 1.0; // from [0, 1] to [-1, +1]
     lightIntensity = saturate((lightIntensity - _ShadeShift) / (1.0 - _ShadeToony)); // tooned
 
-    // lighting with color
-    half3 directLighting = _LightColor0.rgb; // direct
-    half3 lighting = directLighting;
+    // direct lighting
+    half3 lighting = _LightColor0.rgb;
     lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
     
     // light cookie from AutoLight.cginc ( LIGHT_ATTENUATION(i) / SHADOW_ATTENUATION(i) )
