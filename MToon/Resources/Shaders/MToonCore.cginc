@@ -156,7 +156,10 @@ float4 frag_forward(v2f i) : SV_TARGET
     lightIntensity = lightIntensity * lightAttenuation; // receive shadow
     lightIntensity = lightIntensity * shadingGrade; // darker
     lightIntensity = lightIntensity * 2.0 - 1.0; // from [0, 1] to [-1, +1]
-    lightIntensity = saturate((lightIntensity - _ShadeShift) / (1.0 - _ShadeToony)); // tooned
+    // tooned. mapping from [minIntensityThreshold, maxIntensityThreshold] to [0, 1]
+    half maxIntensityThreshold = lerp(1, _ShadeShift, _ShadeToony);
+    half minIntensityThreshold = _ShadeShift;
+    lightIntensity = saturate((lightIntensity - minIntensityThreshold) / max(0.0000001, (maxIntensityThreshold - minIntensityThreshold)));
 
     // direct lighting
     half3 lighting = _LightColor0.rgb;
