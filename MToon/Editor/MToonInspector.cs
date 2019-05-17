@@ -43,6 +43,12 @@ namespace MToon
         private MaterialProperty _rimLightingMix;
         private MaterialProperty _rimFresnelPower;
         private MaterialProperty _rimLift;
+        private MaterialProperty _uvOffsetNormalTexture;
+        private MaterialProperty _uvOffsetNormalScale;
+        private MaterialProperty _uvAnimMaskTexture;
+        private MaterialProperty _uvAnimScrollX;
+        private MaterialProperty _uvAnimScrollY;
+        private MaterialProperty _uvAnimRotation;
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
@@ -80,6 +86,12 @@ namespace MToon
             _outlineScaledMaxDistance = FindProperty(Utils.PropOutlineScaledMaxDistance, properties);
             _outlineColor = FindProperty(Utils.PropOutlineColor, properties);
             _outlineLightingMix = FindProperty(Utils.PropOutlineLightingMix, properties);
+            _uvOffsetNormalTexture = FindProperty(Utils.PropUvOffsetNormalTexture, properties);
+            _uvOffsetNormalScale = FindProperty(Utils.PropUvOffsetNormalScale, properties);
+            _uvAnimMaskTexture = FindProperty(Utils.PropUvAnimMaskTexture, properties);
+            _uvAnimScrollX = FindProperty(Utils.PropUvAnimScrollX, properties);
+            _uvAnimScrollY = FindProperty(Utils.PropUvAnimScrollY, properties);
+            _uvAnimRotation = FindProperty(Utils.PropUvAnimRotation, properties);
 
             var materials = materialEditor.targets.Select(x => x as Material).ToArray();
             Draw(materialEditor, materials);
@@ -165,7 +177,7 @@ namespace MToon
                     {
                         // Normal
                         EditorGUI.BeginChangeCheck();
-                        materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map (RGB)"),
+                        materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map [Normal]", "Normal Map (RGB)"),
                             _bumpMap,
                             _bumpScale);
                         if (EditorGUI.EndChangeCheck())
@@ -266,15 +278,40 @@ namespace MToon
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.Space();
 
-                EditorGUILayout.LabelField("Options", EditorStyles.boldLabel);
+                
+                EditorGUILayout.LabelField("UV Coordinates", EditorStyles.boldLabel);
                 EditorGUILayout.BeginVertical(GUI.skin.box);
                 {
-                    EditorGUILayout.LabelField("Texture Options", EditorStyles.boldLabel);
+                    // UV
+                    EditorGUILayout.LabelField("Scale & Offset", EditorStyles.boldLabel);
                     {
                         materialEditor.TextureScaleOffsetProperty(_mainTex);
                     }
                     EditorGUILayout.Space();
 
+                    EditorGUILayout.LabelField("Offset Texture", EditorStyles.boldLabel);
+                    {
+                        materialEditor.TexturePropertySingleLine(new GUIContent("Offset [Normal]"),
+                            _uvOffsetNormalTexture,
+                            _uvOffsetNormalScale);
+                    }
+                    EditorGUILayout.Space();
+                    
+                    EditorGUILayout.LabelField("Auto Animation", EditorStyles.boldLabel);
+                    {
+                        materialEditor.TexturePropertySingleLine(new GUIContent("Mask"), _uvAnimMaskTexture);
+                        materialEditor.ShaderProperty(_uvAnimScrollX, "Scroll X (per second)");
+                        materialEditor.ShaderProperty(_uvAnimScrollY, "Scroll Y (per second)");
+                        materialEditor.ShaderProperty(_uvAnimRotation, "Rotation (per second)");
+                    }
+                }
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.Space();
+                
+                
+                EditorGUILayout.LabelField("Options", EditorStyles.boldLabel);
+                EditorGUILayout.BeginVertical(GUI.skin.box);
+                {
                     EditorGUILayout.LabelField("Debugging Options", EditorStyles.boldLabel);
                     {
                         if (PopupEnum<DebugMode>("Visualize", _debugMode, materialEditor))
