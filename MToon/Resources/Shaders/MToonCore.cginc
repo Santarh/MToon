@@ -139,14 +139,21 @@ float4 frag_forward(v2f i) : SV_TARGET
     worldNormal *= lerp(+1.0, -1.0, i.isOutline);
     worldNormal = normalize(worldNormal);
 
+    // Shadow (Directional Light only includes shadow.)
+#if DIRECTIONAL
+    UNITY_LIGHT_ATTENUATION(atten, i, i.posWorld.xyz);
+    half receiveShadow = _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, mainUv).a;
+    half lightAttenuation = lerp(1, atten, receiveShadow);
+#else
+    half lightAttenuation = 1;
+#endif
+    
     // lighting intensity
     half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
-    half receiveShadow = _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, mainUv).a;
     half shadingGrade = 1.0 - _ShadingGradeRate * (1.0 - tex2D(_ShadingGradeTexture, mainUv).r);
-    UNITY_LIGHT_ATTENUATION(atten, i, i.posWorld.xyz);
     half lightIntensity = dot(lightDir, worldNormal);
     lightIntensity = lightIntensity * 0.5 + 0.5; // from [-1, +1] to [0, 1]
-    lightIntensity = lightIntensity * (1.0 - receiveShadow * (1.0 - (atten * 0.5 + 0.5))); // receive shadow
+    lightIntensity = lightIntensity * lightAttenuation; // receive shadow
     lightIntensity = lightIntensity * shadingGrade; // darker
     lightIntensity = lightIntensity * 2.0 - 1.0; // from [0, 1] to [-1, +1]
     lightIntensity = saturate((lightIntensity - _ShadeShift) / (1.0 - _ShadeToony)); // tooned
