@@ -139,9 +139,9 @@ float4 frag_forward(v2f i) : SV_TARGET
     worldNormal *= lerp(+1.0, -1.0, i.isOutline);
     worldNormal = normalize(worldNormal);
 
-    // Shadow (Directional Light only includes shadow.)
-#if DIRECTIONAL
+    // directional light shadow
     UNITY_LIGHT_ATTENUATION(atten, i, i.posWorld.xyz);
+#if DIRECTIONAL
     half receiveShadow = _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, mainUv).a;
     half lightAttenuation = lerp(1, atten, receiveShadow);
 #else
@@ -165,15 +165,10 @@ float4 frag_forward(v2f i) : SV_TARGET
     half3 lighting = _LightColor0.rgb;
     lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
     
-    // light cookie from AutoLight.cginc ( LIGHT_ATTENUATION(i) / SHADOW_ATTENUATION(i) )
-#ifdef DIRECTIONAL_COOKIE
-    lighting *= tex2D(_LightTexture0, i._LightCoord).w;
-#elif POINT
-    lighting *= tex2D(_LightTexture0, dot(i._LightCoord,i._LightCoord).rr).r;
-#elif POINT_COOKIE
-    lighting *= tex2D(_LightTextureB0, dot(i._LightCoord,i._LightCoord).rr).r * texCUBE(_LightTexture0, i._LightCoord).w;
-#elif SPOT
-    lighting *= (i._LightCoord.z > 0) * UnitySpotCookie(i._LightCoord) * UnitySpotAttenuate(i._LightCoord.xyz);
+    // direct light occulusion
+#if DIRECTIONAL
+#else
+    lighting *= atten;
 #endif
 
     // GI
