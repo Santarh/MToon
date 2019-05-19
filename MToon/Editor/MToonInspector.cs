@@ -8,6 +8,8 @@ namespace MToon
 {
     public class MToonInspector : ShaderGUI
     {
+        private static bool isAdvancedLightingPanelFoldout = false;
+
         private MaterialProperty _blendMode;
         private MaterialProperty _bumpMap;
         private MaterialProperty _bumpScale;
@@ -43,8 +45,6 @@ namespace MToon
         private MaterialProperty _rimLightingMix;
         private MaterialProperty _rimFresnelPower;
         private MaterialProperty _rimLift;
-
-        private bool _isLightingPanelFoldOut = false;
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
@@ -155,9 +155,9 @@ namespace MToon
 
                     EditorGUI.indentLevel++;
                     {
-                        _isLightingPanelFoldOut = EditorGUILayout.Foldout(_isLightingPanelFoldOut, "Advanced Settings", EditorStyles.boldFont);
+                        isAdvancedLightingPanelFoldout = EditorGUILayout.Foldout(isAdvancedLightingPanelFoldout, "Advanced Settings", EditorStyles.boldFont);
 
-                        if (_isLightingPanelFoldOut)
+                        if (isAdvancedLightingPanelFoldout)
                         {
                             materialEditor.ShaderProperty(_shadeShift,
                                 new GUIContent("Shading Shift",
