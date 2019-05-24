@@ -209,15 +209,8 @@ namespace MToon
                 EditorGUILayout.LabelField("Emission", EditorStyles.boldLabel);
                 EditorGUILayout.BeginVertical(GUI.skin.box);
                 {
-                    materialEditor.TexturePropertyWithHDRColor(new GUIContent("Emission", "Emission (RGB)"),
-                        _emissionMap,
-                        _emissionColor,
-#if UNITY_2018_1_OR_NEWER
-#else
-                        new ColorPickerHDRConfig(minBrightness: 0, maxBrightness: 10, minExposureValue: -10,
-                            maxExposureValue: 10),
-#endif
-                        showAlpha: false);
+                    TextureWithHdrColor(materialEditor, "Emission", "Emission (RGB)",
+                        _emissionMap, _emissionColor);
                     
                     materialEditor.TexturePropertySingleLine(new GUIContent("MatCap", "MatCap Texture (RGB)"),
                         _sphereAdd);
@@ -228,7 +221,7 @@ namespace MToon
                 EditorGUILayout.LabelField("Rim", EditorStyles.boldLabel);
                 EditorGUILayout.BeginVertical(GUI.skin.box);
                 {
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Color", "Rim Color (RGB)"),
+                    TextureWithHdrColor(materialEditor, "Color", "Rim Color (RGB)",
                         _rimTexture, _rimColor);
                     
                     materialEditor.DefaultShaderProperty(_rimLightingMix, "Lighting Mix");
@@ -388,5 +381,19 @@ namespace MToon
             return changed;
         }
 
+        private static void TextureWithHdrColor(MaterialEditor materialEditor, string label, string description,
+            MaterialProperty texProp, MaterialProperty colorProp)
+        {
+            materialEditor.TexturePropertyWithHDRColor(new GUIContent(label, description),
+                texProp,
+                colorProp,
+#if UNITY_2018_1_OR_NEWER
+#else
+                new ColorPickerHDRConfig(minBrightness: 0, maxBrightness: 10, minExposureValue: -10,
+                    maxExposureValue: 10),
+#endif
+                showAlpha: false);
+            
+        }
     }
 }
