@@ -52,14 +52,15 @@ struct v2f
     float2 uv0 : TEXCOORD4;
     float isOutline : TEXCOORD5;
     fixed4 color : TEXCOORD6;
-    LIGHTING_COORDS(7,8)
-    UNITY_FOG_COORDS(9)
+    UNITY_FOG_COORDS(7)
+    SHADOW_COORDS(8)
     //UNITY_VERTEX_INPUT_INSTANCE_ID // necessary only if any instanced properties are going to be accessed in the fragment Shader.
 };
 
 inline v2f InitializeV2F(appdata_full v, float4 projectedVertex, float isOutline)
 {
     v2f o;
+    UNITY_INITIALIZE_OUTPUT(v2f, o);
     UNITY_SETUP_INSTANCE_ID(v);
     //UNITY_TRANSFER_INSTANCE_ID(v, o);
     
@@ -75,7 +76,7 @@ inline v2f InitializeV2F(appdata_full v, float4 projectedVertex, float isOutline
     o.tspace2 = half3(worldTangent.z, worldBitangent.z, worldNormal.z);
     o.isOutline = isOutline;
     o.color = v.color;
-    TRANSFER_VERTEX_TO_FRAGMENT(o);
+    TRANSFER_SHADOW(o);
     UNITY_TRANSFER_FOG(o, o.pos);
     return o;
 }
