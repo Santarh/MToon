@@ -8,6 +8,8 @@ namespace MToon
 {
     public class MToonInspector : ShaderGUI
     {
+        private static bool isAdvancedLightingPanelFoldout = false;
+
         private MaterialProperty _blendMode;
         private MaterialProperty _bumpMap;
         private MaterialProperty _bumpScale;
@@ -145,36 +147,11 @@ namespace MToon
                 EditorGUILayout.LabelField("Lighting", EditorStyles.boldLabel);
                 EditorGUILayout.BeginVertical(GUI.skin.box);
                 {
-                    EditorGUILayout.LabelField("Lit & Shade Mixing", EditorStyles.boldLabel);
                     {
-                        materialEditor.ShaderProperty(_shadeShift,
-                            new GUIContent("Shading Shift",
-                                "Zero is Default. Negative value increase lit area. Positive value increase shade area."));
                         materialEditor.ShaderProperty(_shadeToony,
                             new GUIContent("Shading Toony",
                                 "0.0 is Lambert. Higher value get toony shading."));
-                        materialEditor.TexturePropertySingleLine(
-                            new GUIContent("Shadow Receive Multiplier",
-                                "Texture (A) * Rate. White is Default. Black attenuates shadows."),
-                            _receiveShadowTexture,
-                            _receiveShadowRate);
-                        materialEditor.TexturePropertySingleLine(
-                            new GUIContent("Lit & Shade Mixing Multiplier",
-                                "Texture (R) * Rate. Compatible with UTS2 ShadingGradeMap. White is Default. Black amplifies shade."),
-                            _shadingGradeTexture,
-                            _shadingGradeRate);
-                    }
-                    EditorGUILayout.Space();
 
-                    EditorGUILayout.LabelField("Light Color", EditorStyles.boldLabel);
-                    {
-                        materialEditor.ShaderProperty(_lightColorAttenuation, "LightColor Attenuation");
-                        materialEditor.ShaderProperty(_indirectLightIntensity, "GI Intensity");
-                    }
-                    EditorGUILayout.Space();
-
-                    EditorGUILayout.LabelField("Normal", EditorStyles.boldLabel);
-                    {
                         // Normal
                         EditorGUI.BeginChangeCheck();
                         materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map [Normal]", "Normal Map (RGB)"),
@@ -186,6 +163,45 @@ namespace MToon
                             ModeChanged(materials);
                         }
                     }
+                    EditorGUILayout.Space();
+
+                    EditorGUI.indentLevel++;
+                    {
+                        isAdvancedLightingPanelFoldout = EditorGUILayout.Foldout(isAdvancedLightingPanelFoldout, "Advanced Settings", EditorStyles.boldFont);
+
+                        if (isAdvancedLightingPanelFoldout)
+                        {
+                            if (materialEditor.HelpBoxWithButton(
+                                new GUIContent(
+                                    "The default settings are suitable for Advanced Settings if you want to toony result."),
+                                new GUIContent("Reset")))
+                            {
+                                _shadeShift.floatValue = 0;
+                                _receiveShadowTexture.textureValue = null;
+                                _receiveShadowRate.floatValue = 1;
+                                _shadingGradeTexture.textureValue = null;
+                                _shadingGradeRate.floatValue = 1;
+                                _lightColorAttenuation.floatValue = 0;
+                                _indirectLightIntensity.floatValue = 0.1f;
+                            }
+                            materialEditor.ShaderProperty(_shadeShift,
+                                new GUIContent("Shading Shift",
+                                    "Zero is Default. Negative value increase lit area. Positive value increase shade area."));
+                            materialEditor.TexturePropertySingleLine(
+                                new GUIContent("Shadow Receive Multiplier",
+                                    "Texture (A) * Rate. White is Default. Black attenuates shadows."),
+                                _receiveShadowTexture,
+                                _receiveShadowRate);
+                            materialEditor.TexturePropertySingleLine(
+                                new GUIContent("Lit & Shade Mixing Multiplier",
+                                    "Texture (R) * Rate. Compatible with UTS2 ShadingGradeMap. White is Default. Black amplifies shade."),
+                                _shadingGradeTexture,
+                                _shadingGradeRate);
+                            materialEditor.ShaderProperty(_lightColorAttenuation, "LightColor Attenuation");
+                            materialEditor.ShaderProperty(_indirectLightIntensity, "GI Intensity");
+                        }
+                    }
+                    EditorGUI.indentLevel--;
                 }
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.Space();
