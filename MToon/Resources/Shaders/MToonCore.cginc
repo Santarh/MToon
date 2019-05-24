@@ -130,8 +130,6 @@ float4 frag_forward(v2f i) : SV_TARGET
     float rotateRad = _UvAnimRotation * 6.28318530718 * uvAnim;
     const float2 rotatePivot = float2(0.5, 0.5);
     mainUv = mul(float2x2(cos(rotateRad), -sin(rotateRad), sin(rotateRad), cos(rotateRad)), mainUv - rotatePivot) + rotatePivot;
-    //
-    //mainUv %= 1;
     
     // main tex
     half4 mainTex = tex2D(_MainTex, mainUv);
