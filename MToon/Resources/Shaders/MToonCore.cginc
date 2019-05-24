@@ -160,17 +160,17 @@ float4 frag_forward(v2f i) : SV_TARGET
     worldNormal *= lerp(+1.0, -1.0, i.isOutline);
     worldNormal = normalize(worldNormal);
 
-    // directional light shadow
-    UNITY_LIGHT_ATTENUATION(atten, i, i.posWorld.xyz);
-#if DIRECTIONAL
-    half receiveShadow = _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, mainUv).a;
-    half lightAttenuation = lerp(1, atten, receiveShadow);
-#else
+    // Unity lighting
+    UNITY_LIGHT_ATTENUATION(shadowAttenuation, i, i.posWorld.xyz);
+    shadowAttenuation = lerp(1, shadowAttenuation, _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, mainUv).r);
+    half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
+#ifdef MTOON_FORWARD_ADD
     half lightAttenuation = 1;
+#else
+    half lightAttenuation = shadowAttenuation;
 #endif
     
-    // lighting intensity
-    half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
+    // lit & shade mix value
     half shadingGrade = 1.0 - _ShadingGradeRate * (1.0 - tex2D(_ShadingGradeTexture, mainUv).r);
     half lightIntensity = dot(lightDir, worldNormal); // [-1, +1]
     lightIntensity = lightIntensity * 0.5 + 0.5; // from [-1, +1] to [0, 1]
@@ -182,14 +182,14 @@ float4 frag_forward(v2f i) : SV_TARGET
     half minIntensityThreshold = _ShadeShift;
     lightIntensity = saturate((lightIntensity - minIntensityThreshold) / max(0.0000001, (maxIntensityThreshold - minIntensityThreshold)));
 
-    // direct lighting
+    
+    // lighting entire multiply
     half3 lighting = _LightColor0.rgb;
     lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
-    
-    // direct light occulusion
-#if DIRECTIONAL
+#ifdef MTOON_FORWARD_ADD
+    lighting *= shadowAttenuation;
 #else
-    lighting *= atten;
+    lighting *= length(lightDir); // if directional light is disabled.
 #endif
 
     // GI
