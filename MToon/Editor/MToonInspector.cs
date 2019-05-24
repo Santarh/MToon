@@ -171,6 +171,19 @@ namespace MToon
 
                         if (isAdvancedLightingPanelFoldout)
                         {
+                            if (materialEditor.HelpBoxWithButton(
+                                new GUIContent(
+                                    "The default settings are suitable for Advanced Settings if you want to toony result."),
+                                new GUIContent("Reset")))
+                            {
+                                _shadeShift.floatValue = 0;
+                                _receiveShadowTexture.textureValue = null;
+                                _receiveShadowRate.floatValue = 1;
+                                _shadingGradeTexture.textureValue = null;
+                                _shadingGradeRate.floatValue = 1;
+                                _lightColorAttenuation.floatValue = 0;
+                                _indirectLightIntensity.floatValue = 0.1f;
+                            }
                             materialEditor.ShaderProperty(_shadeShift,
                                 new GUIContent("Shading Shift",
                                     "Zero is Default. Negative value increase lit area. Positive value increase shade area."));
