@@ -162,12 +162,11 @@ float4 frag_forward(v2f i) : SV_TARGET
 
     // Unity lighting
     UNITY_LIGHT_ATTENUATION(shadowAttenuation, i, i.posWorld.xyz);
-    shadowAttenuation = lerp(1, shadowAttenuation, _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, mainUv).r);
     half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
 #ifdef MTOON_FORWARD_ADD
     half lightAttenuation = 1;
 #else
-    half lightAttenuation = shadowAttenuation;
+    half lightAttenuation = shadowAttenuation * lerp(1, shadowAttenuation, _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, mainUv).r);
 #endif
     
     // lit & shade mix value
