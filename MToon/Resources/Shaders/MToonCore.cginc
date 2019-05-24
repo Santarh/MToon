@@ -32,6 +32,12 @@ half _OutlineWidth;
 half _OutlineScaledMaxDistance;
 fixed4 _OutlineColor;
 half _OutlineLightingMix;
+sampler2D _UvOffsetNormalTexture;
+float _UvOffsetNormalScale;
+sampler2D _UvAnimMaskTexture;
+float _UvAnimScrollX;
+float _UvAnimScrollY;
+float _UvAnimRotation;
 
 //UNITY_INSTANCING_BUFFER_START(Props)
 //UNITY_INSTANCING_BUFFER_END(Props)
@@ -110,8 +116,22 @@ float4 frag_forward(v2f i) : SV_TARGET
 
     //UNITY_TRANSFER_INSTANCE_ID(v, o);
     
-    // main tex
+    // uv
     float2 mainUv = TRANSFORM_TEX(i.uv0, _MainTex);
+    
+    // offset uv with normal.xy*scale*0.01
+    mainUv += UnpackScaleNormal(tex2D(_UvOffsetNormalTexture, mainUv), _UvOffsetNormalScale * 0.01).xy;
+    
+    // uv anim
+    half uvAnim = tex2D(_UvAnimMaskTexture, mainUv).r * _Time.y;
+    // translate uv in bottom-left origin coordinates.
+    mainUv += float2(_UvAnimScrollX, _UvAnimScrollY) * uvAnim;
+    // rotate uv counter-clockwise around (0.5, 0.5) in bottom-left origin coordinates.
+    float rotateRad = _UvAnimRotation * 6.28318530718 * uvAnim;
+    const float2 rotatePivot = float2(0.5, 0.5);
+    mainUv = mul(float2x2(cos(rotateRad), -sin(rotateRad), sin(rotateRad), cos(rotateRad)), mainUv - rotatePivot) + rotatePivot;
+    
+    // main tex
     half4 mainTex = tex2D(_MainTex, mainUv);
     
     // alpha

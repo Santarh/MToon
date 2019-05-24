@@ -74,6 +74,12 @@ namespace MToon
                 var textureOptions = parameters.TextureOption;
                 material.SetTextureScale(PropMainTex, textureOptions.MainTextureLeftBottomOriginScale);
                 material.SetTextureOffset(PropMainTex, textureOptions.MainTextureLeftBottomOriginOffset);
+                material.SetTexture(PropUvOffsetNormalTexture, textureOptions.UvOffsetNormalTexture);
+                material.SetFloat(PropUvOffsetNormalScale, textureOptions.UvOffsetNormalScaleValue);
+                material.SetTexture(PropUvAnimMaskTexture, textureOptions.UvAnimationMaskTexture);
+                material.SetFloat(PropUvAnimScrollX, textureOptions.UvAnimationScrollXSpeedValue);
+                material.SetFloat(PropUvAnimScrollY, textureOptions.UvAnimationScrollYSpeedValue);
+                material.SetFloat(PropUvAnimRotation, textureOptions.UvAnimationRotationSpeedValue);
             }
         }
 

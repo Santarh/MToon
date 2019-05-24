@@ -43,6 +43,12 @@ namespace MToon
         public const string PropOutlineScaledMaxDistance = "_OutlineScaledMaxDistance";
         public const string PropOutlineColor = "_OutlineColor";
         public const string PropOutlineLightingMix = "_OutlineLightingMix";
+        public const string PropUvOffsetNormalTexture = "_UvOffsetNormalTexture";
+        public const string PropUvOffsetNormalScale = "_UvOffsetNormalScale";
+        public const string PropUvAnimMaskTexture = "_UvAnimMaskTexture";
+        public const string PropUvAnimScrollX = "_UvAnimScrollX";
+        public const string PropUvAnimScrollY = "_UvAnimScrollY";
+        public const string PropUvAnimRotation = "_UvAnimRotation";
         public const string PropSrcBlend = "_SrcBlend";
         public const string PropDstBlend = "_DstBlend";
         public const string PropZWrite = "_ZWrite";
