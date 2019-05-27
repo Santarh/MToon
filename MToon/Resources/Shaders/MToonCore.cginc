@@ -163,6 +163,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     // Unity lighting
     UNITY_LIGHT_ATTENUATION(shadowAttenuation, i, i.posWorld.xyz);
     half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
+    half dotNL = dot(lightDir, worldNormal);
 #ifdef MTOON_FORWARD_ADD
     half lightAttenuation = 1;
 #else
@@ -171,7 +172,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     
     // lit & shade mix value
     half shadingGrade = 1.0 - _ShadingGradeRate * (1.0 - tex2D(_ShadingGradeTexture, mainUv).r);
-    half lightIntensity = dot(lightDir, worldNormal); // [-1, +1]
+    half lightIntensity = dotNL; // [-1, +1]
     lightIntensity = lightIntensity * 0.5 + 0.5; // from [-1, +1] to [0, 1]
     lightIntensity = lightIntensity * lightAttenuation; // receive shadow
     lightIntensity = lightIntensity * shadingGrade; // darker
@@ -186,7 +187,8 @@ float4 frag_forward(v2f i) : SV_TARGET
     half3 lighting = _LightColor0.rgb;
     lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
 #ifdef MTOON_FORWARD_ADD
-    lighting *= shadowAttenuation;
+    lighting *= lerp((dotNL + 1) * 0.1 / max(1, max(lighting.x, max(lighting.y, lighting.z))), 1, step(0, dotNL)); // darken if dotNL < 0
+    lighting *= shadowAttenuation; // darken if receiving shadow
 #else
     lighting *= length(lightDir); // if directional light is disabled.
 #endif
