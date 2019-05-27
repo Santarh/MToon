@@ -52,14 +52,15 @@ struct v2f
     float2 uv0 : TEXCOORD4;
     float isOutline : TEXCOORD5;
     fixed4 color : TEXCOORD6;
-    LIGHTING_COORDS(7,8)
-    UNITY_FOG_COORDS(9)
+    UNITY_FOG_COORDS(7)
+    SHADOW_COORDS(8)
     //UNITY_VERTEX_INPUT_INSTANCE_ID // necessary only if any instanced properties are going to be accessed in the fragment Shader.
 };
 
 inline v2f InitializeV2F(appdata_full v, float4 projectedVertex, float isOutline)
 {
     v2f o;
+    UNITY_INITIALIZE_OUTPUT(v2f, o);
     UNITY_SETUP_INSTANCE_ID(v);
     //UNITY_TRANSFER_INSTANCE_ID(v, o);
     
@@ -75,7 +76,7 @@ inline v2f InitializeV2F(appdata_full v, float4 projectedVertex, float isOutline
     o.tspace2 = half3(worldTangent.z, worldBitangent.z, worldNormal.z);
     o.isOutline = isOutline;
     o.color = v.color;
-    TRANSFER_VERTEX_TO_FRAGMENT(o);
+    TRANSFER_SHADOW(o);
     UNITY_TRANSFER_FOG(o, o.pos);
     return o;
 }
@@ -159,33 +160,47 @@ float4 frag_forward(v2f i) : SV_TARGET
     worldNormal *= lerp(+1.0, -1.0, i.isOutline);
     worldNormal = normalize(worldNormal);
 
-    // lighting intensity
+    // Unity lighting
+    UNITY_LIGHT_ATTENUATION(shadowAttenuation, i, i.posWorld.xyz);
     half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
-    half receiveShadow = _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, mainUv).a;
+    half dotNL = dot(lightDir, worldNormal);
+#ifdef MTOON_FORWARD_ADD
+    half lightAttenuation = 1;
+#else
+    half lightAttenuation = shadowAttenuation * lerp(1, shadowAttenuation, _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, mainUv).r);
+#endif
+    
+    // lit & shade mix value
     half shadingGrade = 1.0 - _ShadingGradeRate * (1.0 - tex2D(_ShadingGradeTexture, mainUv).r);
-    UNITY_LIGHT_ATTENUATION(atten, i, i.posWorld.xyz);
-    half lightIntensity = dot(lightDir, worldNormal);
+    half lightIntensity = dotNL; // [-1, +1]
     lightIntensity = lightIntensity * 0.5 + 0.5; // from [-1, +1] to [0, 1]
-    lightIntensity = lightIntensity * (1.0 - receiveShadow * (1.0 - (atten * 0.5 + 0.5))); // receive shadow
+    lightIntensity = lightIntensity * lightAttenuation; // receive shadow
     lightIntensity = lightIntensity * shadingGrade; // darker
     lightIntensity = lightIntensity * 2.0 - 1.0; // from [0, 1] to [-1, +1]
-    lightIntensity = saturate((lightIntensity - _ShadeShift) / (1.0 - _ShadeToony)); // tooned
+    // tooned. mapping from [minIntensityThreshold, maxIntensityThreshold] to [0, 1]
+    half maxIntensityThreshold = lerp(1, _ShadeShift, _ShadeToony);
+    half minIntensityThreshold = _ShadeShift;
+    lightIntensity = saturate((lightIntensity - minIntensityThreshold) / max(0.0000001, (maxIntensityThreshold - minIntensityThreshold)));
 
-    // lighting with color
-    half3 directLighting = _LightColor0.rgb; // direct
-    half3 lighting = directLighting;
-    lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
     
-#ifdef POINT
-    lighting *= tex2D(_LightTexture0, dot(lightCoord, lightCoord).rr).r;
-#endif
-#ifdef SPOT
-    lighting *= (lightCoord.z > 0) * UnitySpotCookie(lightCoord) * UnitySpotAttenuate(lightCoord.xyz);
+    // lighting entire multiply
+    half3 lighting = _LightColor0.rgb;
+    lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
+#ifdef MTOON_FORWARD_ADD
+    lighting *= dotNL * 0.5 + 0.5; // darken by using half lambert
+    lighting *= shadowAttenuation; // darken if receiving shadow
+#else
+    lighting *= length(lightDir); // if directional light is disabled.
 #endif
 
     // GI
-    half3 indirectLighting = _IndirectLightIntensity * ShadeSH9(half4(worldNormal, 1)); // ambient
+#ifdef MTOON_FORWARD_ADD
+    half3 indirectLighting = half3(0, 0, 0);
+#else
+    half3 toonedGI = 0.5 * (ShadeSH9(half4(0, 1, 0, 1)) + ShadeSH9(half4(0, -1, 0, 1)));
+    half3 indirectLighting = lerp(toonedGI, ShadeSH9(half4(worldNormal, 1)), _IndirectLightIntensity);
     indirectLighting = lerp(indirectLighting, max(0.001, max(indirectLighting.x, max(indirectLighting.y, indirectLighting.z))), _LightColorAttenuation); // color atten
+#endif
 
     // color lerp
     half4 shade = _ShadeColor * tex2D(_ShadeTexture, mainUv);
