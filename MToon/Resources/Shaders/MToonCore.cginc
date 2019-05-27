@@ -117,6 +117,10 @@ float4 frag_forward(v2f i) : SV_TARGET
 
     //UNITY_TRANSFER_INSTANCE_ID(v, o);
     
+    // const
+    const float PI_2 = 6.28318530718;
+    const float EPS_COL = 0.00001;
+    
     // uv
     float2 mainUv = TRANSFORM_TEX(i.uv0, _MainTex);
     
@@ -128,7 +132,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     // translate uv in bottom-left origin coordinates.
     mainUv += float2(_UvAnimScrollX, _UvAnimScrollY) * uvAnim;
     // rotate uv counter-clockwise around (0.5, 0.5) in bottom-left origin coordinates.
-    float rotateRad = _UvAnimRotation * 6.28318530718 * uvAnim;
+    float rotateRad = _UvAnimRotation * PI_2 * uvAnim;
     const float2 rotatePivot = float2(0.5, 0.5);
     mainUv = mul(float2x2(cos(rotateRad), -sin(rotateRad), sin(rotateRad), cos(rotateRad)), mainUv - rotatePivot) + rotatePivot;
     
@@ -163,6 +167,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     // Unity lighting
     UNITY_LIGHT_ATTENUATION(shadowAttenuation, i, i.posWorld.xyz);
     half3 lightDir = lerp(_WorldSpaceLightPos0.xyz, normalize(_WorldSpaceLightPos0.xyz - i.posWorld.xyz), _WorldSpaceLightPos0.w);
+    half3 lightColor = _LightColor0.rgb * step(0.5, length(lightDir)); // length(lightDir) is zero if directional light is disabled.
     half dotNL = dot(lightDir, worldNormal);
 #ifdef MTOON_FORWARD_ADD
     half lightAttenuation = 1;
@@ -170,7 +175,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     half lightAttenuation = shadowAttenuation * lerp(1, shadowAttenuation, _ReceiveShadowRate * tex2D(_ReceiveShadowTexture, mainUv).r);
 #endif
     
-    // lit & shade mix value
+    // Decide albedo color rate from Direct Light
     half shadingGrade = 1.0 - _ShadingGradeRate * (1.0 - tex2D(_ShadingGradeTexture, mainUv).r);
     half lightIntensity = dotNL; // [-1, +1]
     lightIntensity = lightIntensity * 0.5 + 0.5; // from [-1, +1] to [0, 1]
@@ -180,44 +185,41 @@ float4 frag_forward(v2f i) : SV_TARGET
     // tooned. mapping from [minIntensityThreshold, maxIntensityThreshold] to [0, 1]
     half maxIntensityThreshold = lerp(1, _ShadeShift, _ShadeToony);
     half minIntensityThreshold = _ShadeShift;
-    lightIntensity = saturate((lightIntensity - minIntensityThreshold) / max(0.0000001, (maxIntensityThreshold - minIntensityThreshold)));
-
+    lightIntensity = saturate((lightIntensity - minIntensityThreshold) / max(EPS_COL, (maxIntensityThreshold - minIntensityThreshold)));
     
-    // lighting entire multiply
-    half3 lighting = _LightColor0.rgb;
-    lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
-#ifdef MTOON_FORWARD_ADD
-#ifdef _ALPHABLEND_ON
-    lighting *= step(0, dotNL); // darken if transparent. Because transparent material can't receive shadowAttenuation.
-#endif
-    lighting *= dotNL * 0.5 + 0.5; // darken by using half lambert
-    lighting *= shadowAttenuation; // darken if receiving shadow
-#else
-    lighting *= length(lightDir); // if directional light is disabled.
-#endif
-
-    // GI
-#ifdef MTOON_FORWARD_ADD
-    half3 indirectLighting = half3(0, 0, 0);
-#else
-    half3 toonedGI = 0.5 * (ShadeSH9(half4(0, 1, 0, 1)) + ShadeSH9(half4(0, -1, 0, 1)));
-    half3 indirectLighting = lerp(toonedGI, ShadeSH9(half4(worldNormal, 1)), _IndirectLightIntensity);
-    indirectLighting = lerp(indirectLighting, max(0.001, max(indirectLighting.x, max(indirectLighting.y, indirectLighting.z))), _LightColorAttenuation); // color atten
-#endif
-
-    // color lerp
+    // Albedo color
     half4 shade = _ShadeColor * tex2D(_ShadeTexture, mainUv);
     half4 lit = _Color * mainTex;
     half3 col = lerp(shade.rgb, lit.rgb, lightIntensity);
-    col = col * lighting + indirectLighting * lit;
-    
-    // pure light
-    half3 pureLight = lighting * lightIntensity + indirectLighting;
-    pureLight = lerp(pureLight, max(0.001, max(pureLight.x, max(pureLight.y, pureLight.z))), _LightColorAttenuation);
-    
+
+    // Direct Light
+    half3 lighting = lightColor;
+    lighting = lerp(lighting, max(EPS_COL, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
+#ifdef MTOON_FORWARD_ADD
+    #ifdef _ALPHABLEND_ON
+        lighting *= step(0, dotNL); // darken if transparent. Because transparent material can't receive shadowAttenuation.
+    #endif
+        lighting *= dotNL * 0.5 + 0.5; // darken by using half lambert
+        lighting *= shadowAttenuation; // darken if receiving shadow
+#else
+#endif
+    col *= lighting;
+
+    // Indirect Light
+#ifdef MTOON_FORWARD_ADD
+#else
+    half3 toonedGI = 0.5 * (ShadeSH9(half4(0, 1, 0, 1)) + ShadeSH9(half4(0, -1, 0, 1)));
+    half3 indirectLighting = lerp(toonedGI, ShadeSH9(half4(worldNormal, 1)), _IndirectLightIntensity);
+    indirectLighting = lerp(indirectLighting, max(EPS_COL, max(indirectLighting.x, max(indirectLighting.y, indirectLighting.z))), _LightColorAttenuation); // color atten
+    col += indirectLighting * lit;
+#endif
+
     // parametric rim lighting
 #ifdef MTOON_FORWARD_ADD
 #else
+    half3 pureLight = lighting * lightIntensity + indirectLighting;
+    pureLight = lerp(pureLight, max(EPS_COL, max(pureLight.x, max(pureLight.y, pureLight.z))), _LightColorAttenuation);
+    
     half3 rim = pow(saturate(1.0 - dot(worldNormal, worldView) + _RimLift), _RimFresnelPower) * _RimColor.rgb * tex2D(_RimTexture, mainUv).rgb;
     rim *= lerp(half3(1, 1, 1), pureLight, _RimLightingMix);
     col += lerp(rim, half3(0, 0, 0), i.isOutline);
