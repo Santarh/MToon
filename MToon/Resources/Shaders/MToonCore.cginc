@@ -187,7 +187,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     half3 lighting = _LightColor0.rgb;
     lighting = lerp(lighting, max(0.001, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
 #ifdef MTOON_FORWARD_ADD
-    lighting *= saturate(dotNL * 0.5 + 0.5); // darken if dotNL < 0
+    lighting *= dotNL * 0.5 + 0.5; // darken by using half lambert
     lighting *= shadowAttenuation; // darken if receiving shadow
 #else
     lighting *= length(lightDir); // if directional light is disabled.
