@@ -192,9 +192,13 @@ float4 frag_forward(v2f i) : SV_TARGET
 #endif
 
     // GI
+#ifdef MTOON_FORWARD_ADD
+    half3 indirectLighting = half3(0, 0, 0);
+#else
     half3 toonedGI = 0.5 * (ShadeSH9(half4(0, 1, 0, 1)) + ShadeSH9(half4(0, -1, 0, 1)));
     half3 indirectLighting = lerp(toonedGI, ShadeSH9(half4(worldNormal, 1)), _IndirectLightIntensity);
     indirectLighting = lerp(indirectLighting, max(0.001, max(indirectLighting.x, max(indirectLighting.y, indirectLighting.z))), _LightColorAttenuation); // color atten
+#endif
 
     // color lerp
     half4 shade = _ShadeColor * tex2D(_ShadeTexture, mainUv);
