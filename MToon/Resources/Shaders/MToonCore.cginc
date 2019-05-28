@@ -199,7 +199,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     #ifdef _ALPHABLEND_ON
         lighting *= step(0, dotNL); // darken if transparent. Because transparent material can't receive shadowAttenuation.
     #endif
-        lighting *= dotNL * 0.5 + 0.5; // darken by using half lambert
+        lighting *= min(0, dotNL) * 0.5 + 0.5; // darken dotNL < 0 area by using half lambert
         lighting *= shadowAttenuation; // darken if receiving shadow
 #else
 #endif
