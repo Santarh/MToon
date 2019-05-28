@@ -196,12 +196,14 @@ float4 frag_forward(v2f i) : SV_TARGET
     half3 lighting = lightColor;
     lighting = lerp(lighting, max(EPS_COL, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
 #ifdef MTOON_FORWARD_ADD
-    #ifdef _ALPHABLEND_ON
-        lighting *= step(0, dotNL); // darken if transparent. Because transparent material can't receive shadowAttenuation.
-    #endif
-        lighting *= min(0, dotNL) * 0.5 + 0.5; // darken dotNL < 0 area by using half lambert
-        lighting *= shadowAttenuation; // darken if receiving shadow
+#ifdef _ALPHABLEND_ON
+    lighting *= step(0, dotNL); // darken if transparent. Because Unity's transparent material can't receive shadowAttenuation.
+#endif
+    lighting *= 0.5; // darken if additional light.
+    lighting *= min(0, dotNL) + 1; // darken dotNL < 0 area by using half lambert
+    lighting *= shadowAttenuation; // darken if receiving shadow
 #else
+    // base light does not darken.
 #endif
     col *= lighting;
 
@@ -217,10 +219,12 @@ float4 frag_forward(v2f i) : SV_TARGET
     // parametric rim lighting
 #ifdef MTOON_FORWARD_ADD
     half3 staticRimLighting = 0;
+    half3 mixedRimLighting = lighting;
 #else
     half3 staticRimLighting = 1;
+    half3 mixedRimLighting = lighting + indirectLighting;
 #endif
-    half3 rimLighting = lerp(staticRimLighting, lighting, _RimLightingMix);
+    half3 rimLighting = lerp(staticRimLighting, mixedRimLighting, _RimLightingMix);
     half3 rim = pow(saturate(1.0 - dot(worldNormal, worldView) + _RimLift), _RimFresnelPower) * _RimColor.rgb * tex2D(_RimTexture, mainUv).rgb;
     col += lerp(rim * rimLighting, half3(0, 0, 0), i.isOutline);
 
