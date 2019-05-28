@@ -196,12 +196,14 @@ float4 frag_forward(v2f i) : SV_TARGET
     half3 lighting = lightColor;
     lighting = lerp(lighting, max(EPS_COL, max(lighting.x, max(lighting.y, lighting.z))), _LightColorAttenuation); // color atten
 #ifdef MTOON_FORWARD_ADD
-    #ifdef _ALPHABLEND_ON
-        lighting *= step(0, dotNL); // darken if transparent. Because transparent material can't receive shadowAttenuation.
-    #endif
-        lighting *= min(0, dotNL) * 0.5 + 0.5; // darken dotNL < 0 area by using half lambert
-        lighting *= shadowAttenuation; // darken if receiving shadow
+#ifdef _ALPHABLEND_ON
+    lighting *= step(0, dotNL); // darken if transparent. Because Unity's transparent material can't receive shadowAttenuation.
+#endif
+    lighting *= 0.5; // darken if additional light.
+    lighting *= min(0, dotNL) + 1; // darken dotNL < 0 area by using half lambert
+    lighting *= shadowAttenuation; // darken if receiving shadow
 #else
+    // base light does not darken.
 #endif
     col *= lighting;
 
