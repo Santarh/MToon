@@ -216,14 +216,13 @@ float4 frag_forward(v2f i) : SV_TARGET
 
     // parametric rim lighting
 #ifdef MTOON_FORWARD_ADD
+    half3 staticRimLighting = 0;
 #else
-    half3 pureLight = lighting * lightIntensity + indirectLighting;
-    pureLight = lerp(pureLight, max(EPS_COL, max(pureLight.x, max(pureLight.y, pureLight.z))), _LightColorAttenuation);
-    
-    half3 rim = pow(saturate(1.0 - dot(worldNormal, worldView) + _RimLift), _RimFresnelPower) * _RimColor.rgb * tex2D(_RimTexture, mainUv).rgb;
-    rim *= lerp(half3(1, 1, 1), pureLight, _RimLightingMix);
-    col += lerp(rim, half3(0, 0, 0), i.isOutline);
+    half3 staticRimLighting = 1;
 #endif
+    half3 rimLighting = lerp(staticRimLighting, lighting, _RimLightingMix);
+    half3 rim = pow(saturate(1.0 - dot(worldNormal, worldView) + _RimLift), _RimFresnelPower) * _RimColor.rgb * tex2D(_RimTexture, mainUv).rgb;
+    col += lerp(rim * rimLighting, half3(0, 0, 0), i.isOutline);
 
     // additive matcap
 #ifdef MTOON_FORWARD_ADD
