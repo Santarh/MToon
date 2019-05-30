@@ -112,6 +112,11 @@ namespace MToon
                         ModeChanged(materials, isBlendModeChangedByUser: true);
                     }
 
+                    if ((RenderMode) _blendMode.floatValue == RenderMode.TransparentWithZWrite)
+                    {
+                        EditorGUILayout.HelpBox("TransparentWithZWrite mode can cause problems with rendering.", MessageType.Warning);
+                    }
+
                     if (PopupEnum<CullMode>("Cull Mode", _cullMode, materialEditor))
                     {
                         ModeChanged(materials);
@@ -171,10 +176,11 @@ namespace MToon
 
                         if (isAdvancedLightingPanelFoldout)
                         {
-                            if (materialEditor.HelpBoxWithButton(
-                                new GUIContent(
-                                    "The default settings are suitable for Advanced Settings if you want to toony result."),
-                                new GUIContent("Reset")))
+                            EditorGUILayout.BeginHorizontal();
+                            EditorGUILayout.HelpBox(
+                                "The default settings are suitable for Advanced Settings if you want to toony result.",
+                                MessageType.Info);
+                            if (GUILayout.Button("Use Default"))
                             {
                                 _shadeShift.floatValue = 0;
                                 _receiveShadowTexture.textureValue = null;
@@ -184,6 +190,8 @@ namespace MToon
                                 _lightColorAttenuation.floatValue = 0;
                                 _indirectLightIntensity.floatValue = 0.1f;
                             }
+                            EditorGUILayout.EndHorizontal();
+                            
                             materialEditor.ShaderProperty(_shadeShift,
                                 new GUIContent("Shading Shift",
                                     "Zero is Default. Negative value increase lit area. Positive value increase shade area."));
@@ -247,6 +255,12 @@ namespace MToon
                         if (PopupEnum<OutlineWidthMode>("Mode", _outlineWidthMode, materialEditor))
                         {
                             ModeChanged(materials);
+                        }
+                        
+                        if ((RenderMode) _blendMode.floatValue == RenderMode.Transparent &&
+                            (OutlineWidthMode) _outlineWidthMode.floatValue != OutlineWidthMode.None)
+                        {
+                            EditorGUILayout.HelpBox("Outline with Transparent material cause problem with rendering.", MessageType.Warning);
                         }
 
                         var widthMode = (OutlineWidthMode) _outlineWidthMode.floatValue;
