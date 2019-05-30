@@ -10,6 +10,7 @@ namespace MToon
     {
         private static bool isAdvancedLightingPanelFoldout = false;
 
+        private MaterialProperty _version;
         private MaterialProperty _blendMode;
         private MaterialProperty _bumpMap;
         private MaterialProperty _bumpScale;
@@ -54,6 +55,7 @@ namespace MToon
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
+            _version = FindProperty(Utils.PropVersion, properties);
             _debugMode = FindProperty(Utils.PropDebugMode, properties);
             _outlineWidthMode = FindProperty(Utils.PropOutlineWidthMode, properties);
             _outlineColorMode = FindProperty(Utils.PropOutlineColorMode, properties);
@@ -103,6 +105,8 @@ namespace MToon
         {
             EditorGUI.BeginChangeCheck();
             {
+                _version.floatValue = Utils.VersionNumber;
+                
                 EditorGUILayout.LabelField("Rendering", EditorStyles.boldLabel);
                 EditorGUILayout.BeginVertical(GUI.skin.box);
                 {
