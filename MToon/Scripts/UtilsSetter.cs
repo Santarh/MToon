@@ -9,6 +9,10 @@ namespace MToon
         public static void SetMToonParametersToMaterial(Material material, MToonDefinition parameters)
         {
             {
+                var meta = parameters.Meta;
+                SetValue(material, PropVersion, meta.VersionNumber);
+            }
+            {
                 var rendering = parameters.Rendering;
                 ValidateBlendMode(material, rendering.RenderMode, isChangedByUser: true);
                 ValidateCullMode(material, rendering.CullMode);
