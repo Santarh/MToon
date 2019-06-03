@@ -20,7 +20,7 @@ half _ShadeToony;
 half _LightColorAttenuation;
 half _IndirectLightIntensity;
 sampler2D _RimTexture;
-fixed4 _RimColor;
+half4 _RimColor;
 half _RimLightingMix;
 half _RimFresnelPower;
 half _RimLift;
