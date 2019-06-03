@@ -197,7 +197,7 @@ namespace MToon
                                     "Zero is Default. Negative value increase lit area. Positive value increase shade area."));
                             materialEditor.TexturePropertySingleLine(
                                 new GUIContent("Shadow Receive Multiplier",
-                                    "Texture (A) * Rate. White is Default. Black attenuates shadows."),
+                                    "Texture (R) * Rate. White is Default. Black attenuates shadows."),
                                 _receiveShadowTexture,
                                 _receiveShadowRate);
                             materialEditor.TexturePropertySingleLine(
@@ -314,7 +314,7 @@ namespace MToon
 
                     EditorGUILayout.LabelField("Auto Animation", EditorStyles.boldLabel);
                     {
-                        materialEditor.TexturePropertySingleLine(new GUIContent("Mask"), _uvAnimMaskTexture);
+                        materialEditor.TexturePropertySingleLine(new GUIContent("Mask", "Auto Animation Mask Texture (R)"), _uvAnimMaskTexture);
                         materialEditor.ShaderProperty(_uvAnimScrollX, "Scroll X (per second)");
                         materialEditor.ShaderProperty(_uvAnimScrollY, "Scroll Y (per second)");
                         materialEditor.ShaderProperty(_uvAnimRotation, "Rotation (per second)");
