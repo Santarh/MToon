@@ -81,8 +81,6 @@ namespace MToon
                 {
                     MainTextureLeftBottomOriginScale = material.GetTextureScale(PropMainTex),
                     MainTextureLeftBottomOriginOffset = material.GetTextureOffset(PropMainTex),
-                    UvOffsetNormalTexture = GetTexture(material, PropUvOffsetNormalTexture),
-                    UvOffsetNormalScaleValue = GetValue(material, PropUvOffsetNormalScale),
                     UvAnimationMaskTexture = GetTexture(material, PropUvAnimMaskTexture),
                     UvAnimationScrollXSpeedValue = GetValue(material, PropUvAnimScrollX),
                     UvAnimationScrollYSpeedValue = GetValue(material, PropUvAnimScrollY),

@@ -32,8 +32,6 @@ half _OutlineWidth;
 half _OutlineScaledMaxDistance;
 fixed4 _OutlineColor;
 half _OutlineLightingMix;
-sampler2D _UvOffsetNormalTexture;
-float _UvOffsetNormalScale;
 sampler2D _UvAnimMaskTexture;
 float _UvAnimScrollX;
 float _UvAnimScrollY;
@@ -123,9 +121,6 @@ float4 frag_forward(v2f i) : SV_TARGET
     
     // uv
     float2 mainUv = TRANSFORM_TEX(i.uv0, _MainTex);
-    
-    // offset uv with normal.xy*scale*0.01
-    mainUv += UnpackScaleNormal(tex2D(_UvOffsetNormalTexture, mainUv), _UvOffsetNormalScale * 0.01).xy;
     
     // uv anim
     half uvAnim = tex2D(_UvAnimMaskTexture, mainUv).r * _Time.y;
