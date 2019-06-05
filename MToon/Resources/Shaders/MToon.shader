@@ -30,7 +30,7 @@ Shader "VRM/MToon"
         _OutlineScaledMaxDistance ("Outline Scaled Max Distance", Range(1, 10)) = 1
         _OutlineColor ("Outline Color", Color) = (0,0,0,1)
         _OutlineLightingMix ("Outline Lighting Mix", Range(0, 1)) = 1
-        _UvAnimMaskTexture ("UV Animation Mask", 2D) = "white" {}
+        [NoScaleOffset] _UvAnimMaskTexture ("UV Animation Mask", 2D) = "white" {}
         _UvAnimScrollX ("UV Animation Scroll X", Float) = 0
         _UvAnimScrollY ("UV Animation Scroll Y", Float) = 0
         _UvAnimRotation ("UV Animation Rotation", Float) = 0
