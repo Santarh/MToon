@@ -209,6 +209,8 @@ float4 frag_forward(v2f i) : SV_TARGET
     half3 indirectLighting = lerp(toonedGI, ShadeSH9(half4(worldNormal, 1)), _IndirectLightIntensity);
     indirectLighting = lerp(indirectLighting, max(EPS_COL, max(indirectLighting.x, max(indirectLighting.y, indirectLighting.z))), _LightColorAttenuation); // color atten
     col += indirectLighting * lit;
+    
+    col = min(col, lit); // comment out if you want to PBR absolutely.
 #endif
 
     // parametric rim lighting
