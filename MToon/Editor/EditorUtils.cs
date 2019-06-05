@@ -7,11 +7,11 @@ namespace MToon
 {
     public class EditorUtils
     {
-        private static string BasePath => Path.Combine(Application.dataPath, "VRM/MToon");
+        private static string BasePath { get { return Path.Combine(Application.dataPath, "VRM/MToon"); } }
 
-        private static string ShaderFilePath => Path.Combine(BasePath, "MToon/Resources/Shaders/MToon.shader");
-        private static string ReadMeFilePath => Path.Combine(BasePath, "README.md");
-        private static string VersionFilePath => Path.Combine(BasePath, "MToon/Scripts/UtilsVersion.cs");
+        private static string ShaderFilePath { get { return Path.Combine(BasePath, "MToon/Resources/Shaders/MToon.shader"); } }
+        private static string ReadMeFilePath { get { return Path.Combine(BasePath, "README.md"); } }
+        private static string VersionFilePath { get { return Path.Combine(BasePath, "MToon/Scripts/UtilsVersion.cs"); } }
 
 
         //[MenuItem("VRM/MToon Version Up")]
