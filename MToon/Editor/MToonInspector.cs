@@ -436,7 +436,7 @@ namespace MToon
                 }
                 case MToon.RotationUnit.Radians:
                 {
-                    return val / 2.0f;
+                    return val / (2.0f * 3.14159265359f);
                 }
                 default:
                     return val;
@@ -456,7 +456,7 @@ namespace MToon
                 }
                 case MToon.RotationUnit.Radians:
                 {
-                    return val * 2.0f;
+                    return val * (2.0f * 3.14159265359f);
                 }
                 default:
                     return val;
