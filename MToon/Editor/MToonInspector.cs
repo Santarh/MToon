@@ -51,6 +51,9 @@ namespace MToon
         private MaterialProperty _uvAnimScrollY;
         private MaterialProperty _uvAnimRotation;
 
+        private MToon.RotationUnit uvRotationUnit = MToon.RotationUnit.Rounds ;
+        private float uvRotation;
+
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
             _version = FindProperty(Utils.PropVersion, properties);
@@ -92,7 +95,7 @@ namespace MToon
             _uvAnimScrollX = FindProperty(Utils.PropUvAnimScrollX, properties);
             _uvAnimScrollY = FindProperty(Utils.PropUvAnimScrollY, properties);
             _uvAnimRotation = FindProperty(Utils.PropUvAnimRotation, properties);
-
+            uvRotation = getUvRotationValue(uvRotationUnit, _uvAnimRotation.floatValue);
             var materials = materialEditor.targets.Select(x => x as Material).ToArray();
             Draw(materialEditor, materials);
         }
@@ -317,7 +320,11 @@ namespace MToon
                         materialEditor.TexturePropertySingleLine(new GUIContent("Mask", "Auto Animation Mask Texture (R)"), _uvAnimMaskTexture);
                         materialEditor.ShaderProperty(_uvAnimScrollX, "Scroll X (per second)");
                         materialEditor.ShaderProperty(_uvAnimScrollY, "Scroll Y (per second)");
-                        materialEditor.ShaderProperty(_uvAnimRotation, "Rotation (per second)");
+                        uvRotationUnit = (MToon.RotationUnit)EditorGUILayout.EnumPopup("Rotation Unit", uvRotationUnit);
+                        uvRotation = EditorGUILayout.DelayedFloatField("Rotation value (per second)", uvRotation);
+                        _uvAnimRotation.floatValue = getUvRoundValue( uvRotationUnit, uvRotation);
+                        //materialEditor.ShaderProperty(_uvAnimRotation, "Rotation (per second)");
+             
                     }
                 }
                 EditorGUILayout.EndVertical();
@@ -400,6 +407,39 @@ namespace MToon
 #endif
                 showAlpha: false);
             
+        }
+
+        private float getUvRoundValue(MToon.RotationUnit unit , float val)
+        {
+            if (unit == MToon.RotationUnit.Rounds)
+            {
+                return val;
+            }
+            else if (unit == MToon.RotationUnit.Degrees)
+            {
+                return val / 360.0f;
+            }
+            else if (unit == MToon.RotationUnit.Radians)
+            {
+                return val / 2.0f;
+            }
+            return val;
+        }
+        private float getUvRotationValue(MToon.RotationUnit unit,float val)
+        {
+            if (unit == MToon.RotationUnit.Rounds)
+            {
+                return val;
+            }
+            else if (unit == MToon.RotationUnit.Degrees)
+            {
+                return val * 360.0f;
+            }
+            else if (unit == MToon.RotationUnit.Radians)
+            {
+                return val * 2.0f;
+            }
+            return val;
         }
     }
 }
