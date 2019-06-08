@@ -37,9 +37,9 @@ namespace MToon
 
     public enum RotationUnit
     {
-        Degrees = 0,
-        Radians = 1,
-        Rounds = 2
+        Rounds = 0,
+        Degrees = 1,
+        Radians = 2
     }
 
     public struct RenderQueueRequirement
