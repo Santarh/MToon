@@ -9,6 +9,7 @@ namespace MToon
     public class MToonInspector : ShaderGUI
     {
         private static bool isAdvancedLightingPanelFoldout = false;
+        private static MToon.RotationUnit ofUvRotationUnit = MToon.RotationUnit.Rounds;
 
         private MaterialProperty _version;
         private MaterialProperty _blendMode;
@@ -92,7 +93,6 @@ namespace MToon
             _uvAnimScrollX = FindProperty(Utils.PropUvAnimScrollX, properties);
             _uvAnimScrollY = FindProperty(Utils.PropUvAnimScrollY, properties);
             _uvAnimRotation = FindProperty(Utils.PropUvAnimRotation, properties);
-
             var materials = materialEditor.targets.Select(x => x as Material).ToArray();
             Draw(materialEditor, materials);
         }
@@ -317,7 +317,27 @@ namespace MToon
                         materialEditor.TexturePropertySingleLine(new GUIContent("Mask", "Auto Animation Mask Texture (R)"), _uvAnimMaskTexture);
                         materialEditor.ShaderProperty(_uvAnimScrollX, "Scroll X (per second)");
                         materialEditor.ShaderProperty(_uvAnimScrollY, "Scroll Y (per second)");
-                        materialEditor.ShaderProperty(_uvAnimRotation, "Rotation (per second)");
+
+                        switch (EditorGUILayout.EnumPopup("Rotation Unit", ofUvRotationUnit))
+                        {
+                            case MToon.RotationUnit.Rounds:
+                                ofUvRotationUnit = MToon.RotationUnit.Rounds;
+                                break;
+                            case MToon.RotationUnit.Degrees:
+                                ofUvRotationUnit = MToon.RotationUnit.Degrees;
+                                break;
+                            case MToon.RotationUnit.Radians:
+                                ofUvRotationUnit = MToon.RotationUnit.Radians;
+                                break;
+                            default:
+                                ofUvRotationUnit = MToon.RotationUnit.Rounds;
+                                break;
+                        };
+                        var uvRotation = GetUvRotationValue(ofUvRotationUnit, _uvAnimRotation.floatValue);
+                        
+                        uvRotation = EditorGUILayout.DelayedFloatField("Rotation value (per second)", uvRotation);
+                        _uvAnimRotation.floatValue = GetUvRoundValue(ofUvRotationUnit, uvRotation);
+             
                     }
                 }
                 EditorGUILayout.EndVertical();
@@ -400,6 +420,47 @@ namespace MToon
 #endif
                 showAlpha: false);
             
+        }
+
+        private float GetUvRoundValue(MToon.RotationUnit unit , float val)
+        {
+            switch (unit)
+            {
+                case MToon.RotationUnit.Rounds:
+                {
+                    return val;
+                }
+                case MToon.RotationUnit.Degrees:
+                {
+                    return val / 360.0f;
+                }
+                case MToon.RotationUnit.Radians:
+                {
+                    return val / (2.0f * 3.14159265359f);
+                }
+                default:
+                    return val;
+            }
+        }
+        private float GetUvRotationValue(MToon.RotationUnit unit,float val)
+        {
+            switch (unit)
+            {
+                case MToon.RotationUnit.Rounds:
+                {
+                    return val;
+                }
+                case MToon.RotationUnit.Degrees:
+                {
+                    return val * 360.0f;
+                }
+                case MToon.RotationUnit.Radians:
+                {
+                    return val * (2.0f * 3.14159265359f);
+                }
+                default:
+                    return val;
+            }
         }
     }
 }

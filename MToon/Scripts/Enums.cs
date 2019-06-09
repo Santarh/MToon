@@ -35,6 +35,13 @@ namespace MToon
         Back = 2,
     }
 
+    public enum RotationUnit
+    {
+        Rounds = 0,
+        Degrees = 1,
+        Radians = 2
+    }
+
     public struct RenderQueueRequirement
     {
         public int DefaultValue;
