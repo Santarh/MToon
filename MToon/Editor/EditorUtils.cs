@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MToon
 {
-    public class EditorUtils
+    public static class EditorUtils
     {
         private static string BasePath { get { return Path.Combine(Application.dataPath, "VRM/MToon"); } }
 
