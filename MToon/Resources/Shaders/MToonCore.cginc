@@ -138,6 +138,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     half alpha = 1;
 #ifdef _ALPHATEST_ON
     alpha = _Color.a * mainTex.a;
+    alpha = (alpha - _Cutoff) / max(fwidth(alpha), EPS_COL) + 0.5; // Alpha to Coverage
     clip(alpha - _Cutoff);
 #endif
 #ifdef _ALPHABLEND_ON
