@@ -50,6 +50,7 @@ namespace MToon
         public const string PropSrcBlend = "_SrcBlend";
         public const string PropDstBlend = "_DstBlend";
         public const string PropZWrite = "_ZWrite";
+        public const string PropAlphaToMask = "_AlphaToMask";
 
         public const string KeyNormalMap = "_NORMALMAP";
         public const string KeyAlphaTestOn = "_ALPHATEST_ON";

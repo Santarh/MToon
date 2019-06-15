@@ -137,6 +137,7 @@ namespace MToon
                     material.SetInt(PropSrcBlend, (int) BlendMode.One);
                     material.SetInt(PropDstBlend, (int) BlendMode.Zero);
                     material.SetInt(PropZWrite, EnabledIntValue);
+                    material.SetInt(PropAlphaToMask, DisabledIntValue);
                     SetKeyword(material, KeyAlphaTestOn, false);
                     SetKeyword(material, KeyAlphaBlendOn, false);
                     SetKeyword(material, KeyAlphaPremultiplyOn, false);
@@ -146,6 +147,7 @@ namespace MToon
                     material.SetInt(PropSrcBlend, (int) BlendMode.One);
                     material.SetInt(PropDstBlend, (int) BlendMode.Zero);
                     material.SetInt(PropZWrite, EnabledIntValue);
+                    material.SetInt(PropAlphaToMask, EnabledIntValue);
                     SetKeyword(material, KeyAlphaTestOn, true);
                     SetKeyword(material, KeyAlphaBlendOn, false);
                     SetKeyword(material, KeyAlphaPremultiplyOn, false);
@@ -155,6 +157,7 @@ namespace MToon
                     material.SetInt(PropSrcBlend, (int) BlendMode.SrcAlpha);
                     material.SetInt(PropDstBlend, (int) BlendMode.OneMinusSrcAlpha);
                     material.SetInt(PropZWrite, DisabledIntValue);
+                    material.SetInt(PropAlphaToMask, DisabledIntValue);
                     SetKeyword(material, KeyAlphaTestOn, false);
                     SetKeyword(material, KeyAlphaBlendOn, true);
                     SetKeyword(material, KeyAlphaPremultiplyOn, false);
@@ -164,6 +167,7 @@ namespace MToon
                     material.SetInt(PropSrcBlend, (int) BlendMode.SrcAlpha);
                     material.SetInt(PropDstBlend, (int) BlendMode.OneMinusSrcAlpha);
                     material.SetInt(PropZWrite, EnabledIntValue);
+                    material.SetInt(PropAlphaToMask, DisabledIntValue);
                     SetKeyword(material, KeyAlphaTestOn, false);
                     SetKeyword(material, KeyAlphaBlendOn, true);
                     SetKeyword(material, KeyAlphaPremultiplyOn, false);

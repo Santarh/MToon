@@ -45,6 +45,7 @@ Shader "VRM/MToon"
         [HideInInspector] _SrcBlend ("_SrcBlend", Float) = 1.0
         [HideInInspector] _DstBlend ("_DstBlend", Float) = 0.0
         [HideInInspector] _ZWrite ("_ZWrite", Float) = 1.0
+        [HideInInspector] _AlphaToMask ("_AlphaToMask", Float) = 0.0
     }
     
     // for SM 3.0
@@ -63,7 +64,7 @@ Shader "VRM/MToon"
             ZWrite [_ZWrite]
             ZTest LEqual
             BlendOp Add, Max
-            AlphaToMask On
+            AlphaToMask [_AlphaToMask]
 
             CGPROGRAM
             #pragma target 3.0
@@ -92,7 +93,7 @@ Shader "VRM/MToon"
             ZTest LEqual
             Offset 1, 1
             BlendOp Add, Max
-            AlphaToMask On
+            AlphaToMask [_AlphaToMask]
 
             CGPROGRAM
             #pragma target 3.0
@@ -123,7 +124,7 @@ Shader "VRM/MToon"
             ZWrite Off
             ZTest LEqual
             BlendOp Add, Max
-            AlphaToMask On
+            AlphaToMask [_AlphaToMask]
 
             CGPROGRAM
             #pragma target 3.0
