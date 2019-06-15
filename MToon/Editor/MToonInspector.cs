@@ -8,9 +8,12 @@ namespace MToon
 {
     public class MToonInspector : ShaderGUI
     {
-        private static bool isAdvancedLightingPanelFoldout = false;
-        private static MToon.RotationUnit ofUvRotationUnit = MToon.RotationUnit.Rounds;
+        private const float RoundsToDegree = 360f;
+        private const float RoundsToRadian = (float) Math.PI * 2f;
 
+        private static bool isAdvancedLightingPanelFoldout = false;
+        private static EditorRotationUnit editorRotationUnit = EditorRotationUnit.Rounds;
+        
         private MaterialProperty _version;
         private MaterialProperty _blendMode;
         private MaterialProperty _bumpMap;
@@ -318,26 +321,27 @@ namespace MToon
                         materialEditor.ShaderProperty(_uvAnimScrollX, "Scroll X (per second)");
                         materialEditor.ShaderProperty(_uvAnimScrollY, "Scroll Y (per second)");
 
-                        switch (EditorGUILayout.EnumPopup("Rotation Unit", ofUvRotationUnit))
                         {
-                            case MToon.RotationUnit.Rounds:
-                                ofUvRotationUnit = MToon.RotationUnit.Rounds;
-                                break;
-                            case MToon.RotationUnit.Degrees:
-                                ofUvRotationUnit = MToon.RotationUnit.Degrees;
-                                break;
-                            case MToon.RotationUnit.Radians:
-                                ofUvRotationUnit = MToon.RotationUnit.Radians;
-                                break;
-                            default:
-                                ofUvRotationUnit = MToon.RotationUnit.Rounds;
-                                break;
-                        };
-                        var uvRotation = GetUvRotationValue(ofUvRotationUnit, _uvAnimRotation.floatValue);
-                        
-                        uvRotation = EditorGUILayout.DelayedFloatField("Rotation value (per second)", uvRotation);
-                        _uvAnimRotation.floatValue = GetUvRoundValue(ofUvRotationUnit, uvRotation);
-             
+                            var control = EditorGUILayout.GetControlRect(hasLabel: true);
+                            const int popupMargin = 5;
+                            const int popupWidth = 80;
+
+                            var floatControl = new Rect(control);
+                            floatControl.width -= popupMargin + popupWidth;
+                            var popupControl = new Rect(control);
+                            popupControl.x = floatControl.x + floatControl.width + popupMargin;
+                            popupControl.width = popupWidth;
+                            
+                            EditorGUI.BeginChangeCheck();
+                            var inspectorRotationValue = GetInspectorRotationValue(editorRotationUnit, _uvAnimRotation.floatValue);
+                            inspectorRotationValue = EditorGUI.FloatField(floatControl, "Rotation value (per second)", inspectorRotationValue);
+                            if (EditorGUI.EndChangeCheck())
+                            {
+                                materialEditor.RegisterPropertyChangeUndo("UvAnimRotationValueChanged");
+                                _uvAnimRotation.floatValue = GetRawRotationValue(editorRotationUnit, inspectorRotationValue);
+                            }
+                            editorRotationUnit = (EditorRotationUnit) EditorGUI.EnumPopup(popupControl, editorRotationUnit);
+                        }
                     }
                 }
                 EditorGUILayout.EndVertical();
@@ -422,44 +426,33 @@ namespace MToon
             
         }
 
-        private float GetUvRoundValue(MToon.RotationUnit unit , float val)
+        private static float GetRawRotationValue(EditorRotationUnit unit, float inspectorValue)
         {
             switch (unit)
             {
-                case MToon.RotationUnit.Rounds:
-                {
-                    return val;
-                }
-                case MToon.RotationUnit.Degrees:
-                {
-                    return val / 360.0f;
-                }
-                case MToon.RotationUnit.Radians:
-                {
-                    return val / (2.0f * 3.14159265359f);
-                }
+                case EditorRotationUnit.Rounds:
+                    return inspectorValue;
+                case EditorRotationUnit.Degrees:
+                    return inspectorValue / RoundsToDegree;
+                case EditorRotationUnit.Radians:
+                    return inspectorValue / RoundsToRadian;
                 default:
-                    return val;
+                    throw new ArgumentOutOfRangeException();
             }
         }
-        private float GetUvRotationValue(MToon.RotationUnit unit,float val)
+
+        private static float GetInspectorRotationValue(EditorRotationUnit unit, float rawValue)
         {
             switch (unit)
             {
-                case MToon.RotationUnit.Rounds:
-                {
-                    return val;
-                }
-                case MToon.RotationUnit.Degrees:
-                {
-                    return val * 360.0f;
-                }
-                case MToon.RotationUnit.Radians:
-                {
-                    return val * (2.0f * 3.14159265359f);
-                }
+                case EditorRotationUnit.Rounds:
+                    return rawValue;
+                case EditorRotationUnit.Degrees:
+                    return rawValue * RoundsToDegree;
+                case EditorRotationUnit.Radians:
+                    return rawValue * RoundsToRadian;
                 default:
-                    return val;
+                    throw new ArgumentOutOfRangeException();
             }
         }
     }
