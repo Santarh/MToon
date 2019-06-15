@@ -63,6 +63,7 @@ Shader "VRM/MToon"
             ZWrite [_ZWrite]
             ZTest LEqual
             BlendOp Add, Max
+            AlphaToMask On
 
             CGPROGRAM
             #pragma target 3.0
@@ -91,6 +92,7 @@ Shader "VRM/MToon"
             ZTest LEqual
             Offset 1, 1
             BlendOp Add, Max
+            AlphaToMask On
 
             CGPROGRAM
             #pragma target 3.0
@@ -121,6 +123,7 @@ Shader "VRM/MToon"
             ZWrite Off
             ZTest LEqual
             BlendOp Add, Max
+            AlphaToMask On
 
             CGPROGRAM
             #pragma target 3.0
