@@ -54,6 +54,7 @@ namespace MToon
         private MaterialProperty _uvAnimScrollX;
         private MaterialProperty _uvAnimScrollY;
         private MaterialProperty _uvAnimRotation;
+        private MaterialProperty _stencilMode;
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
@@ -96,6 +97,7 @@ namespace MToon
             _uvAnimScrollX = FindProperty(Utils.PropUvAnimScrollX, properties);
             _uvAnimScrollY = FindProperty(Utils.PropUvAnimScrollY, properties);
             _uvAnimRotation = FindProperty(Utils.PropUvAnimRotation, properties);
+            _stencilMode = FindProperty(Utils.PropStencilMode, properties);
             var materials = materialEditor.targets.Select(x => x as Material).ToArray();
             Draw(materialEditor, materials);
         }
@@ -123,6 +125,14 @@ namespace MToon
                     if (PopupEnum<CullMode>("Cull Mode", _cullMode, materialEditor))
                     {
                         ModeChanged(materials);
+                    }
+
+                    if ((RenderMode) _blendMode.floatValue == RenderMode.Cutout)
+                    {
+                        if (PopupEnum<StencilMode>("Stencil Mode", _stencilMode, materialEditor))
+                        {
+                            ModeChanged(materials);
+                        }
                     }
                 }
                 EditorGUILayout.EndVertical();

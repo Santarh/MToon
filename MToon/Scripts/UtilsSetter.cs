@@ -15,6 +15,7 @@ namespace MToon
             {
                 var rendering = parameters.Rendering;
                 ValidateBlendMode(material, rendering.RenderMode, isChangedByUser: true);
+                ValidateStencilMode(material, rendering.StencilMode);
                 ValidateCullMode(material, rendering.CullMode);
                 ValidateRenderQueue(material, offset: rendering.RenderQueueOffsetNumber);
             }
@@ -94,6 +95,7 @@ namespace MToon
         public static void ValidateProperties(Material material, bool isBlendModeChangedByUser = false)
         {
             ValidateBlendMode(material, (RenderMode) material.GetFloat(PropBlendMode), isBlendModeChangedByUser);
+            ValidateStencilMode(material, (StencilMode) material.GetFloat(PropStencilMode));
             ValidateNormalMode(material, material.GetTexture(PropBumpMap));
             ValidateOutlineMode(material,
                 (OutlineWidthMode) material.GetFloat(PropOutlineWidthMode),
@@ -174,20 +176,57 @@ namespace MToon
                     break;
             }
 
+            if (renderMode != RenderMode.Cutout)
+            {
+                material.SetInt(PropStencilMode, (int) StencilMode.None);
+            }
+            ValidateStencilMode(material, GetStencilMode(material));
+            
             if (isChangedByUser)
             {
                 ValidateRenderQueue(material, offset: 0);
             }
             else
             {
-                var requirement = GetRenderQueueRequirement(renderMode);
+                var requirement = GetRenderQueueRequirement(renderMode, GetStencilMode(material));
                 ValidateRenderQueue(material, offset: material.renderQueue - requirement.DefaultValue);
             }
         }
 
+        private static void ValidateStencilMode(Material material, StencilMode stencilMode)
+        {
+            switch (stencilMode)
+            {
+                case StencilMode.None:
+                    material.SetInt(PropStencilRef, 0);
+                    material.SetInt(PropStencilComp, (int) CompareFunction.Disabled);
+                    material.SetInt(PropStencilPass, (int) StencilOp.Keep);
+                    material.SetInt(PropStencilFail, (int) StencilOp.Keep);
+                    material.SetInt(PropStencilZFail, (int) StencilOp.Keep);
+                    break;
+                case StencilMode.Mask:
+                    material.SetInt(PropStencilRef, 1);
+                    material.SetInt(PropStencilComp, (int) CompareFunction.Always);
+                    material.SetInt(PropStencilPass, (int) StencilOp.Replace);
+                    material.SetInt(PropStencilFail, (int) StencilOp.Keep);
+                    material.SetInt(PropStencilZFail, (int) StencilOp.Keep);
+                    break;
+                case StencilMode.Out:
+                    material.SetInt(PropStencilRef, 1);
+                    material.SetInt(PropStencilComp, (int) CompareFunction.NotEqual);
+                    material.SetInt(PropStencilPass, (int) StencilOp.Keep);
+                    material.SetInt(PropStencilFail, (int) StencilOp.Keep);
+                    material.SetInt(PropStencilZFail, (int) StencilOp.Keep);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(stencilMode), stencilMode, null);
+            }
+
+        }
+
         private static void ValidateRenderQueue(Material material, int offset)
         {
-            var requirement = GetRenderQueueRequirement(GetBlendMode(material));
+            var requirement = GetRenderQueueRequirement(GetBlendMode(material), GetStencilMode(material));
             var value = Mathf.Clamp(requirement.DefaultValue + offset, requirement.MinValue, requirement.MaxValue);
             material.renderQueue = value;
         }

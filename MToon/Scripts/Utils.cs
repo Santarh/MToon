@@ -51,6 +51,12 @@ namespace MToon
         public const string PropDstBlend = "_DstBlend";
         public const string PropZWrite = "_ZWrite";
         public const string PropAlphaToMask = "_AlphaToMask";
+        public const string PropStencilMode = "_StencilMode";
+        public const string PropStencilRef = "_StencilRef";
+        public const string PropStencilComp = "_StencilComp";
+        public const string PropStencilPass = "_StencilPass";
+        public const string PropStencilFail = "_StencilFail";
+        public const string PropStencilZFail = "_StencilZFail";
 
         public const string KeyNormalMap = "_NORMALMAP";
         public const string KeyAlphaTestOn = "_ALPHATEST_ON";
@@ -71,7 +77,7 @@ namespace MToon
         public const int DisabledIntValue = 0;
         public const int EnabledIntValue = 1;
         
-        public static RenderQueueRequirement GetRenderQueueRequirement(RenderMode renderMode)
+        public static RenderQueueRequirement GetRenderQueueRequirement(RenderMode renderMode, StencilMode stencilMode)
         {
             const int shaderDefaultQueue = -1;
             const int firstTransparentQueue = 2501;
@@ -87,12 +93,32 @@ namespace MToon
                         MaxValue = shaderDefaultQueue,
                     };
                 case RenderMode.Cutout:
-                    return new RenderQueueRequirement()
+                    switch (stencilMode)
                     {
-                        DefaultValue = (int) RenderQueue.AlphaTest,
-                        MinValue = (int) RenderQueue.AlphaTest,
-                        MaxValue = (int) RenderQueue.AlphaTest,
-                    };
+                        case StencilMode.None:
+                            return new RenderQueueRequirement()
+                            {
+                                DefaultValue = (int) RenderQueue.AlphaTest,
+                                MinValue = (int) RenderQueue.AlphaTest,
+                                MaxValue = (int) RenderQueue.AlphaTest,
+                            };
+                        case StencilMode.Mask:
+                            return new RenderQueueRequirement()
+                            {
+                                DefaultValue = (int) RenderQueue.AlphaTest + 1,
+                                MinValue = (int) RenderQueue.AlphaTest + 1,
+                                MaxValue = (int) RenderQueue.AlphaTest + 1,
+                            };
+                        case StencilMode.Out:
+                            return new RenderQueueRequirement()
+                            {
+                                DefaultValue = (int) RenderQueue.AlphaTest + 2,
+                                MinValue = (int) RenderQueue.AlphaTest + 2,
+                                MaxValue = (int) RenderQueue.AlphaTest + 2,
+                            };
+                        default:
+                            throw new ArgumentOutOfRangeException("stencilMode", stencilMode, null);
+                    }
                 case RenderMode.Transparent:
                     return new RenderQueueRequirement()
                     {

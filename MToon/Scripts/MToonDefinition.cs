@@ -25,6 +25,7 @@ namespace MToon
     {
         public RenderMode RenderMode;
         public CullMode CullMode;
+        public StencilMode StencilMode;
         public int RenderQueueOffsetNumber;
     }
 

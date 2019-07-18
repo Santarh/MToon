@@ -35,6 +35,13 @@ namespace MToon
         Back = 2,
     }
 
+    public enum StencilMode
+    {
+        None = 0,
+        Mask = 1,
+        Out = 2,
+    }
+
     public struct RenderQueueRequirement
     {
         public int DefaultValue;

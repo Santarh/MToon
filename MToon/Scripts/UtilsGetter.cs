@@ -18,7 +18,7 @@ namespace MToon
                 {
                     RenderMode = GetBlendMode(material),
                     CullMode = GetCullMode(material),
-                    RenderQueueOffsetNumber = GetRenderQueueOffset(material, GetRenderQueueOriginMode(material)),
+                    RenderQueueOffsetNumber = GetRenderQueueOffset(material, GetBlendMode(material), GetStencilMode(material)),
                 },
                 Color = new ColorDefinition
                 {
@@ -129,6 +129,11 @@ namespace MToon
             }
         }
 
+        private static StencilMode GetStencilMode(Material material)
+        {
+            return (StencilMode) material.GetInt(PropStencilMode);
+        }
+
         private static CullMode GetCullMode(Material material)
         {
             switch ((CullMode) material.GetInt(PropCullMode))
@@ -166,10 +171,10 @@ namespace MToon
             return GetBlendMode(material);
         }
 
-        private static int GetRenderQueueOffset(Material material, RenderMode originMode)
+        private static int GetRenderQueueOffset(Material material, RenderMode renderMode, StencilMode stencilMode)
         {
             var rawValue = material.renderQueue;
-            var requirement = GetRenderQueueRequirement(originMode);
+            var requirement = GetRenderQueueRequirement(renderMode, stencilMode);
             if (rawValue < requirement.MinValue || rawValue > requirement.MaxValue)
             {
                 return 0;

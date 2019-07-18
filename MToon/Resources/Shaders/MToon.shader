@@ -46,6 +46,12 @@ Shader "VRM/MToon"
         [HideInInspector] _DstBlend ("_DstBlend", Float) = 0.0
         [HideInInspector] _ZWrite ("_ZWrite", Float) = 1.0
         [HideInInspector] _AlphaToMask ("_AlphaToMask", Float) = 0.0
+        [HideInInspector] _StencilMode ("_StencilMode", Float) = 0
+        [HideInInspector] _StencilRef ("_StencilRef", Int) = 0
+        [HideInInspector] _StencilComp ("_StencilComp", Int) = 0
+        [HideInInspector] _StencilPass ("_StencilPass", Int) = 0
+        [HideInInspector] _StencilFail ("_StencilFail", Int) = 0
+        [HideInInspector] _StencilZFail ("_StencilZFail", Int) = 0
     }
     
     // for SM 3.0
@@ -65,6 +71,15 @@ Shader "VRM/MToon"
             ZTest LEqual
             BlendOp Add, Max
             AlphaToMask [_AlphaToMask]
+            
+            Stencil
+            {
+                Ref [_StencilRef]
+                Comp [_StencilComp]
+                Pass [_StencilPass]
+                Fail [_StencilFail]
+                ZFail [_StencilZFail]
+            }
 
             CGPROGRAM
             #pragma target 3.0
@@ -94,6 +109,15 @@ Shader "VRM/MToon"
             Offset 1, 1
             BlendOp Add, Max
             AlphaToMask [_AlphaToMask]
+
+            Stencil
+            {
+                Ref [_StencilRef]
+                Comp [_StencilComp]
+                Pass [_StencilPass]
+                Fail [_StencilFail]
+                ZFail [_StencilZFail]
+            }
 
             CGPROGRAM
             #pragma target 3.0
@@ -125,6 +149,15 @@ Shader "VRM/MToon"
             ZTest LEqual
             BlendOp Add, Max
             AlphaToMask [_AlphaToMask]
+
+            Stencil
+            {
+                Ref [_StencilRef]
+                Comp [_StencilComp]
+                Pass [_StencilPass]
+                Fail [_StencilFail]
+                ZFail [_StencilZFail]
+            }
 
             CGPROGRAM
             #pragma target 3.0
