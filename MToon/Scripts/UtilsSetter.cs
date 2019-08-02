@@ -96,7 +96,7 @@ namespace MToon
         {
             SetRenderMode(material,
                 (RenderMode) material.GetFloat(PropBlendMode),
-                material.renderQueue - GetRenderQueueOffset(material, GetBlendMode(material)),
+                material.renderQueue - GetRenderQueueRequirement((RenderMode) material.GetFloat(PropBlendMode)).DefaultValue,
                 useDefaultRenderQueue: isBlendModeChangedByUser);
             SetNormalMapping(material, material.GetTexture(PropBumpMap), material.GetFloat(PropBumpScale));
             SetOutlineMode(material,
