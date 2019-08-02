@@ -14,9 +14,9 @@ namespace MToon
             }
             {
                 var rendering = parameters.Rendering;
-                ValidateBlendMode(material, rendering.RenderMode, isChangedByUser: true);
-                ValidateCullMode(material, rendering.CullMode);
-                ValidateRenderQueue(material, offset: rendering.RenderQueueOffsetNumber);
+                SetRenderMode(material, rendering.RenderMode, rendering.RenderQueueOffsetNumber,
+                    useDefaultRenderQueue: false);
+                SetCullMode(material, rendering.CullMode);
             }
             {
                 var color = parameters.Color;
@@ -44,8 +44,7 @@ namespace MToon
                 }
                 {
                     var prop = lighting.Normal;
-                    SetTexture(material, PropBumpMap, prop.NormalTexture);
-                    SetValue(material, PropBumpScale, prop.NormalScaleValue);
+                    SetNormalMapping(material, prop.NormalTexture, prop.NormalScaleValue);
                 }
             }
             {
@@ -72,7 +71,7 @@ namespace MToon
                 SetValue(material, PropOutlineScaledMaxDistance, outline.OutlineScaledMaxDistanceValue);
                 SetColor(material, PropOutlineColor, outline.OutlineColor);
                 SetValue(material, PropOutlineLightingMix, outline.OutlineLightingMixValue);
-                ValidateOutlineMode(material, outline.OutlineWidthMode, outline.OutlineColorMode);
+                SetOutlineMode(material, outline.OutlineWidthMode, outline.OutlineColorMode);
             }
             {
                 var textureOptions = parameters.TextureOption;
@@ -83,6 +82,8 @@ namespace MToon
                 material.SetFloat(PropUvAnimScrollY, textureOptions.UvAnimationScrollYSpeedValue);
                 material.SetFloat(PropUvAnimRotation, textureOptions.UvAnimationRotationSpeedValue);
             }
+            
+            ValidateProperties(material, isBlendModeChangedByUser: false);
         }
 
         /// <summary>
@@ -93,13 +94,16 @@ namespace MToon
         /// <param name="isBlendModeChangedByUser"></param>
         public static void ValidateProperties(Material material, bool isBlendModeChangedByUser = false)
         {
-            ValidateBlendMode(material, (RenderMode) material.GetFloat(PropBlendMode), isBlendModeChangedByUser);
-            ValidateNormalMode(material, material.GetTexture(PropBumpMap));
-            ValidateOutlineMode(material,
+            SetRenderMode(material,
+                (RenderMode) material.GetFloat(PropBlendMode),
+                material.renderQueue - GetRenderQueueOffset(material, GetBlendMode(material)),
+                useDefaultRenderQueue: isBlendModeChangedByUser);
+            SetNormalMapping(material, material.GetTexture(PropBumpMap), material.GetFloat(PropBumpScale));
+            SetOutlineMode(material,
                 (OutlineWidthMode) material.GetFloat(PropOutlineWidthMode),
                 (OutlineColorMode) material.GetFloat(PropOutlineColorMode));
-            ValidateDebugMode(material, (DebugMode) material.GetFloat(PropDebugMode));
-            ValidateCullMode(material, (CullMode) material.GetFloat(PropCullMode));
+            SetDebugMode(material, (DebugMode) material.GetFloat(PropDebugMode));
+            SetCullMode(material, (CullMode) material.GetFloat(PropCullMode));
 
             var mainTex = material.GetTexture(PropMainTex);
             var shadeTex = material.GetTexture(PropShadeTexture);
@@ -109,8 +113,10 @@ namespace MToon
             }
         }
 
-        private static void ValidateDebugMode(Material material, DebugMode debugMode)
+        private static void SetDebugMode(Material material, DebugMode debugMode)
         {
+            SetValue(material, PropDebugMode, (int) debugMode);
+            
             switch (debugMode)
             {
                 case DebugMode.None:
@@ -128,8 +134,11 @@ namespace MToon
             }
         }
 
-        public static void ValidateBlendMode(Material material, RenderMode renderMode, bool isChangedByUser)
+        private static void SetRenderMode(Material material, RenderMode renderMode, int renderQueueOffset,
+            bool useDefaultRenderQueue)
         {
+            SetValue(material, PropBlendMode, (int) renderMode);
+            
             switch (renderMode)
             {
                 case RenderMode.Opaque:
@@ -174,27 +183,25 @@ namespace MToon
                     break;
             }
 
-            if (isChangedByUser)
+            if (useDefaultRenderQueue)
             {
-                ValidateRenderQueue(material, offset: 0);
+                var requirement = GetRenderQueueRequirement(renderMode);
+                material.renderQueue = requirement.DefaultValue;
             }
             else
             {
                 var requirement = GetRenderQueueRequirement(renderMode);
-                ValidateRenderQueue(material, offset: material.renderQueue - requirement.DefaultValue);
+                material.renderQueue = Mathf.Clamp(
+                    requirement.DefaultValue + renderQueueOffset, requirement.MinValue, requirement.MaxValue);
             }
         }
 
-        private static void ValidateRenderQueue(Material material, int offset)
-        {
-            var requirement = GetRenderQueueRequirement(GetBlendMode(material));
-            var value = Mathf.Clamp(requirement.DefaultValue + offset, requirement.MinValue, requirement.MaxValue);
-            material.renderQueue = value;
-        }
-
-        private static void ValidateOutlineMode(Material material, OutlineWidthMode outlineWidthMode,
+        private static void SetOutlineMode(Material material, OutlineWidthMode outlineWidthMode,
             OutlineColorMode outlineColorMode)
         {
+            SetValue(material, PropOutlineWidthMode, (int) outlineWidthMode);
+            SetValue(material, PropOutlineColorMode, (int) outlineColorMode);
+            
             var isFixed = outlineColorMode == OutlineColorMode.FixedColor;
             var isMixed = outlineColorMode == OutlineColorMode.MixedLighting;
             
@@ -221,13 +228,18 @@ namespace MToon
             }
         }
 
-        private static void ValidateNormalMode(Material material, bool requireNormalMapping)
+        private static void SetNormalMapping(Material material, Texture bumpMap, float bumpScale)
         {
-            SetKeyword(material, KeyNormalMap, requireNormalMapping);
+            SetTexture(material, PropBumpMap, bumpMap);
+            SetValue(material, PropBumpScale, bumpScale);
+            
+            SetKeyword(material, KeyNormalMap, bumpMap != null);
         }
 
-        private static void ValidateCullMode(Material material, CullMode cullMode)
+        private static void SetCullMode(Material material, CullMode cullMode)
         {
+            SetValue(material, PropCullMode, (int) cullMode);
+            
             switch (cullMode)
             {
                 case CullMode.Back:
@@ -255,7 +267,7 @@ namespace MToon
             material.SetColor(propertyName, color);
         }
 
-        private static void SetTexture(Material material, string propertyName, Texture2D texture)
+        private static void SetTexture(Material material, string propertyName, Texture texture)
         {
             material.SetTexture(propertyName, texture);
         }
