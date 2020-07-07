@@ -140,6 +140,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     alpha = _Color.a * mainTex.a;
     alpha = (alpha - _Cutoff) / max(fwidth(alpha), EPS_COL) + 0.5; // Alpha to Coverage
     clip(alpha - _Cutoff);
+    alpha = 1.0; // Discarded, otherwise it should be assumed to have full opacity
 #endif
 #ifdef _ALPHABLEND_ON
     alpha = _Color.a * mainTex.a;
