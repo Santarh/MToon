@@ -144,6 +144,9 @@ float4 frag_forward(v2f i) : SV_TARGET
 #endif
 #ifdef _ALPHABLEND_ON
     alpha = _Color.a * mainTex.a;
+#if !_ALPHATEST_ON && SHADER_API_D3D11 // Only enable this on D3D11, where I tested it
+    clip(alpha - 0.0001);              // Slightly improves rendering with layered transparency
+#endif
 #endif
     
     // normal
