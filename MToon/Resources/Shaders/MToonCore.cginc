@@ -123,7 +123,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     float2 mainUv = TRANSFORM_TEX(i.uv0, _MainTex);
     
     // uv anim
-    half uvAnim = tex2D(_UvAnimMaskTexture, mainUv).r * _Time.y;
+    float uvAnim = tex2D(_UvAnimMaskTexture, mainUv).r * _Time.y;
     // translate uv in bottom-left origin coordinates.
     mainUv += float2(_UvAnimScrollX, _UvAnimScrollY) * uvAnim;
     // rotate uv counter-clockwise around (0.5, 0.5) in bottom-left origin coordinates.
