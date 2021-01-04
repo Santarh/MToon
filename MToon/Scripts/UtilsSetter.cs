@@ -1,4 +1,4 @@
-using System;
+
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -14,9 +14,10 @@ namespace MToon
             }
             {
                 var rendering = parameters.Rendering;
-                SetRenderMode(material, rendering.RenderMode, rendering.RenderQueueOffsetNumber,
+                SetRenderMode(material, rendering.RenderMode, rendering.StencilMode, rendering.RenderQueueOffsetNumber,
                     useDefaultRenderQueue: false);
                 SetCullMode(material, rendering.CullMode);
+                SetStencilMode(material, rendering.StencilMode);
             }
             {
                 var color = parameters.Color;
@@ -96,7 +97,8 @@ namespace MToon
         {
             SetRenderMode(material,
                 (RenderMode) material.GetFloat(PropBlendMode),
-                material.renderQueue - GetRenderQueueRequirement((RenderMode) material.GetFloat(PropBlendMode)).DefaultValue,
+                (StencilMode) material.GetFloat(PropStencilMode),
+                material.renderQueue - GetRenderQueueRequirement((RenderMode) material.GetFloat(PropBlendMode), (StencilMode) material.GetFloat(PropStencilMode)).DefaultValue,
                 useDefaultRenderQueue: isBlendModeChangedByUser);
             SetNormalMapping(material, material.GetTexture(PropBumpMap), material.GetFloat(PropBumpScale));
             SetOutlineMode(material,
@@ -104,6 +106,7 @@ namespace MToon
                 (OutlineColorMode) material.GetFloat(PropOutlineColorMode));
             SetDebugMode(material, (DebugMode) material.GetFloat(PropDebugMode));
             SetCullMode(material, (CullMode) material.GetFloat(PropCullMode));
+            SetStencilMode(material, (StencilMode) material.GetFloat(PropStencilMode));
 
             var mainTex = material.GetTexture(PropMainTex);
             var shadeTex = material.GetTexture(PropShadeTexture);
@@ -134,7 +137,7 @@ namespace MToon
             }
         }
 
-        private static void SetRenderMode(Material material, RenderMode renderMode, int renderQueueOffset,
+        private static void SetRenderMode(Material material, RenderMode renderMode, StencilMode stencilMode, int renderQueueOffset,
             bool useDefaultRenderQueue)
         {
             SetValue(material, PropBlendMode, (int) renderMode);
@@ -183,14 +186,39 @@ namespace MToon
                     break;
             }
 
+            switch (stencilMode)
+            {
+                case StencilMode.None:
+                    material.SetInt(PropStencilRef, 0);
+                    material.SetInt(PropStencilComp, (int) CompareFunction.Disabled);
+                    material.SetInt(PropStencilPass, (int) StencilOp.Keep);
+                    material.SetInt(PropStencilFail, (int) StencilOp.Keep);
+                    material.SetInt(PropStencilZFail, (int) StencilOp.Keep);
+                    break;
+                case StencilMode.Mask:
+                    material.SetInt(PropStencilRef, 1);
+                    material.SetInt(PropStencilComp, (int) CompareFunction.Always);
+                    material.SetInt(PropStencilPass, (int) StencilOp.Replace);
+                    material.SetInt(PropStencilFail, (int) StencilOp.Keep);
+                    material.SetInt(PropStencilZFail, (int) StencilOp.Keep);
+                    break;
+                case StencilMode.Out:
+                    material.SetInt(PropStencilRef, 1);
+                    material.SetInt(PropStencilComp, (int) CompareFunction.NotEqual);
+                    material.SetInt(PropStencilPass, (int) StencilOp.Keep);
+                    material.SetInt(PropStencilFail, (int) StencilOp.Keep);
+                    material.SetInt(PropStencilZFail, (int) StencilOp.Keep);
+                    break;
+            }
+            
             if (useDefaultRenderQueue)
             {
-                var requirement = GetRenderQueueRequirement(renderMode);
+                var requirement = GetRenderQueueRequirement(renderMode, stencilMode);
                 material.renderQueue = requirement.DefaultValue;
             }
             else
             {
-                var requirement = GetRenderQueueRequirement(renderMode);
+                var requirement = GetRenderQueueRequirement(renderMode, stencilMode);
                 material.renderQueue = Mathf.Clamp(
                     requirement.DefaultValue + renderQueueOffset, requirement.MinValue, requirement.MaxValue);
             }
@@ -239,7 +267,7 @@ namespace MToon
         private static void SetCullMode(Material material, CullMode cullMode)
         {
             SetValue(material, PropCullMode, (int) cullMode);
-            
+
             switch (cullMode)
             {
                 case CullMode.Back:
@@ -255,6 +283,10 @@ namespace MToon
                     material.SetInt(PropOutlineCullMode, (int) CullMode.Front);
                     break;
             }
+        }
+
+        private static void SetStencilMode(Material material, StencilMode stencilMode)
+        {
         }
 
         private static void SetValue(Material material, string propertyName, float val)
