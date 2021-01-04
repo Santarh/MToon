@@ -123,7 +123,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     float2 mainUv = TRANSFORM_TEX(i.uv0, _MainTex);
     
     // uv anim
-    half uvAnim = tex2D(_UvAnimMaskTexture, mainUv).r * _Time.y;
+    float uvAnim = tex2D(_UvAnimMaskTexture, mainUv).r * _Time.y;
     // translate uv in bottom-left origin coordinates.
     mainUv += float2(_UvAnimScrollX, _UvAnimScrollY) * uvAnim;
     // rotate uv counter-clockwise around (0.5, 0.5) in bottom-left origin coordinates.
@@ -140,6 +140,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     alpha = _Color.a * mainTex.a;
     alpha = (alpha - _Cutoff) / max(fwidth(alpha), EPS_COL) + 0.5; // Alpha to Coverage
     clip(alpha - _Cutoff);
+    alpha = 1.0; // Discarded, otherwise it should be assumed to have full opacity
 #endif
 #ifdef _ALPHABLEND_ON
     alpha = _Color.a * mainTex.a;

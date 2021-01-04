@@ -2,10 +2,10 @@
 Toon Shader with Unity Global Illumination
 
 ## Tutorial
-https://niconare.nicovideo.jp/watch/kn3485
+https://www.slideshare.net/VirtualCast/vrm-mtoon
 
 ## Version
-v3.2
+v3.4
 
 ## Release Note
 https://github.com/Santarh/MToon/releases
