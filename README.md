@@ -5,7 +5,7 @@ Toon Shader with Unity Global Illumination
 https://www.slideshare.net/VirtualCast/vrm-mtoon
 
 ## Version
-v3.4
+v3.5
 
 ## Release Note
 https://github.com/Santarh/MToon/releases
