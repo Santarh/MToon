@@ -2,12 +2,14 @@
 
 appdata_full vert_forward_base_with_outline(appdata_full v)
 {
+    UNITY_SETUP_INSTANCE_ID(v);
     v.normal = normalize(v.normal);
     return v;
 }
 
 v2f vert_forward_add(appdata_full v)
 {
+    UNITY_SETUP_INSTANCE_ID(v);
     v.normal = normalize(v.normal);
     return InitializeV2F(v, UnityObjectToClipPos(v.vertex), 0);
 }
