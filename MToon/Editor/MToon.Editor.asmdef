@@ -1,9 +1,8 @@
 {
     "name": "MToon.Editor",
     "references": [
-        "MToon"
+        "GUID:a9bc101fb0471f94a8f99fd242fdd934"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor"
     ],
@@ -12,5 +11,7 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": false,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
