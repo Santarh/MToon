@@ -35,7 +35,7 @@ Shader "VRM/MToon"
         _UvAnimScrollY ("UV Animation Scroll Y", Float) = 0
         _UvAnimRotation ("UV Animation Rotation", Float) = 0
 
-        [HideInInspector] _MToonVersion ("_MToonVersion", Float) = 37
+        [HideInInspector] _MToonVersion ("_MToonVersion", Float) = 38
         [HideInInspector] _DebugMode ("_DebugMode", Float) = 0.0
         [HideInInspector] _BlendMode ("_BlendMode", Float) = 0.0
         [HideInInspector] _OutlineWidthMode ("_OutlineWidthMode", Float) = 0.0
@@ -47,14 +47,14 @@ Shader "VRM/MToon"
         [HideInInspector] _ZWrite ("_ZWrite", Float) = 1.0
         [HideInInspector] _AlphaToMask ("_AlphaToMask", Float) = 0.0
     }
-    
+
     // for SM 3.0
     SubShader
     {
         Tags { "RenderType" = "Opaque"  "Queue" = "Geometry" }
-        
+
         // Forward Base
-        Pass 
+        Pass
         {
             Name "FORWARD_BASE"
             Tags { "LightMode" = "ForwardBase" }
@@ -79,10 +79,10 @@ Shader "VRM/MToon"
 //            #pragma multi_compile_instancing
             ENDCG
         }
-        
-        
+
+
         // Forward Base Outline Pass
-        Pass 
+        Pass
         {
             Name "FORWARD_BASE_ONLY_OUTLINE"
             Tags { "LightMode" = "ForwardBase" }
@@ -112,9 +112,9 @@ Shader "VRM/MToon"
             ENDCG
         }
 
-        
+
         // Forward Add
-        Pass 
+        Pass
         {
             Name "FORWARD_ADD"
             Tags { "LightMode" = "ForwardAdd" }
@@ -139,7 +139,7 @@ Shader "VRM/MToon"
             #pragma multi_compile_fog
             ENDCG
         }
-        
+
         //  Shadow rendering pass
         Pass
         {
@@ -160,7 +160,7 @@ Shader "VRM/MToon"
             ENDCG
         }
     }
-    
+
     Fallback "Unlit/Texture"
     CustomEditor "MToon.MToonInspector"
 }
