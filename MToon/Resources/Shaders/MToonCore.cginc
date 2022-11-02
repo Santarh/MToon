@@ -230,7 +230,7 @@ float4 frag_forward(v2f i) : SV_TARGET
     half3 mixedRimLighting = lighting + indirectLighting;
 #endif
     half3 rimLighting = lerp(staticRimLighting, mixedRimLighting, _RimLightingMix);
-    half3 rim = pow(saturate(1.0 - dot(worldNormal, worldView) + _RimLift), _RimFresnelPower) * _RimColor.rgb * tex2D(_RimTexture, mainUv).rgb;
+    half3 rim = pow(saturate(1.0 - dot(worldNormal, worldView) + _RimLift), max(_RimFresnelPower, EPS_COL)) * _RimColor.rgb * tex2D(_RimTexture, mainUv).rgb;
     col += lerp(rim * rimLighting, half3(0, 0, 0), i.isOutline);
 
     // additive matcap
