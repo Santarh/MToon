@@ -1,6 +1,7 @@
 #ifndef MTOON_CORE_INCLUDED
 #define MTOON_CORE_INCLUDED
 
+#include "UnityGC.cginc"
 #include "Lighting.cginc"
 #include "AutoLight.cginc"
 
